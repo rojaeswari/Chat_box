@@ -1,0 +1,45 @@
+.create-group-container {
+  width: 400px;
+  margin: 80px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.create-group-container h2 {
+  margin-bottom: 25px;
+  color: #1f2a44;
+}
+
+.group-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.group-input:focus {
+  border-color: #007bff;
+}
+
+.create-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  background: #1f2a44;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 17px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.create-btn:hover {
+  background: #31456d;
+}
