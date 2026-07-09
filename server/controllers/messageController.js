@@ -3,12 +3,12 @@ const pool = require("../db");
 // Send Message
 const sendMessage = async (req, res) => {
   try {
-    const { sender_id, receiver_id, message } = req.body;
+    const { sender_id, receiver_id, message, image, document,status } = req.body;
 
-    await pool.query(
-      `INSERT INTO messages(sender_id, receiver_id, message)
-       VALUES($1, $2, $3)`,
-      [sender_id, receiver_id, message]
+      await pool.query(
+      `INSERT INTO messages(sender_id, receiver_id, message, image, document, status)
+       VALUES($1, $2, $3, $4, $5, $6)`,
+      [sender_id, receiver_id, message, image, document,"sent"]
     );
 
     res.json({
@@ -16,7 +16,12 @@ const sendMessage = async (req, res) => {
     });
 
   } catch (err) {
-    console.log(err);
+    console.log("Error:", err);
+    console.log(err.message);
+    res.status(500).json({
+    message: err.message,
+  });
+
     res.status(500).json({
       message: "Server Error",
     });
@@ -51,7 +56,80 @@ const getMessages = async (req, res) => {
   }
 };
 
+
+const deleteMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id } = req.body;
+
+    const result = await pool.query(
+      "DELETE FROM messages WHERE id=$1 AND sender_id=$2 RETURNING *",
+      [id, user_id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(403).json({
+        message: "You can delete only your own messages",
+      });
+    }
+
+    res.json({
+      message: "Message Deleted",
+    });
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updateMessageStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    await pool.query(
+      "UPDATE messages SET status=$1 WHERE id=$2",
+      [status, id]
+    );
+
+    res.json({
+      message: "Status Updated"
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server Error"
+    });
+  }
+};
+
+const updateSeenStatus = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    await pool.query(
+      "UPDATE messages SET status='seen' WHERE id=$1",
+      [id]
+    );
+
+    res.json({
+      message: "Seen Updated"
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server Error"
+    });
+  }
+};
+
 module.exports = {
   sendMessage,
   getMessages,
+  deleteMessage,
+   updateMessageStatus,
+  updateSeenStatus
 };

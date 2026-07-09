@@ -43,38 +43,38 @@ const getGroups = async (req, res) => {
 
 
 // Add Member to Group
-const addMember = async (req, res) => {
-  try {
-    const { group_id, user_id } = req.body;
+// const addMember = async (req, res) => {
+//   try {
+//     const { group_id, user_id } = req.body;
 
-    // Check if already a member
-    const member = await pool.query(
-      "SELECT * FROM group_members WHERE group_id=$1 AND user_id=$2",
-      [group_id, user_id]
-    );
+//     // Check if already a member
+//     const member = await pool.query(
+//       "SELECT * FROM group_members WHERE group_id=$1 AND user_id=$2",
+//       [group_id, user_id]
+//     );
 
-    if (member.rows.length > 0) {
-      return res.status(400).json({
-        message: "User already exists in this group",
-      });
-    }
+//     if (member.rows.length > 0) {
+//       return res.status(400).json({
+//         message: "User already exists in this group",
+//       });
+//     }
 
-    await pool.query(
-      "INSERT INTO group_members(group_id,user_id) VALUES($1,$2)",
-      [group_id, user_id]
-    );
+//     await pool.query(
+//       "INSERT INTO group_members(group_id,user_id) VALUES($1,$2)",
+//       [group_id, user_id]
+//     );
 
-    res.json({
-      message: "Member Added Successfully",
-    });
+//     res.json({
+//       message: "Member Added Successfully",
+//     });
 
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: "Server Error",
-    });
-  }
-};
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({
+//       message: "Server Error",
+//     });
+//   }
+// };
 
 
 
@@ -157,12 +157,73 @@ const deleteGroup = async (req, res) => {
 };
 
 
+const removeMember = async (req, res) => {
+  try {
+    const { groupId, userId } = req.params;
+
+    await pool.query(
+      `DELETE FROM group_members
+       WHERE group_id = $1
+       AND user_id = $2`,
+      [groupId, userId]
+    );
+
+    res.json({
+      message: "Member Removed Successfully",
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
+const addMember = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { user_id } = req.body;
+
+    // Check already exists
+    const exists = await pool.query(
+      "SELECT * FROM group_members WHERE group_id=$1 AND user_id=$2",
+      [groupId, user_id]
+    );
+
+    if (exists.rows.length > 0) {
+      return res.status(400).json({
+        message: "User already exists in group",
+      });
+    }
+
+    await pool.query(
+      "INSERT INTO group_members(group_id,user_id) VALUES($1,$2)",
+      [groupId, user_id]
+    );
+
+    res.json({
+      message: "Member Added Successfully",
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
+
+
 module.exports = {
   createGroup,
   getGroups,
-  addMember,
    getGroupMembers,
      updateGroup,
      deleteGroup,
+      removeMember,
+      addMember,
 
 };

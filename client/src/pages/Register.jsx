@@ -10,6 +10,7 @@ function Register() {
     name: "",
     email: "",
     password: "",
+    role:"",
   });
 
   const handleChange = (e) => {
@@ -44,6 +45,10 @@ if (!emailRegex.test(form.email)) {
     alert("Please enter your password");
     return;
   }
+  if (!form.role) {
+  alert("Please select a role");
+  return;
+}
 
   try {
     const res = await axios.post(
@@ -57,6 +62,7 @@ if (!emailRegex.test(form.email)) {
       name: "",
       email: "",
       password: "",
+      role:"",
     });
 
   } catch (err) {
@@ -98,12 +104,23 @@ if (!emailRegex.test(form.email)) {
             value={form.password}
             onChange={handleChange}
           />
+           <label>Select Role</label>
+
+<select
+  name="role"
+  value={form.role}
+  onChange={handleChange}
+>
+  <option value="">-- Select Role --</option>
+  <option value="admin">admin</option>
+  <option value="user">user</option>
+</select>
 
           <button type="submit">Register</button>
 
-          <p className="login-link">
+          {/* <p className="login-link">
             Already have an account? <Link to="/login">Login</Link>
-          </p>
+          </p> */}
         </form>
       </div>
     </div>

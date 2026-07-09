@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate ,Link} from "react-router-dom";
 import "./Login.css";
 
 function Login() {
@@ -31,8 +31,13 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
       alert(res.data.message);
-      navigate("/register");
-      navigate("/chat");
+      // navigate("/register");
+      // navigate("/chat");
+      if (res.data.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/chat");
+      }
     } catch (err) {
       alert(err.response?.data?.message || "Login Failed");
     }
@@ -63,9 +68,9 @@ function Login() {
           <button type="submit">Login</button>
         </form>
 
-        <p className="register-link">
+        {/* <p className="register-link">
           Don't have an account? <Link to="/register">Register</Link>
-        </p>
+        </p> */}
       </div>
     </div>
   );

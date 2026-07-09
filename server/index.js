@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const pool = require("./db");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -12,8 +13,10 @@ const { Server } = require("socket.io");
 const groupRoutes = require("./routes/groupRoutes");
 const groupMessageRoutes = require("./routes/groupMessageRoutes");
 
+
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/groups", groupRoutes);
@@ -34,9 +37,11 @@ app.get("/", async (req, res) => {
   }
 });
 
+
 const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);
+const { setIO } = require("./socket");
 
 const io = new Server(server, {
   cors: {
@@ -44,9 +49,16 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
+setIO(io);
 
 io.on("connection", (socket) => {
   console.log("User Connected:", socket.id);
+
+   socket.on("join", (userId) => {
+    socket.join(`user_${userId}`);
+    console.log(`User ${userId} joined room user_${userId}`);
+  });
+
 
   socket.on("send_message", (data) => {
     socket.broadcast.emit("receive_message", data);
@@ -56,11 +68,44 @@ io.on("connection", (socket) => {
     io.emit("receive_group_message", data);
   });
 
+  socket.on("mention_notification", (data) => {
+  io.to(`user_${data.user_id}`).emit("mention_notification", data);
+});
+
+  socket.on("message_delivered", (data) => {
+    io.emit("message_delivered", data);
+ 
+});
+ socket.on("message_seen", (data) => {
+    io.emit("message_seen", data);
+ });
+socket.on("group_message_delivered", (data) => {
+    io.emit("group_message_delivered", data);
+
+});
+
+socket.on("group_message_seen", (data) => {
+    io.emit("group_message_seen", data);
+
+});
+
+
+
+// socket.on("typing", (data) => {
+//   socket.broadcast.emit("typing", data);
+// });
+
+// socket.on("stop_typing", (data) => {
+//   socket.broadcast.emit("stop_typing", data);
+// });
+
   socket.on("disconnect", () => {
     console.log("User Disconnected:", socket.id);
   });
 });
 
+
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+module.exports = { io };

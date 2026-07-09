@@ -1,0 +1,26 @@
+.add-user{
+    width:400px;
+    margin:40px auto;
+}
+
+.add-user h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.add-user form{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.add-user input,
+.add-user select{
+    padding:10px;
+    font-size:16px;
+}
+
+.add-user button{
+    padding:12px;
+    cursor:pointer;
+}

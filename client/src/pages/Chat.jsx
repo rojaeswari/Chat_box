@@ -13,16 +13,35 @@ function Chat() {
   const [groupMembers, setGroupMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const [image, setImage] = useState(null);
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [document, setDocument] = useState(null);
+  const [groupMessages, setGroupMessages] = useState([]);
+
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("user"));
-    setUser(data);
+  const logout = () => {
+  if (window.confirm("Are you sure you want to logout?")) {
+    localStorage.removeItem("user");
+    navigate("/login");
+  }
+};
 
-    fetchUsers();
-    fetchGroups();
-  }, []);
+  useEffect(() => {
+  const data = JSON.parse(localStorage.getItem("user"));
+
+  if (!data) {
+    navigate("/login");
+    return;
+  }
+
+  setUser(data);
+  fetchUsers();
+  fetchGroups();
+}, []);
+
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
@@ -36,19 +55,139 @@ function Chat() {
 
 
   useEffect(() => {
-  socket.on("receive_group_message", (data) => {
-    if (
-      selectedGroup &&
-      selectedGroup.id === data.group_id
-    ) {
-      setMessages((prev) => [...prev, data]);
-    }
+    socket.on("receive_group_message", (data) => {
+      if (
+        selectedGroup &&
+        selectedGroup.id === data.group_id
+      ) {
+        setMessages((prev) => [...prev, data]);
+      }
+    });
+
+    return () => {
+      socket.off("receive_group_message");
+    };
+  }, [selectedGroup]);
+
+  
+
+useEffect(() => {
+  socket.on("message_delivered", (data) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === data.id
+          ? { ...msg, status: "delivered" }
+          : msg
+      )
+    );
   });
 
   return () => {
-    socket.off("receive_group_message");
+    socket.off("message_delivered");
   };
-}, [selectedGroup]);
+}, []);
+
+
+useEffect(() => {
+  socket.on("message_seen", (data) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === data.id
+          ? { ...msg, status: "seen" }
+          : msg
+      )
+    );
+  });
+
+  return () => {
+    socket.off("message_seen");
+  };
+}, []);
+
+
+useEffect(() => {
+
+    socket.on("group_message_delivered", (data) => {
+
+        setGroupMessages((prev) =>
+            prev.map((msg) =>
+                msg.id === data.id
+                    ? { ...msg, status: "delivered" }
+                    : msg
+            )
+        );
+
+    });
+
+    return () =>
+        socket.off("group_message_delivered");
+
+}, []);
+
+
+
+useEffect(() => {
+
+    socket.on("group_message_seen", (data) => {
+
+        setGroupMessages((prev) =>
+            prev.map((msg) =>
+                msg.id === data.id
+                    ? { ...msg, status: "seen" }
+                    : msg
+            )
+        );
+
+    });
+
+    return () =>
+        socket.off("group_message_seen");
+
+}, []);
+
+useEffect(() => {
+  if (user) {
+    socket.emit("join", user.id);
+  }
+}, [user]);
+
+
+useEffect(() => {
+
+  socket.on("mention_notification", (data) => {
+
+    alert(`${data.sender_name} mentioned you`);
+
+  });
+
+  return () => {
+    socket.off("mention_notification");
+  };
+
+}, []);
+
+
+// useEffect(() => {
+
+//   if (Notification.permission !== "granted") {
+//     Notification.requestPermission();
+//   }
+
+//   socket.on("mention_notification", (data) => {
+
+//     if (Notification.permission === "granted") {
+
+//       new Notification(`${data.sender_name} mentioned you`, {
+//         body: data.message,
+//       });
+
+//     }
+
+//   });
+
+//   return () => socket.off("mention_notification");
+
+// }, []);
 
 
   const fetchUsers = async () => {
@@ -75,134 +214,363 @@ function Chat() {
   };
 
   const fetchMessages = async (receiverId) => {
-    try {
-      const currentUser = JSON.parse(localStorage.getItem("user"));
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
 
-      const res = await axios.get(
-        `http://localhost:5000/api/messages/${currentUser.id}/${receiverId}`
+    const res = await axios.get(
+      `http://localhost:5000/api/messages/${currentUser.id}/${receiverId}`
+    );
+
+    // Update delivered status
+   for (const msg of res.data) {
+  if (
+    msg.receiver_id === currentUser.id &&
+    msg.status === "sent"
+  ) {
+    await axios.put(
+      `http://localhost:5000/api/messages/status/${msg.id}`,
+      {
+        status: "delivered",
+      }
+    );
+
+    socket.emit("message_delivered", {
+      id: msg.id,
+      status: "delivered",
+    });
+
+    msg.status = "delivered";
+  }
+}
+
+for (const msg of res.data) {
+
+  if (
+    msg.receiver_id === currentUser.id &&
+    msg.status === "delivered"
+  ) {
+
+    await axios.put(
+      `http://localhost:5000/api/messages/seen/${msg.id}`
+    );
+
+    socket.emit("message_seen", {
+      id: msg.id,
+      status: "seen",
+    });
+
+    msg.status = "seen";
+  }
+}
+    setMessages(res.data);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+  const renameGroup = async (id) => {
+    const newName = prompt("Enter New Group Name");
+
+    if (!newName) return;
+
+    try {
+      await axios.put(
+        `http://localhost:5000/api/groups/${id}`,
+        {
+          group_name: newName,
+        }
       );
 
-      setMessages(res.data);
+      alert("Group Updated");
+
+      fetchGroups();
+
     } catch (err) {
       console.log(err);
     }
   };
 
-  const renameGroup = async (id) => {
-  const newName = prompt("Enter New Group Name");
 
-  if (!newName) return;
+  const deleteGroup = async (id) => {
 
-  try {
-    await axios.put(
-      `http://localhost:5000/api/groups/${id}`,
-      {
-        group_name: newName,
+    if (!window.confirm("Delete this group?"))
+      return;
+
+    try {
+
+      await axios.delete(
+        `http://localhost:5000/api/groups/${id}`
+      );
+
+      alert("Group Deleted");
+
+      fetchGroups();
+
+    } catch (err) {
+      console.log(err);
+    }
+
+  };
+
+  const sendMessage = async () => {
+   if (!message.trim() && !image && !document) return;
+     console.log(image);
+
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("user"));
+
+      let imageName = "";
+
+    if (image) {
+      const formData = new FormData();
+      formData.append("image", image);
+
+      const uploadRes = await axios.post(
+        "http://localhost:5000/api/messages/upload",
+        formData
+      );
+
+      imageName = uploadRes.data.image;
+
+      console.log(uploadRes.data);
+    }
+
+    let documentName = "";
+
+if (document) {
+
+  const formData = new FormData();
+  formData.append("image", document);
+
+  const res = await axios.post(
+    "http://localhost:5000/api/messages/upload",
+    formData
+  );
+
+  documentName = res.data.image;
+}
+
+      // Group Chat
+      if (selectedGroup) {
+        await axios.post("http://localhost:5000/api/group-messages", {
+          group_id: selectedGroup.id,
+          sender_id: currentUser.id,
+          message,
+          image: imageName,
+           document:documentName
+        });
+
+        socket.emit("send_group_message", {
+          group_id: selectedGroup.id,
+          sender_id: currentUser.id,
+          name: currentUser.name,
+          message,
+          image: imageName,
+           document:documentName
+        });
+
+        setMessage("");
+        setImage(null);
+        setDocument(null);
+        fetchGroupMessages(selectedGroup.id);
+
+        return;
       }
-    );
-
-    alert("Group Updated");
-
-    fetchGroups();
-
-  } catch (err) {
-    console.log(err);
-  }
-};
 
 
-const deleteGroup = async (id) => {
+      // Private Chat
+      await axios.post("http://localhost:5000/api/messages", {
+        sender_id: currentUser.id,
+        receiver_id: selectedUser.id,
+        message,
+         image: imageName,
+          document:documentName
+      });
 
-  if (!window.confirm("Delete this group?"))
-    return;
+      socket.emit("send_message", {
+        sender_id: currentUser.id,
+        receiver_id: selectedUser.id,
+        message,
+          image: imageName,
+           document:documentName
+      });
 
-  try {
+      setMessage("");
+      setImage(null);
+      setDocument(null);
+      fetchMessages(selectedUser.id);
 
-    await axios.delete(
-      `http://localhost:5000/api/groups/${id}`
-    );
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-    alert("Group Deleted");
 
-    fetchGroups();
+  const fetchGroupMembers = async (groupId) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/groups/${groupId}/members`
+      );
 
-  } catch (err) {
-    console.log(err);
-  }
+      setGroupMembers(res.data);
 
-};
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
- const sendMessage = async () => {
-  if (!message.trim()) return;
 
+  const fetchGroupMessages = async (groupId) => {
   try {
     const currentUser = JSON.parse(localStorage.getItem("user"));
 
-    // Group Chat
- if (selectedGroup) {
-  await axios.post("http://localhost:5000/api/group-messages", {
-    group_id: selectedGroup.id,
-    sender_id: currentUser.id,
-    message,
-  });
-
-  socket.emit("send_group_message", {
-    group_id: selectedGroup.id,
-    sender_id: currentUser.id,
-    name: currentUser.name,
-    message,
-  });
-
-  setMessage("");
-  fetchGroupMessages(selectedGroup.id);
-
-  return;
-}
-
-
-    // Private Chat
-    await axios.post("http://localhost:5000/api/messages", {
-      sender_id: currentUser.id,
-      receiver_id: selectedUser.id,
-      message,
-    });
-
-    socket.emit("send_message", {
-      sender_id: currentUser.id,
-      receiver_id: selectedUser.id,
-      message,
-    });
-
-    setMessage("");
-    fetchMessages(selectedUser.id);
-
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-
-const fetchGroupMembers = async (groupId) => {
-  try {
-    const res = await axios.get(
-      `http://localhost:5000/api/groups/${groupId}/members`
-    );
-
-    setGroupMembers(res.data);
-
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-
-const fetchGroupMessages = async (groupId) => {
-  try {
     const res = await axios.get(
       `http://localhost:5000/api/group-messages/${groupId}`
     );
 
-    setMessages(res.data);
+    // Delivered
+    for (const msg of res.data) {
+      if (
+        msg.sender_id !== currentUser.id &&
+        msg.status === "sent"
+      ) {
+
+        await axios.put(
+          `http://localhost:5000/api/group-messages/status/${msg.id}`,
+          {
+            status: "delivered",
+          }
+        );
+
+        socket.emit("group_message_delivered", {
+          id: msg.id,
+          status: "delivered",
+        });
+
+        msg.status = "delivered";
+      }
+    }
+
+    // Seen
+    for (const msg of res.data) {
+
+      if (
+        msg.sender_id !== currentUser.id &&
+        msg.status === "delivered"
+      ) {
+
+        await axios.put(
+          `http://localhost:5000/api/group-messages/seen/${msg.id}`
+        );
+
+        socket.emit("group_message_seen", {
+          id: msg.id,
+          status: "seen",
+        });
+
+        msg.status = "seen";
+      }
+    }
+
+    setGroupMessages(res.data);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+  const removeMember = async (groupId, userId) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/groups/${groupId}/remove-member/${userId}`
+      );
+
+      alert("Member Removed");
+
+      fetchGroupMembers(groupId);
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+
+  const addMember = async (groupId, userId) => {
+    try {
+      await axios.post(
+        `http://localhost:5000/api/groups/${groupId}/add-member`,
+        {
+          user_id: userId,
+        }
+      );
+
+      alert("Member Added Successfully");
+
+      // Refresh Members
+      fetchGroupMembers(groupId);
+
+      // Refresh Available Users
+      fetchAvailableUsers(groupId);
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchAvailableUsers = async (groupId) => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("user"));
+
+      const res = await axios.get(
+        `http://localhost:5000/api/users?email=${currentUser.email}`
+      );
+      const members = await axios.get(
+        `http://localhost:5000/api/groups/${groupId}/members`
+      );
+
+      const memberIds = members.data.map((m) => m.id);
+
+      const filteredUsers = res.data.filter(
+        (u) => !memberIds.includes(u.id)
+      );
+
+      setAvailableUsers(filteredUsers);
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+   
+
+  const deleteMessage = async (id) => {
+  try {
+    if (!window.confirm("Delete this message?")) return;
+
+    if (selectedGroup) {
+      await axios.delete(
+  `http://localhost:5000/api/group-messages/${id}`,
+  {
+    data: {
+      user_id: user.id,
+    },
+  }
+);
+
+      fetchGroupMessages(selectedGroup.id);
+    } else {
+     await axios.delete(
+  `http://localhost:5000/api/messages/${id}`,
+  {
+    data: {
+      user_id: user.id,
+    },
+  }
+);
+
+      fetchMessages(selectedUser.id);
+    }
+
   } catch (err) {
     console.log(err);
   }
@@ -222,8 +590,9 @@ const fetchGroupMessages = async (groupId) => {
               key={u.id}
               className="user"
               onClick={() => {
+                 setMessages([]);  
                 setSelectedUser(u);
-                  setSelectedGroup(null);  
+                setSelectedGroup(null);
                 fetchMessages(u.id);
               }}
             >
@@ -238,94 +607,297 @@ const fetchGroupMessages = async (groupId) => {
 
         <h2>Groups</h2>
 
-     {groups.length > 0 ? (
-  groups.map((group) => (
-    <div key={group.id} className="group-item">
+        {groups.length > 0 ? (
+          groups.map((group) => (
+            <div key={group.id} className="group-item">
 
-      <span
-        className="group-name"
-        onClick={() => {setSelectedGroup(group);setSelectedUser(null); fetchGroupMembers(group.id);  fetchGroupMessages(group.id);}}
-      >
-        {group.group_name}
-      </span>
+              <span
+                className="group-name"
+                onClick={() => {
+                   setMessages([]);  
+                  setSelectedGroup(group);
+                  setSelectedUser(null);
+                  fetchGroupMembers(group.id);
+                  fetchGroupMessages(group.id);
+                  fetchAvailableUsers(group.id);
+                }}
+              >
+                {group.group_name}
+              </span>
 
-      <div className="group-actions">
-        <button
-          className="edit-btn"
-          onClick={() => renameGroup(group.id)}
-        >
-          ✏️
-        </button>
+              {user?.role === "admin" && (
+                <div className="group-actions">
+                  <button
+                    className="edit-btn"
+                    onClick={() => renameGroup(group.id)}
+                  >
+                    ✏️
+                  </button>
 
-        <button
-          className="delete-btn"
-          onClick={() => deleteGroup(group.id)}
-        >
-          🗑️
-        </button>
-      </div>
+                  <button
+                    className="delete-btn"
+                    onClick={() => deleteGroup(group.id)}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              )}
+            </div>
 
-    </div>     
-    
-))
+          ))
         ) : (
           <p>No Groups Found</p>
         )}
 
+        {user?.role === "admin" && (
+          <button
+            className="button"
+            onClick={() => navigate("/create-group")}
+          >
+            + Create Group
+          </button>
+        )}
+
         <button
-          className="button"
-          onClick={() => navigate("/create-group")}
-        >
-          + Create Group
-        </button>
+  className="logout-btn"
+  onClick={logout}
+>
+   Logout
+</button>
 
       </div>
 
       {/* Chat Area */}
-    <div className="chatArea">
+      <div className="chatArea">
+        {/* <h3>Role : {user?.role}</h3> */}
 
- {selectedGroup ? (
-  <>
-    <h2>{selectedGroup.group_name}</h2>
+        {selectedGroup ? (
+         <>
+  <h2>{selectedGroup.group_name}</h2>
 
-    <h4>Members</h4>
+  <div className="group-chat-container">
 
-    {groupMembers.map((member) => (
-      <p key={member.id}>{member.name}</p>
-    ))}
+    {/* Left Panel */}
+    <div className="group-left">
 
-    <div className="messages">
-      {messages.map((msg) => (
-        <div key={msg.id}>
-          <p>
-            <strong>{msg.name}</strong> : {msg.message}
-          </p>
-        </div>
-      ))}
-    </div>
+      <h4>Members</h4>
 
-  </>
-) : selectedUser ? (
-        <>
-      <h2>Chat with {selectedUser.name}</h2>
+      <div className="members-list">
+        {groupMembers.map((member) => (
+          <div key={member.id} className="member-row">
 
-      <div className="messages">
-        {messages.map((msg) => (
-          <div key={msg.id}>
-            <p>
-              <strong>
-                {msg.sender_id === user?.id
-                  ? "You"
-                  : selectedUser.name}
-              </strong>
-              : {msg.message}
-            </p>
+            <span>{member.name}</span>
+
+            {user?.role === "admin" && (
+              <button
+                className="remove-btn"
+                onClick={() =>
+                  removeMember(selectedGroup.id, member.id)
+                }
+              >
+                Remove
+              </button>
+            )}
+
           </div>
         ))}
       </div>
-    </>
-    
-) : (
+
+      {user?.role === "admin" && (
+        <>
+          <h4>Available Users</h4>
+
+          <div className="members-list">
+            {availableUsers.map((u) => (
+              <div key={u.id} className="member-row">
+
+                <span>{u.name}</span>
+
+                <button
+                  className="add-btn"
+                  onClick={() =>
+                    addMember(selectedGroup.id, u.id)
+                  }
+                >
+                  Add
+                </button>
+
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+    </div>
+
+    {/* Right Panel */}
+    <div className="messages">
+
+      {groupMessages.map((msg, index) => (
+        <div
+          key={`${msg.id}-${index}`}
+          className={`message ${
+            msg.sender_id === user?.id
+              ? "sent"
+              : "received"
+          }`}
+        >
+
+          <strong>
+            {msg.sender_id === user?.id
+              ? "You"
+              : msg.name}
+          </strong>
+
+         {msg.message && (
+  /^https?:\/\//.test(msg.message) ? (
+    <a
+      href={msg.message}
+      target="_blank"
+      rel="noreferrer"
+      className="document-link"
+    >
+      🔗 Open Document
+    </a>
+  ) : (
+    <p>{msg.message}</p>
+  )
+)}
+
+        {msg.image && (
+  <img
+    src={`http://localhost:5000/uploads/${msg.image}`}
+    alt=""
+    className="chat-image"
+  />
+)}
+
+{msg.document && (
+  <a
+    href={`http://localhost:5000/uploads/${msg.document}`}
+    target="_blank"
+    rel="noreferrer"
+    className="document-link"
+  >
+    📄 {msg.document}
+  </a>
+)}
+
+{msg.sender_id === user?.id && (
+  <button
+    className="delete-btn"
+    onClick={() => deleteMessage(msg.id)}
+  >
+    Delete
+  </button>
+)}
+
+<div className="status">
+  {msg.status === "sent" && (
+    <span>✓ Sent</span>
+  )}
+
+  {msg.status === "delivered" && (
+    <span>✓✓ Delivered</span>
+  )}
+
+  {msg.status === "seen" && (
+    <span className="seen-status">
+      ✓✓ Seen
+    </span>
+  )}
+</div>
+        </div>
+      ))}
+
+    </div>
+
+  </div>
+</>
+
+// private chat
+        ) : selectedUser ? (
+          <>
+            <h2>Chat with {selectedUser.name}</h2>
+
+           <div className="messages">
+  {messages.map((msg, index) => (
+    <div
+      key={`${msg.id}-${index}`}
+      className={`message ${
+        msg.sender_id === user?.id ? "sent" : "received"
+      }`}
+    >
+      <strong>
+        {msg.sender_id === user?.id ? "You" : msg.name}
+      </strong>
+
+     {msg.message && (
+  /^https?:\/\//.test(msg.message) ? (
+    <a
+      href={msg.message}
+      target="_blank"
+      rel="noreferrer"
+      className="document-link"
+    >
+      🔗 Open Document
+    </a>
+  ) : (
+    <p>{msg.message}</p>
+  )
+)}
+
+
+    {msg.image && (
+  <img
+    src={`http://localhost:5000/uploads/${msg.image}`}
+    alt="Group"
+    className="chat-image"
+  />
+)}
+
+{msg.document && (
+  <a
+    href={`http://localhost:5000/uploads/${msg.document}`}
+    target="_blank"
+    rel="noreferrer"
+    className="document-link"
+  >
+    📄 {msg.document}
+  </a>
+)}
+
+{msg.sender_id === user?.id && (
+  <button
+    className="delete-btn"
+    onClick={() => deleteMessage(msg.id)}
+  >
+    Delete
+  </button>
+)}
+
+<div className="status">
+  {msg.status === "sent" && (
+    <span>✓ Sent</span>
+  )}
+
+  {msg.status === "delivered" && (
+    <span>✓✓ Delivered</span>
+  )}
+
+  {msg.status === "seen" && (
+    <span className="seen-status">
+      ✓✓ Seen
+    </span>
+  )}
+</div>
+
+    </div>
+  ))}
+</div>
+          </>
+
+        ) : (
           <div className="messages">
             <h2>Welcome {user?.name}</h2>
             <p>Select a user to start chatting.</p>
@@ -339,16 +911,57 @@ const fetchGroupMessages = async (groupId) => {
             placeholder="Type a message..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-           disabled={!selectedUser && !selectedGroup}
+            disabled={!selectedUser && !selectedGroup}
           />
+
+
+        <label htmlFor="imageUpload" className="file-btn">
+  📷 Choose Image
+</label>
+
+<input
+  id="imageUpload"
+  type="file"
+  accept="image/*"
+  className="file-input"
+  onChange={(e) => setImage(e.target.files[0])}
+/>
+
+<label htmlFor="docUpload" className="file-btn">
+📄 Document
+</label>
+
+<input
+id="docUpload"
+type="file"
+className="file-input"
+accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+onChange={(e)=>setDocument(e.target.files[0])}
+/>
+
+<button
+  className="link-btn"
+  onClick={() => {
+    const link = prompt("Paste Document Link");
+    if (link) setMessage(link);
+  }}
+>
+🔗 Link
+</button>
 
           <button
             className="button"
             onClick={sendMessage}
-           disabled={!selectedUser && !selectedGroup}
+            disabled={!selectedUser && !selectedGroup}
           >
             Send
           </button>
+
+          {/* <button
+            onClick={() =>  navigate(`/change-password/${user.id}`)}
+          >
+            Change Password
+          </button> */}
         </div>
 
       </div>
