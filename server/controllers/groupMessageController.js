@@ -20,6 +20,15 @@ const sendGroupMessage = async (req, res) => {
 );
 const senderName = sender.rows[0].name;
 
+const savedMessage = result.rows[0];
+
+const io = getIO();
+
+io.to(`group_${group_id}`).emit("receive_group_message", {
+  ...savedMessage,
+  name: senderName,
+});
+
     if (message && message.trim()) {
 
       const mentionRegex = /@(\w+)/g;
@@ -73,7 +82,7 @@ const senderName = sender.rows[0].name;
       }
     }
 
-    res.status(201).json(result.rows[0]);
+   res.status(201).json(savedMessage);
 
   } catch (err) {
     console.log(err);

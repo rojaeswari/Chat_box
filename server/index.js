@@ -59,14 +59,28 @@ io.on("connection", (socket) => {
     console.log(`User ${userId} joined room user_${userId}`);
   });
 
+   socket.on("join_group", (groupId) => {
+    socket.join(`group_${groupId}`);
+    console.log(`Joined group_${groupId}`);
+  });
+
+//  socket.on("send_group_message", (data) => {
+//   console.log("send_group_message fired");
+
+//   io.to(`group_${data.group_id}`).emit(
+//     "receive_group_message",
+//     data
+//   );
+// });
+
 
   socket.on("send_message", (data) => {
     socket.broadcast.emit("receive_message", data);
   });
 
-   socket.on("send_group_message", (data) => {
-    io.emit("receive_group_message", data);
-  });
+  //  socket.on("send_group_message", (data) => {
+  //   io.emit("receive_group_message", data);
+  // });
 
   socket.on("mention_notification", (data) => {
   io.to(`user_${data.user_id}`).emit("mention_notification", data);

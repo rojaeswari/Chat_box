@@ -55,21 +55,43 @@ function Chat() {
 
 
   useEffect(() => {
-    socket.on("receive_group_message", (data) => {
-      if (
-        selectedGroup &&
-        selectedGroup.id === data.group_id
-      ) {
-        setMessages((prev) => [...prev, data]);
-      }
-    });
+  const handleGroupMessage = async (data) => {
+    console.log("Received:", data);
 
-    return () => {
-      socket.off("receive_group_message");
-    };
-  }, [selectedGroup]);
+    if (selectedGroup?.id !== data.group_id) return;
 
-  
+    setGroupMessages((prev) => [...prev, data]);
+
+    // Only receiver updates status
+    if (data.sender_id !== user.id) {
+
+      // Delivered
+      await axios.put(
+        `http://localhost:5000/api/group-messages/status/${data.id}`
+      );
+
+      socket.emit("group_message_delivered", {
+        id: data.id,
+      });
+
+      // Seen
+      await axios.put(
+        `http://localhost:5000/api/group-messages/seen/${data.id}`
+      );
+
+      socket.emit("group_message_seen", {
+        id: data.id,
+      });
+    }
+  };
+
+  socket.off("receive_group_message", handleGroupMessage);
+  socket.on("receive_group_message", handleGroupMessage);
+
+  return () => {
+    socket.off("receive_group_message", handleGroupMessage);
+  };
+}, [selectedGroup, user]);
 
 useEffect(() => {
   socket.on("message_delivered", (data) => {
@@ -361,14 +383,14 @@ if (document) {
            document:documentName
         });
 
-        socket.emit("send_group_message", {
-          group_id: selectedGroup.id,
-          sender_id: currentUser.id,
-          name: currentUser.name,
-          message,
-          image: imageName,
-           document:documentName
-        });
+        // socket.emit("send_group_message", {
+        //   group_id: selectedGroup.id,
+        //   sender_id: currentUser.id,
+        //   name: currentUser.name,
+        //   message,
+        //   image: imageName,
+        //    document:documentName
+        // });
 
         setMessage("");
         setImage(null);
@@ -614,9 +636,10 @@ if (document) {
               <span
                 className="group-name"
                 onClick={() => {
-                   setMessages([]);  
+                   setGroupMessages([]); 
                   setSelectedGroup(group);
                   setSelectedUser(null);
+                    socket.emit("join_group", group.id);
                   fetchGroupMembers(group.id);
                   fetchGroupMessages(group.id);
                   fetchAvailableUsers(group.id);
