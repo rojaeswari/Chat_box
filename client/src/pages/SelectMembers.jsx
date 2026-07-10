@@ -19,7 +19,7 @@ function SelectMembers() {
 
     try {
       const res = await axios.get(
-        ` https://chat-box-1-4g7s.onrender.com/api/users?email=${currentUser.email}`
+        `https://chat-box-1-4g7s.onrender.com/api/users?email=${currentUser.email}`
       );
 
       setUsers(res.data);
@@ -40,7 +40,7 @@ function SelectMembers() {
     try {
       for (const userId of selectedUsers) {
         await axios.post(
-          " https://chat-box-1-4g7s.onrender.com/api/groups/add-member",
+          "https://chat-box-1-4g7s.onrender.com/api/groups/add-member",
           {
             group_id: groupId,
             user_id: userId,
