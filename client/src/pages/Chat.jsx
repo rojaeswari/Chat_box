@@ -52,6 +52,9 @@ function Chat() {
   //     socket.off("receive_message");
   //   };
   // }, []);
+
+
+
 // useEffect(() => {
 //   const handleMessage = async (data) => {
 
@@ -218,8 +221,27 @@ useEffect(() => {
 }, []);
 
 
+// useEffect(() => {
+//   socket.on("message_seen", (data) => {
+//     setMessages((prev) =>
+//       prev.map((msg) =>
+//         msg.id === data.id
+//           ? { ...msg, status: "seen" }
+//           : msg
+//       )
+//     );
+//   });
+
+//   return () => {
+//     socket.off("message_seen");
+//   };
+// }, []);
+
+
 useEffect(() => {
-  socket.on("message_seen", (data) => {
+  const handleSeen = (data) => {
+    console.log("Received message_seen:", data);
+
     setMessages((prev) =>
       prev.map((msg) =>
         msg.id === data.id
@@ -227,10 +249,12 @@ useEffect(() => {
           : msg
       )
     );
-  });
+  };
+
+  socket.on("message_seen", handleSeen);
 
   return () => {
-    socket.off("message_seen");
+    socket.off("message_seen", handleSeen);
   };
 }, []);
 
@@ -256,20 +280,42 @@ useEffect(() => {
 
 
 
+// useEffect(() => {
+//     socket.on("group_message_seen", (data) => {
+//         console.log("Received group_message_seen:", data);
+
+//         setGroupMessages((prev) =>
+//             prev.map((msg) =>
+//                 msg.id === data.id
+//                     ? { ...msg, status: "seen" }
+//                     : msg
+//             )
+//         );
+//     });
+
+//     return () => socket.off("group_message_seen");
+// }, []);
+
+
+
 useEffect(() => {
-    socket.on("group_message_seen", (data) => {
-        console.log("Received group_message_seen:", data);
+  const handleGroupSeen = (data) => {
+    console.log("Received group_message_seen:", data);
 
-        setGroupMessages((prev) =>
-            prev.map((msg) =>
-                msg.id === data.id
-                    ? { ...msg, status: "seen" }
-                    : msg
-            )
-        );
-    });
+    setGroupMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === data.id
+          ? { ...msg, status: "seen" }
+          : msg
+      )
+    );
+  };
 
-    return () => socket.off("group_message_seen");
+  socket.on("group_message_seen", handleGroupSeen);
+
+  return () => {
+    socket.off("group_message_seen", handleGroupSeen);
+  };
 }, []);
 
 useEffect(() => {
