@@ -74,9 +74,9 @@ io.on("connection", (socket) => {
 // });
 
 
-  // socket.on("send_message", (data) => {
-  //   socket.broadcast.emit("receive_message", data);
-  // });
+  socket.on("send_message", (data) => {
+    socket.broadcast.emit("receive_message", data);
+  });
 
    socket.on("send_group_message", (data) => {
     io.emit("receive_group_message", data);
