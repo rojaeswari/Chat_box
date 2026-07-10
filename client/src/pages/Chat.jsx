@@ -120,6 +120,7 @@ function Chat() {
 
 useEffect(() => {
   const handleMessage = (data) => {
+        console.log("Received socket message:", data);
     if (
       selectedUser &&
       (
