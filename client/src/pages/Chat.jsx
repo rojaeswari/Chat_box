@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "./Chat.css";
+import "./chat.css";
 import socket from "../socket";
 import { useNavigate } from "react-router-dom";
 
@@ -79,7 +79,7 @@ useEffect(() => {
 
         // Delivered
         await axios.put(
-          `http://localhost:5000/api/messages/status/${data.id}`,
+          ` https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`,
           {
             status: "delivered",
           }
@@ -92,7 +92,7 @@ useEffect(() => {
 
         // Seen
         await axios.put(
-          `http://localhost:5000/api/messages/seen/${data.id}`
+          ` https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
         );
 
         socket.emit("message_seen", {
@@ -142,7 +142,7 @@ useEffect(() => {
 
       // Delivered
       await axios.put(
-        `http://localhost:5000/api/group-messages/status/${data.id}`
+        ` https://chat-box-1-4g7s.onrender.com/api/group-messages/status/${data.id}`
       );
 
       socket.emit("group_message_delivered", {
@@ -151,7 +151,7 @@ useEffect(() => {
 
       // Seen
       await axios.put(
-        `http://localhost:5000/api/group-messages/seen/${data.id}`
+        ` https://chat-box-1-4g7s.onrender.com/api/group-messages/seen/${data.id}`
       );
       console.log("Received:", data);
 
@@ -290,7 +290,7 @@ useEffect(() => {
       const data = JSON.parse(localStorage.getItem("user"));
 
       const res = await axios.get(
-        `http://localhost:5000/api/users?email=${data.email}`
+        ` https://chat-box-1-4g7s.onrender.com/api/users?email=${data.email}`
       );
 
       setUsers(res.data);
@@ -301,7 +301,7 @@ useEffect(() => {
 
   const fetchGroups = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/groups");
+      const res = await axios.get(" https://chat-box-1-4g7s.onrender.com/api/groups");
       setGroups(res.data);
     } catch (err) {
       console.log(err);
@@ -313,7 +313,7 @@ useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem("user"));
 
     const res = await axios.get(
-      `http://localhost:5000/api/messages/${currentUser.id}/${receiverId}`
+      ` https://chat-box-1-4g7s.onrender.com/api/messages/${currentUser.id}/${receiverId}`
     );
 
     // Update delivered status
@@ -323,7 +323,7 @@ useEffect(() => {
     msg.status === "sent"
   ) {
     await axios.put(
-      `http://localhost:5000/api/messages/status/${msg.id}`,
+      ` https://chat-box-1-4g7s.onrender.com/api/messages/status/${msg.id}`,
       {
         status: "delivered",
       }
@@ -346,7 +346,7 @@ for (const msg of res.data) {
   ) {
 
     await axios.put(
-      `http://localhost:5000/api/messages/seen/${msg.id}`
+      ` https://chat-box-1-4g7s.onrender.com/api/messages/seen/${msg.id}`
     );
 
     socket.emit("message_seen", {
@@ -371,7 +371,7 @@ for (const msg of res.data) {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/groups/${id}`,
+        ` https://chat-box-1-4g7s.onrender.com/api/groups/${id}`,
         {
           group_name: newName,
         }
@@ -395,7 +395,7 @@ for (const msg of res.data) {
     try {
 
       await axios.delete(
-        `http://localhost:5000/api/groups/${id}`
+        ` https://chat-box-1-4g7s.onrender.com/api/groups/${id}`
       );
 
       alert("Group Deleted");
@@ -422,7 +422,7 @@ for (const msg of res.data) {
       formData.append("image", image);
 
       const uploadRes = await axios.post(
-        "http://localhost:5000/api/messages/upload",
+        " https://chat-box-1-4g7s.onrender.com/api/messages/upload",
         formData
       );
 
@@ -439,7 +439,7 @@ if (document) {
   formData.append("image", document);
 
   const res = await axios.post(
-    "http://localhost:5000/api/messages/upload",
+    " https://chat-box-1-4g7s.onrender.com/api/messages/upload",
     formData
   );
 
@@ -448,7 +448,7 @@ if (document) {
 
       // Group Chat
       if (selectedGroup) {
-        await axios.post("http://localhost:5000/api/group-messages", {
+        await axios.post(" https://chat-box-1-4g7s.onrender.com/api/group-messages", {
           group_id: selectedGroup.id,
           sender_id: currentUser.id,
           message,
@@ -475,7 +475,7 @@ if (document) {
 
 
       // Private Chat
-      await axios.post("http://localhost:5000/api/messages", {
+      await axios.post(" https://chat-box-1-4g7s.onrender.com/api/messages", {
         sender_id: currentUser.id,
         receiver_id: selectedUser.id,
         message,
@@ -507,7 +507,7 @@ if (document) {
   const fetchGroupMembers = async (groupId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/groups/${groupId}/members`
+        ` https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/members`
       );
 
       setGroupMembers(res.data);
@@ -523,7 +523,7 @@ if (document) {
     const currentUser = JSON.parse(localStorage.getItem("user"));
 
     const res = await axios.get(
-      `http://localhost:5000/api/group-messages/${groupId}`
+      ` https://chat-box-1-4g7s.onrender.com/api/group-messages/${groupId}`
     );
 
     // Delivered
@@ -534,7 +534,7 @@ if (document) {
       ) {
 
         await axios.put(
-          `http://localhost:5000/api/group-messages/status/${msg.id}`,
+          ` https://chat-box-1-4g7s.onrender.com/api/group-messages/status/${msg.id}`,
           {
             status: "delivered",
           }
@@ -558,7 +558,7 @@ if (document) {
       ) {
 
         await axios.put(
-          `http://localhost:5000/api/group-messages/seen/${msg.id}`
+          ` https://chat-box-1-4g7s.onrender.com/api/group-messages/seen/${msg.id}`
         );
 
         socket.emit("group_message_seen", {
@@ -580,7 +580,7 @@ if (document) {
   const removeMember = async (groupId, userId) => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/groups/${groupId}/remove-member/${userId}`
+        ` https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/remove-member/${userId}`
       );
 
       alert("Member Removed");
@@ -596,7 +596,7 @@ if (document) {
   const addMember = async (groupId, userId) => {
     try {
       await axios.post(
-        `http://localhost:5000/api/groups/${groupId}/add-member`,
+        ` https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/add-member`,
         {
           user_id: userId,
         }
@@ -620,10 +620,10 @@ if (document) {
       const currentUser = JSON.parse(localStorage.getItem("user"));
 
       const res = await axios.get(
-        `http://localhost:5000/api/users?email=${currentUser.email}`
+        ` https://chat-box-1-4g7s.onrender.com/api/users?email=${currentUser.email}`
       );
       const members = await axios.get(
-        `http://localhost:5000/api/groups/${groupId}/members`
+        ` https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/members`
       );
 
       const memberIds = members.data.map((m) => m.id);
@@ -646,7 +646,7 @@ if (document) {
 
     if (selectedGroup) {
       await axios.delete(
-  `http://localhost:5000/api/group-messages/${id}`,
+  ` https://chat-box-1-4g7s.onrender.com/api/group-messages/${id}`,
   {
     data: {
       user_id: user.id,
@@ -657,7 +657,7 @@ if (document) {
       fetchGroupMessages(selectedGroup.id);
     } else {
      await axios.delete(
-  `http://localhost:5000/api/messages/${id}`,
+  ` https://chat-box-1-4g7s.onrender.com/api/messages/${id}`,
   {
     data: {
       user_id: user.id,
@@ -864,7 +864,7 @@ if (document) {
 
         {msg.image && (
   <img
-    src={`http://localhost:5000/uploads/${msg.image}`}
+    src={` https://chat-box-1-4g7s.onrender.com/uploads/${msg.image}`}
     alt=""
     className="chat-image"
   />
@@ -872,7 +872,7 @@ if (document) {
 
 {msg.document && (
   <a
-    href={`http://localhost:5000/uploads/${msg.document}`}
+    href={` https://chat-box-1-4g7s.onrender.com/uploads/${msg.document}`}
     target="_blank"
     rel="noreferrer"
     className="document-link"
@@ -948,7 +948,7 @@ if (document) {
 
     {msg.image && (
   <img
-    src={`http://localhost:5000/uploads/${msg.image}`}
+    src={` https://chat-box-1-4g7s.onrender.com/uploads/${msg.image}`}
     alt="Group"
     className="chat-image"
   />
@@ -956,7 +956,7 @@ if (document) {
 
 {msg.document && (
   <a
-    href={`http://localhost:5000/uploads/${msg.document}`}
+    href={` https://chat-box-1-4g7s.onrender.com/uploads/${msg.document}`}
     target="_blank"
     rel="noreferrer"
     className="document-link"
