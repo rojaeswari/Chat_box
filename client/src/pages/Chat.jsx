@@ -43,16 +43,68 @@ function Chat() {
 }, []);
 
 
-  useEffect(() => {
-    socket.on("receive_message", (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
+  // useEffect(() => {
+  //   socket.on("receive_message", (data) => {
+  //     setMessages((prev) => [...prev, data]);
+  //   });
 
-    return () => {
-      socket.off("receive_message");
+  //   return () => {
+  //     socket.off("receive_message");
+  //   };
+  // }, []);
+
+
+//   useEffect(() => {
+//   const handleMessage = async (data) => {
+
+//     setMessages((prev) => [...prev, data]);
+
+//     if (data.sender_id !== user.id) {
+
+//       await axios.put(
+//         `http://localhost:5000/api/messages/status/${data.id}`
+//       );
+
+//       socket.emit("message_delivered", {
+//         id: data.id,
+//       });
+
+//       await axios.put(
+//         `http://localhost:5000/api/messages/seen/${data.id}`
+//       );
+
+//       socket.emit("message_seen", {
+//         id: data.id,
+//       });
+//     }
+//   };
+
+//   socket.off("receive_message", handleMessage);
+//   socket.on("receive_message", handleMessage);
+
+//   return () => {
+//     socket.off("receive_message", handleMessage);
+//   };
+// }, [user]);
+
+
+useEffect(() => {
+
+    const handleMessage = (data) => {
+
+        if (
+            selectedUser &&
+            data.sender_id === selectedUser.id
+        ) {
+            setMessages(prev => [...prev, data]);
+        }
     };
-  }, []);
 
+    socket.on("receive_message", handleMessage);
+
+    return () => socket.off("receive_message", handleMessage);
+
+}, [selectedUser]);
 
   useEffect(() => {
   const handleGroupMessage = async (data) => {
@@ -78,6 +130,7 @@ function Chat() {
       await axios.put(
         `http://localhost:5000/api/group-messages/seen/${data.id}`
       );
+      console.log("Received:", data);
 
       socket.emit("group_message_seen", {
         id: data.id,
@@ -149,8 +202,8 @@ useEffect(() => {
 
 
 useEffect(() => {
-
     socket.on("group_message_seen", (data) => {
+        console.log("Received group_message_seen:", data);
 
         setGroupMessages((prev) =>
             prev.map((msg) =>
@@ -159,12 +212,9 @@ useEffect(() => {
                     : msg
             )
         );
-
     });
 
-    return () =>
-        socket.off("group_message_seen");
-
+    return () => socket.off("group_message_seen");
 }, []);
 
 useEffect(() => {
@@ -395,7 +445,7 @@ if (document) {
         setMessage("");
         setImage(null);
         setDocument(null);
-        fetchGroupMessages(selectedGroup.id);
+        // fetchGroupMessages(selectedGroup.id);
 
         return;
       }
@@ -410,18 +460,18 @@ if (document) {
           document:documentName
       });
 
-      socket.emit("send_message", {
-        sender_id: currentUser.id,
-        receiver_id: selectedUser.id,
-        message,
-          image: imageName,
-           document:documentName
-      });
+      // socket.emit("send_message", {
+      //   sender_id: currentUser.id,
+      //   receiver_id: selectedUser.id,
+      //   message,
+      //     image: imageName,
+      //      document:documentName
+      // });
 
       setMessage("");
       setImage(null);
       setDocument(null);
-      fetchMessages(selectedUser.id);
+      // fetchMessages(selectedUser.id);
 
     } catch (err) {
       console.log(err);

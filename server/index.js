@@ -74,13 +74,13 @@ io.on("connection", (socket) => {
 // });
 
 
-  socket.on("send_message", (data) => {
-    socket.broadcast.emit("receive_message", data);
-  });
-
-  //  socket.on("send_group_message", (data) => {
-  //   io.emit("receive_group_message", data);
+  // socket.on("send_message", (data) => {
+  //   socket.broadcast.emit("receive_message", data);
   // });
+
+   socket.on("send_group_message", (data) => {
+    io.emit("receive_group_message", data);
+  });
 
   socket.on("mention_notification", (data) => {
   io.to(`user_${data.user_id}`).emit("mention_notification", data);
@@ -99,8 +99,9 @@ socket.on("group_message_delivered", (data) => {
 });
 
 socket.on("group_message_seen", (data) => {
-    io.emit("group_message_seen", data);
+    console.log("group_message_seen:", data);
 
+    io.emit("group_message_seen", data);
 });
 
 

@@ -1,30 +1,100 @@
 const pool = require("../db");
 
 // Send Message
+// const sendMessage = async (req, res) => {
+//   try {
+//     const { sender_id, receiver_id, message, image, document,status } = req.body;
+
+//       await pool.query(
+//       `INSERT INTO messages(sender_id, receiver_id, message, image, document, status)
+//        VALUES($1, $2, $3, $4, $5, $6)`,
+//       [sender_id, receiver_id, message, image, document,"sent"]
+//     );
+//     const savedMessage = result.rows[0];
+
+// io.to(`user_${receiver_id}`).emit("receive_message", {
+//   ...savedMessage,
+//   name: senderName,
+// });
+
+//     res.json({
+//       message: "Message Sent Successfully",
+//     });
+
+//   } catch (err) {
+//     console.log("Error:", err);
+//     console.log(err.message);
+//     res.status(500).json({
+//     message: err.message,
+//   });
+
+//     res.status(500).json({
+//       message: "Server Error",
+//     });
+//   }
+// };
+
+
+const { getIO } = require("../socket");
+
 const sendMessage = async (req, res) => {
   try {
-    const { sender_id, receiver_id, message, image, document,status } = req.body;
 
-      await pool.query(
-      `INSERT INTO messages(sender_id, receiver_id, message, image, document, status)
-       VALUES($1, $2, $3, $4, $5, $6)`,
-      [sender_id, receiver_id, message, image, document,"sent"]
+    const {
+      sender_id,
+      receiver_id,
+      message,
+      image,
+      document
+    } = req.body;
+
+    // Save message
+    const result = await pool.query(
+      `INSERT INTO messages
+      (sender_id, receiver_id, message, image, document, status)
+      VALUES ($1,$2,$3,$4,$5,$6)
+      RETURNING *`,
+      [
+        sender_id,
+        receiver_id,
+        message,
+        image,
+        document,
+        "sent"
+      ]
     );
 
-    res.json({
-      message: "Message Sent Successfully",
-    });
+    const savedMessage = result.rows[0];
+
+    // Get sender name
+    const sender = await pool.query(
+      "SELECT name FROM users WHERE id=$1",
+      [sender_id]
+    );
+
+    const senderName = sender.rows[0].name;
+
+    // Emit to receiver
+    const io = getIO();
+
+    io.to(`user_${receiver_id}`).emit(
+      "receive_message",
+      {
+        ...savedMessage,
+        name: senderName
+      }
+    );
+
+    res.status(201).json(savedMessage);
 
   } catch (err) {
-    console.log("Error:", err);
-    console.log(err.message);
-    res.status(500).json({
-    message: err.message,
-  });
+
+    console.log(err);
 
     res.status(500).json({
-      message: "Server Error",
+      message: "Server Error"
     });
+
   }
 };
 
