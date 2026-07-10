@@ -1013,8 +1013,8 @@ if (document) {
     Delete
   </button>
 )}
-
-<div className="status">
+ 
+{/* <div className="status">
   {msg.status === "sent" && (
     <span>✓ Sent</span>
   )}
@@ -1028,7 +1028,26 @@ if (document) {
       ✓✓ Seen
     </span>
   )}
-</div>
+</div> */}
+
+
+{msg.sender_id === user?.id && (
+  <div className="status">
+    {msg.status === "sent" && (
+      <span>✓ Sent</span>
+    )}
+
+    {msg.status === "delivered" && (
+      <span>✓✓ Delivered</span>
+    )}
+
+    {msg.status === "seen" && (
+      <span className="seen-status">
+        ✓✓ Seen
+      </span>
+    )}
+  </div>
+)}
         </div>
       ))}
 
@@ -1098,7 +1117,7 @@ if (document) {
   </button>
 )}
 
-<div className="status">
+{/* <div className="status">
   {msg.status === "sent" && (
     <span>✓ Sent</span>
   )}
@@ -1112,7 +1131,25 @@ if (document) {
       ✓✓ Seen
     </span>
   )}
-</div>
+</div> */}
+
+{msg.sender_id === user?.id && (
+  <div className="status">
+    {msg.status === "sent" && (
+      <span>✓ Sent</span>
+    )}
+
+    {msg.status === "delivered" && (
+      <span>✓✓ Delivered</span>
+    )}
+
+    {msg.status === "seen" && (
+      <span className="seen-status">
+        ✓✓ Seen
+      </span>
+    )}
+  </div>
+)}
 
     </div>
   ))}
