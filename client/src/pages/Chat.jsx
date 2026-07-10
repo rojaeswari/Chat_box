@@ -52,54 +52,87 @@ function Chat() {
   //     socket.off("receive_message");
   //   };
   // }, []);
-useEffect(() => {
-  const handleMessage = async (data) => {
+// useEffect(() => {
+//   const handleMessage = async (data) => {
 
+//     if (
+//       selectedUser &&
+//       (
+//         (data.sender_id === selectedUser.id &&
+//           data.receiver_id === user.id) ||
+
+//         (data.sender_id === user.id &&
+//           data.receiver_id === selectedUser.id)
+//       )
+//     ) {
+
+//       // Duplicate வராமல்
+//       // setMessages((prev) => {
+//       //   if (prev.some((msg) => msg.id === data.id)) {
+//       //     return prev;
+//       //   }
+//       //   return [...prev, data];
+//       // });
+
+//       // Receiver மட்டும் Delivered/Seen update செய்ய வேண்டும்
+//       if (data.receiver_id === user.id) {
+
+//         // Delivered
+//         await axios.put(
+//           ` https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`,
+//           {
+//             status: "delivered",
+//           }
+//         );
+
+//         socket.emit("message_delivered", {
+//           id: data.id,
+//           status: "delivered",
+//         });
+
+//         // Seen
+//         await axios.put(
+//           ` https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
+//         );
+
+//         socket.emit("message_seen", {
+//           id: data.id,
+//           status: "seen",
+//         });
+//       }
+//     }
+//   };
+
+//   socket.off("receive_message", handleMessage);
+//   socket.on("receive_message", handleMessage);
+
+//   return () => {
+//     socket.off("receive_message", handleMessage);
+//   };
+// }, [selectedUser, user]);
+
+
+
+
+
+useEffect(() => {
+  const handleMessage = (data) => {
     if (
       selectedUser &&
       (
-        (data.sender_id === selectedUser.id &&
-          data.receiver_id === user.id) ||
-
         (data.sender_id === user.id &&
-          data.receiver_id === selectedUser.id)
+         data.receiver_id === selectedUser.id) ||
+
+        (data.sender_id === selectedUser.id &&
+         data.receiver_id === user.id)
       )
     ) {
-
-      // Duplicate வராமல்
-      setMessages((prev) => {
-        if (prev.some((msg) => msg.id === data.id)) {
+      setMessages(prev => {
+        if (prev.some(msg => msg.id === data.id)) {
           return prev;
         }
         return [...prev, data];
       });
-
-      // Receiver மட்டும் Delivered/Seen update செய்ய வேண்டும்
-      if (data.receiver_id === user.id) {
-
-        // Delivered
-        await axios.put(
-          ` https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`,
-          {
-            status: "delivered",
-          }
-        );
-
-        socket.emit("message_delivered", {
-          id: data.id,
-          status: "delivered",
-        });
-
-        // Seen
-        await axios.put(
-          ` https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
-        );
-
-        socket.emit("message_seen", {
-          id: data.id,
-          status: "seen",
-        });
-      }
     }
   };
 
@@ -110,7 +143,6 @@ useEffect(() => {
     socket.off("receive_message", handleMessage);
   };
 }, [selectedUser, user]);
-
 // useEffect(() => {
 
 //     const handleMessage = (data) => {
@@ -496,7 +528,7 @@ if (document) {
       setMessage("");
       setImage(null);
       setDocument(null);
-      // fetchMessages(selectedUser.id);
+      fetchMessages(selectedUser.id);
 
     } catch (err) {
       console.log(err);
