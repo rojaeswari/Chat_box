@@ -5,6 +5,9 @@ const setIO = (socketIO) => {
 };
 
 const getIO = () => {
+  if (!io) {
+    throw new Error("Socket.io is not initialized");
+  }
   return io;
 };
 

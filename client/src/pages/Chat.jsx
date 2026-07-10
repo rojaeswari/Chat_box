@@ -52,59 +52,82 @@ function Chat() {
   //     socket.off("receive_message");
   //   };
   // }, []);
-
-
-//   useEffect(() => {
-//   const handleMessage = async (data) => {
-
-//     setMessages((prev) => [...prev, data]);
-
-//     if (data.sender_id !== user.id) {
-
-//       await axios.put(
-//         `http://localhost:5000/api/messages/status/${data.id}`
-//       );
-
-//       socket.emit("message_delivered", {
-//         id: data.id,
-//       });
-
-//       await axios.put(
-//         `http://localhost:5000/api/messages/seen/${data.id}`
-//       );
-
-//       socket.emit("message_seen", {
-//         id: data.id,
-//       });
-//     }
-//   };
-
-//   socket.off("receive_message", handleMessage);
-//   socket.on("receive_message", handleMessage);
-
-//   return () => {
-//     socket.off("receive_message", handleMessage);
-//   };
-// }, [user]);
-
-
 useEffect(() => {
+  const handleMessage = async (data) => {
 
-    const handleMessage = (data) => {
+    if (
+      selectedUser &&
+      (
+        (data.sender_id === selectedUser.id &&
+          data.receiver_id === user.id) ||
 
-        if (
-            selectedUser &&
-            data.sender_id === selectedUser.id
-        ) {
-            setMessages(prev => [...prev, data]);
+        (data.sender_id === user.id &&
+          data.receiver_id === selectedUser.id)
+      )
+    ) {
+
+      // Duplicate வராமல்
+      setMessages((prev) => {
+        if (prev.some((msg) => msg.id === data.id)) {
+          return prev;
         }
-    };
+        return [...prev, data];
+      });
 
-    socket.on("receive_message", handleMessage);
+      // Receiver மட்டும் Delivered/Seen update செய்ய வேண்டும்
+      if (data.receiver_id === user.id) {
 
-    return () => socket.off("receive_message", handleMessage);
+        // Delivered
+        await axios.put(
+          `http://localhost:5000/api/messages/status/${data.id}`,
+          {
+            status: "delivered",
+          }
+        );
 
-}, [selectedUser]);
+        socket.emit("message_delivered", {
+          id: data.id,
+          status: "delivered",
+        });
+
+        // Seen
+        await axios.put(
+          `http://localhost:5000/api/messages/seen/${data.id}`
+        );
+
+        socket.emit("message_seen", {
+          id: data.id,
+          status: "seen",
+        });
+      }
+    }
+  };
+
+  socket.off("receive_message", handleMessage);
+  socket.on("receive_message", handleMessage);
+
+  return () => {
+    socket.off("receive_message", handleMessage);
+  };
+}, [selectedUser, user]);
+
+// useEffect(() => {
+
+//     const handleMessage = (data) => {
+
+//         if (
+//             selectedUser &&
+//             data.sender_id === selectedUser.id
+//         ) {
+//             setMessages(prev => [...prev, data]);
+//         }
+//     };
+
+//     socket.on("receive_message", handleMessage);
+
+//     return () => socket.off("receive_message", handleMessage);
+
+// }, [selectedUser]);
 
   useEffect(() => {
   const handleGroupMessage = async (data) => {
@@ -467,6 +490,8 @@ if (document) {
       //     image: imageName,
       //      document:documentName
       // });
+
+      
 
       setMessage("");
       setImage(null);
