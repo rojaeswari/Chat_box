@@ -30,34 +30,7 @@ io.to(`user_${sender_id}`).emit(
   savedMessage
 );
 
-return res.status(201).json(savedMessage);
-
-// const savedMessage = result.rows[0];
-
-// const senderResult = await pool.query(
-//   "SELECT name FROM users WHERE id=$1",
-//   [sender_id]
-// );
-
-// const messageData = {
-//   ...savedMessage,
-//   sender_name: senderResult.rows[0].name,
-// };
-
-// const io = getIO();
-
-// io.to(`user_${receiver_id}`).emit(
-//   "receive_message",
-//   messageData
-// );
-
-// io.to(`user_${sender_id}`).emit(
-//   "receive_message",
-//   messageData
-// );
-
-// return res.status(201).json(messageData);
-   
+return res.status(201).json(savedMessage);  
 
   } catch (err) {
     console.error(err);

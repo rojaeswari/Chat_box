@@ -180,18 +180,6 @@ useEffect(() => {
 
     setMessages((prev) => [...prev, data]);
 
-//     if (
-//   Notification.permission === "granted" &&
-//   document.hidden &&
-//   data.sender_id !== user.id
-// ) {
-//   new Notification(data.sender_name, {
-//     body: data.message,
-//     icon: "/favicon.svg",
-//   });
-// }
-
-
     // Only if I'm the receiver and I'm currently chatting with this sender
     if (
       data.receiver_id === user?.id &&
@@ -287,24 +275,6 @@ useEffect(() => {
     if (selectedGroup?.id !== data.group_id) return;
 
     setGroupMessages((prev) => [...prev, data]);
-//     if (
-//   Notification.permission === "granted" &&
-//   document.hidden &&
-//   data.sender_id !== user.id
-// ) {
-//   const notification = new Notification(
-//     data.group_name,
-//     {
-//       body: `${data.sender_name}: ${data.message}`,
-//       icon: "/favicon.svg",
-//     }
-//   );
-
-//   notification.onclick = () => {
-//     window.focus();
-//     notification.close();
-//   };
-// }
 
     // Only receiver updates status
     if (data.sender_id !== user.id) {
@@ -627,37 +597,6 @@ for (const msg of res.data) {
     }
 
   };
-
-// mention notification
-
-const handleGroupMessageChange = (e) => {
-
-  const value = e.target.value;
-
-  setMessage(value);
-
-  if (!selectedGroup) return;
-
-  const lastWord = value.split(" ").pop();
-
-  if (lastWord.startsWith("@")) {
-
-    const search = lastWord.substring(1).toLowerCase();
-
-    const filtered = groupMembers.filter((member) =>
-      member.name.toLowerCase().includes(search)
-    );
-
-    setMentionUsers(filtered);
-    setShowMentionBox(true);
-
-  } else {
-
-    setMentionUsers([]);
-    setShowMentionBox(false);
-
-  }
-};
 
 
   const sendMessage = async () => {

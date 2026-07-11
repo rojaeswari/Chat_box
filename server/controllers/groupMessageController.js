@@ -28,35 +28,8 @@ io.to(`group_${group_id}`).emit("receive_group_message", {
   ...savedMessage,
   name: senderName,
 });
-res.status(201).json(savedMessage);
 
-// const savedMessage = result.rows[0];
-
-// // Sender name
-// const senderResult = await pool.query(
-//   "SELECT name FROM users WHERE id = $1",
-//   [sender_id]
-// );
-
-// // Group name
-// const groupResult = await pool.query(
-//   "SELECT group_name FROM groups WHERE id = $1",
-//   [group_id]
-// );
-
-// const messageData = {
-//   ...savedMessage,
-//   sender_name: senderResult.rows[0].name,
-//   group_name: groupResult.rows[0].group_name,
-// };
-
-// const io = getIO();
-
-// io.to(`group_${group_id}`).emit(
-//   "receive_group_message",
-//   messageData
-// );
-// return res.status(201).json(messageData);
+return res.status(201).json(savedMessage); 
 
 
     if (message && message.trim()) {
