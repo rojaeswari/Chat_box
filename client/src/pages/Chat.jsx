@@ -138,7 +138,7 @@ useEffect(() => {
       data.sender_id === selectedUser.id
     ) {
       // Delivered
-      await axios.put(
+      axios.put(
         `https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`,
         {
           status: "delivered",
@@ -151,7 +151,7 @@ useEffect(() => {
       });
 
       // Seen
-      await axios.put(
+      axios.put(
         `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
       );
 
