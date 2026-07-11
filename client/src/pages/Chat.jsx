@@ -18,6 +18,8 @@ function Chat() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [document, setDocument] = useState(null);
   const [groupMessages, setGroupMessages] = useState([]);
+  const [mentionUsers, setMentionUsers] = useState([]);
+  const [showMentionBox, setShowMentionBox] = useState(false);
 
 
   const navigate = useNavigate();
@@ -589,6 +591,38 @@ for (const msg of res.data) {
     }
 
   };
+
+// mention notification
+
+const handleGroupMessageChange = (e) => {
+
+  const value = e.target.value;
+
+  setMessage(value);
+
+  if (!selectedGroup) return;
+
+  const lastWord = value.split(" ").pop();
+
+  if (lastWord.startsWith("@")) {
+
+    const search = lastWord.substring(1).toLowerCase();
+
+    const filtered = groupMembers.filter((member) =>
+      member.name.toLowerCase().includes(search)
+    );
+
+    setMentionUsers(filtered);
+    setShowMentionBox(true);
+
+  } else {
+
+    setMentionUsers([]);
+    setShowMentionBox(false);
+
+  }
+};
+
 
   const sendMessage = async () => {
    if (!message.trim() && !image && !document) return;
@@ -1227,9 +1261,33 @@ if (document) {
             className="input"
             placeholder="Type a message..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+           onChange={
+    selectedGroup
+      ? handleGroupMessageChange
+      : (e) => setMessage(e.target.value)
+  }
             disabled={!selectedUser && !selectedGroup}
-          />
+          /> 
+          {selectedGroup && showMentionBox && (
+  <div className="mention-box">
+    {mentionUsers.map((member) => (
+      <div
+        key={member.id}
+        className="mention-item"
+        onClick={() => {
+          const words = message.split(" ");
+          words[words.length - 1] = `@${member.name}`;
+          setMessage(words.join(" ") + " ");
+          setShowMentionBox(false);
+        }}
+      >
+        {member.name}
+      </div>
+    ))}
+  </div>
+)}
+
+          
 
 
         <label htmlFor="imageUpload" className="file-btn">

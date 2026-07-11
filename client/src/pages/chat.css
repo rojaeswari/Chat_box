@@ -338,3 +338,23 @@ body{
     color:#2196F3 !important;
 }
 
+.mention-box{
+  position:absolute;
+  bottom:60px;
+  width:250px;
+  background:white;
+  border:1px solid #ccc;
+  border-radius:8px;
+  max-height:180px;
+  overflow-y:auto;
+  z-index:1000;
+}
+
+.mention-item{
+  padding:10px;
+  cursor:pointer;
+}
+
+.mention-item:hover{
+  background:#f1f1f1;
+}
