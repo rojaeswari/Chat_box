@@ -1236,34 +1236,9 @@ if (document) {
             className="input"
             placeholder="Type a message..."
             value={message}
-           onChange={
-    selectedGroup
-      ? handleGroupMessageChange
-      : (e) => setMessage(e.target.value)
-  }
-            disabled={!selectedUser && !selectedGroup}
-          /> 
-          {selectedGroup && showMentionBox && (
-  <div className="mention-box">
-    {mentionUsers.map((member) => (
-      <div
-        key={member.id}
-        className="mention-item"
-        onClick={() => {
-          const words = message.split(" ");
-          words[words.length - 1] = `@${member.name}`;
-          setMessage(words.join(" ") + " ");
-          setShowMentionBox(false);
-        }}
-      >
-        {member.name}
-      </div>
-    ))}
-  </div>
-)}
-
-          
-
+            onChange={(e) => setMessage(e.target.value)}
+             disabled={!selectedUser && !selectedGroup}
+          />
 
         <label htmlFor="imageUpload" className="file-btn">
   📷 Choose Image
