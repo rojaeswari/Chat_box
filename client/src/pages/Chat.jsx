@@ -115,19 +115,66 @@ function Chat() {
 //   };
 // }, [selectedUser, user]);
 
+// useEffect(() => {
+//   const handleMessage = async (data) => {
+
+//   const handleMessage = (data) => {
+//     if (
+//       selectedUser &&
+//       (
+//         (data.sender_id === user.id &&
+//          data.receiver_id === selectedUser.id) ||
+// (data.sender_id === selectedUser.id &&
+//          data.receiver_id === user.id)
+//       )
+//     ) {
+
+//     setMessages((prev) => [...prev, data]);
+
+//     // Only if I'm the receiver and I'm currently chatting with this sender
+//     if (
+//       data.receiver_id === user?.id &&
+//       selectedUser &&
+//       data.sender_id === selectedUser.id
+//     ) {
+//       // Delivered
+//       axios.put(
+//         `https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`,
+//         {
+//           status: "delivered",
+//         }
+//       );
+
+//       socket.emit("message_delivered", {
+//         id: data.id,
+//         status: "delivered",
+//       });
+
+//       // Seen
+//       axios.put(
+//         `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
+//       );
+
+//       socket.emit("message_seen", {
+//         id: data.id,
+//         status: "seen",
+//       });
+//     }
+//   };
+// }
+//   }
+
+//   socket.off("receive_message", handleMessage);
+//   socket.on("receive_message", handleMessage);
+
+//   return () => {
+//     socket.off("receive_message", handleMessage);
+//   };
+// }, [user, selectedUser]);
+
+
 useEffect(() => {
   const handleMessage = async (data) => {
-
-  const handleMessage = (data) => {
-    if (
-      selectedUser &&
-      (
-        (data.sender_id === user.id &&
-         data.receiver_id === selectedUser.id) ||
-(data.sender_id === selectedUser.id &&
-         data.receiver_id === user.id)
-      )
-    ) {
 
     setMessages((prev) => [...prev, data]);
 
@@ -138,7 +185,7 @@ useEffect(() => {
       data.sender_id === selectedUser.id
     ) {
       // Delivered
-      axios.put(
+      await axios.put(
         `https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`,
         {
           status: "delivered",
@@ -151,7 +198,7 @@ useEffect(() => {
       });
 
       // Seen
-      axios.put(
+      await axios.put(
         `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
       );
 
@@ -161,8 +208,6 @@ useEffect(() => {
       });
     }
   };
-}
-  }
 
   socket.off("receive_message", handleMessage);
   socket.on("receive_message", handleMessage);
