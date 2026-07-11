@@ -52,7 +52,7 @@ function Chat() {
   //     socket.off("receive_message");
   //   };
   // }, []);
-
+  //use effect for receiving messages
 
 
 // useEffect(() => {
