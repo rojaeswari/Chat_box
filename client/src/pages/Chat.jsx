@@ -185,18 +185,10 @@ useEffect(() => {
   document.hidden &&
   data.sender_id !== user.id
 ) {
-  const notification = new Notification(
-    data.sender_name,
-    {
-      body: data.message || "New Message",
-      icon: "/chat.png",
-    }
-  );
-
-  notification.onclick = () => {
-    window.focus();
-    notification.close();
-  };
+  new Notification(data.sender_name, {
+    body: data.message,
+    icon: "/favicon.svg",
+  });
 }
 
 
@@ -304,7 +296,7 @@ useEffect(() => {
     data.group_name,
     {
       body: `${data.sender_name}: ${data.message}`,
-      icon: "/chat.png",
+      icon: "/favicon.svg",
     }
   );
 
@@ -505,6 +497,12 @@ useEffect(() => {
 //   return () => socket.off("mention_notification");
 
 // }, []);
+
+useEffect(() => {
+  if ("Notification" in window) {
+    Notification.requestPermission();
+  }
+}, []);
 
 
   const fetchUsers = async () => {
