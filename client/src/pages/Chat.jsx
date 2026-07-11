@@ -118,6 +118,17 @@ function Chat() {
 useEffect(() => {
   const handleMessage = async (data) => {
 
+  const handleMessage = (data) => {
+    if (
+      selectedUser &&
+      (
+        (data.sender_id === user.id &&
+         data.receiver_id === selectedUser.id) ||
+(data.sender_id === selectedUser.id &&
+         data.receiver_id === user.id)
+      )
+    ) {
+
     setMessages((prev) => [...prev, data]);
 
     // Only if I'm the receiver and I'm currently chatting with this sender
@@ -150,6 +161,8 @@ useEffect(() => {
       });
     }
   };
+}
+  }
 
   socket.off("receive_message", handleMessage);
   socket.on("receive_message", handleMessage);
