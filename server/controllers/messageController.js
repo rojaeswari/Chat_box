@@ -14,24 +14,53 @@ const sendMessage = async (req, res) => {
       [sender_id, receiver_id, message, image, document, "sent"]
     );
 
-    const savedMessage = result.rows[0];
+//     const savedMessage = result.rows[0];
 
-   const io = getIO();
+//    const io = getIO();
 
-// Receiver
+// // Receiver
+// io.to(`user_${receiver_id}`).emit(
+//   "receive_message",
+//   savedMessage
+// );
+
+// // Sender
+// io.to(`user_${sender_id}`).emit(
+//   "receive_message",
+//   savedMessage
+// );
+
+// return res.status(201).json(savedMessage);
+
+
+const savedMessage = result.rows[0];
+
+// Get sender name
+const senderResult = await pool.query(
+  "SELECT name FROM users WHERE id = $1",
+  [sender_id]
+);
+
+const messageData = {
+  ...savedMessage,
+  sender_name: senderResult.rows[0].name,
+};
+
+const io = getIO();
+
+// Send to receiver
 io.to(`user_${receiver_id}`).emit(
   "receive_message",
-  savedMessage
+  messageData
 );
 
-// Sender
+// Send to sender
 io.to(`user_${sender_id}`).emit(
   "receive_message",
-  savedMessage
+  messageData
 );
 
-return res.status(201).json(savedMessage);
-
+return res.status(201).json(messageData);
    
 
   } catch (err) {

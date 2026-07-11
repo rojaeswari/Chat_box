@@ -180,6 +180,26 @@ useEffect(() => {
 
     setMessages((prev) => [...prev, data]);
 
+    if (
+  Notification.permission === "granted" &&
+  document.hidden &&
+  data.sender_id !== user.id
+) {
+  const notification = new Notification(
+    data.sender_name,
+    {
+      body: data.message || "New Message",
+      icon: "/chat.png",
+    }
+  );
+
+  notification.onclick = () => {
+    window.focus();
+    notification.close();
+  };
+}
+
+
     // Only if I'm the receiver and I'm currently chatting with this sender
     if (
       data.receiver_id === user?.id &&
@@ -275,6 +295,24 @@ useEffect(() => {
     if (selectedGroup?.id !== data.group_id) return;
 
     setGroupMessages((prev) => [...prev, data]);
+    if (
+  Notification.permission === "granted" &&
+  document.hidden &&
+  data.sender_id !== user.id
+) {
+  const notification = new Notification(
+    data.group_name,
+    {
+      body: `${data.sender_name}: ${data.message}`,
+      icon: "/chat.png",
+    }
+  );
+
+  notification.onclick = () => {
+    window.focus();
+    notification.close();
+  };
+}
 
     // Only receiver updates status
     if (data.sender_id !== user.id) {
