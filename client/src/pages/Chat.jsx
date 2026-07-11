@@ -45,16 +45,6 @@ function Chat() {
 }, []);
 
 
-  // useEffect(() => {
-  //   socket.on("receive_message", (data) => {
-  //     setMessages((prev) => [...prev, data]);
-  //   });
-
-  //   return () => {
-  //     socket.off("receive_message");
-  //   };
-  // }, []);
-  //use effect for receiving messages
 
 
 // useEffect(() => {
