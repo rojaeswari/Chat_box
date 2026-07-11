@@ -55,7 +55,7 @@ io.to(`group_${group_id}`).emit(
   "receive_group_message",
   messageData
 );
-res.status(201).json(savedMessage);
+return res.status(201).json(messageData);
 
 
     if (message && message.trim()) {
