@@ -14,49 +14,49 @@ const sendMessage = async (req, res) => {
       [sender_id, receiver_id, message, image, document, "sent"]
     );
 
-//     const savedMessage = result.rows[0];
+    const savedMessage = result.rows[0];
 
-//    const io = getIO();
+   const io = getIO();
 
-// // Receiver
-// io.to(`user_${receiver_id}`).emit(
-//   "receive_message",
-//   savedMessage
-// );
-
-// // Sender
-// io.to(`user_${sender_id}`).emit(
-//   "receive_message",
-//   savedMessage
-// );
-
-// return res.status(201).json(savedMessage);
-
-const savedMessage = result.rows[0];
-
-const senderResult = await pool.query(
-  "SELECT name FROM users WHERE id=$1",
-  [sender_id]
-);
-
-const messageData = {
-  ...savedMessage,
-  sender_name: senderResult.rows[0].name,
-};
-
-const io = getIO();
-
+// Receiver
 io.to(`user_${receiver_id}`).emit(
   "receive_message",
-  messageData
+  savedMessage
 );
 
+// Sender
 io.to(`user_${sender_id}`).emit(
   "receive_message",
-  messageData
+  savedMessage
 );
 
-return res.status(201).json(messageData);
+return res.status(201).json(savedMessage);
+
+// const savedMessage = result.rows[0];
+
+// const senderResult = await pool.query(
+//   "SELECT name FROM users WHERE id=$1",
+//   [sender_id]
+// );
+
+// const messageData = {
+//   ...savedMessage,
+//   sender_name: senderResult.rows[0].name,
+// };
+
+// const io = getIO();
+
+// io.to(`user_${receiver_id}`).emit(
+//   "receive_message",
+//   messageData
+// );
+
+// io.to(`user_${sender_id}`).emit(
+//   "receive_message",
+//   messageData
+// );
+
+// return res.status(201).json(messageData);
    
 
   } catch (err) {

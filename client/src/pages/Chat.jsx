@@ -180,16 +180,16 @@ useEffect(() => {
 
     setMessages((prev) => [...prev, data]);
 
-    if (
-  Notification.permission === "granted" &&
-  document.hidden &&
-  data.sender_id !== user.id
-) {
-  new Notification(data.sender_name, {
-    body: data.message,
-    icon: "/favicon.svg",
-  });
-}
+//     if (
+//   Notification.permission === "granted" &&
+//   document.hidden &&
+//   data.sender_id !== user.id
+// ) {
+//   new Notification(data.sender_name, {
+//     body: data.message,
+//     icon: "/favicon.svg",
+//   });
+// }
 
 
     // Only if I'm the receiver and I'm currently chatting with this sender
@@ -287,24 +287,24 @@ useEffect(() => {
     if (selectedGroup?.id !== data.group_id) return;
 
     setGroupMessages((prev) => [...prev, data]);
-    if (
-  Notification.permission === "granted" &&
-  document.hidden &&
-  data.sender_id !== user.id
-) {
-  const notification = new Notification(
-    data.group_name,
-    {
-      body: `${data.sender_name}: ${data.message}`,
-      icon: "/favicon.svg",
-    }
-  );
+//     if (
+//   Notification.permission === "granted" &&
+//   document.hidden &&
+//   data.sender_id !== user.id
+// ) {
+//   const notification = new Notification(
+//     data.group_name,
+//     {
+//       body: `${data.sender_name}: ${data.message}`,
+//       icon: "/favicon.svg",
+//     }
+//   );
 
-  notification.onclick = () => {
-    window.focus();
-    notification.close();
-  };
-}
+//   notification.onclick = () => {
+//     window.focus();
+//     notification.close();
+//   };
+// }
 
     // Only receiver updates status
     if (data.sender_id !== user.id) {
@@ -498,11 +498,11 @@ useEffect(() => {
 
 // }, []);
 
-useEffect(() => {
-  if ("Notification" in window) {
-    Notification.requestPermission();
-  }
-}, []);
+// useEffect(() => {
+//   if ("Notification" in window) {
+//     Notification.requestPermission();
+//   }
+// }, []);
 
 
   const fetchUsers = async () => {
