@@ -422,7 +422,29 @@ useEffect(() => {
   if (user) {
     socket.emit("join", user.id);
   }
-}, [user]);
+}, []);
+
+useEffect(() => {
+  const handleSeenUpdate = (data) => {
+    console.log("group_message_seen_update:", data);
+
+    fetchSeenCount(data.message_id);
+
+    setGroupMessages((prev) =>
+      prev.map((msg) =>
+        Number(msg.id) === Number(data.message_id)
+          ? { ...msg, status: "seen" }
+          : msg
+      )
+    );
+  };
+
+  socket.on("group_message_seen_update", handleSeenUpdate);
+
+  return () => {
+    socket.off("group_message_seen_update", handleSeenUpdate);
+  };
+}, []);
 
 
 useEffect(() => {
