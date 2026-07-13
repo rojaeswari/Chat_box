@@ -810,10 +810,10 @@ if (document) {
           }
         );
 
-        socket.emit("group_message_delivered", {
-          id: msg.id,
-          status: "delivered",
-        });
+        // socket.emit("group_message_delivered", {
+        //   id: msg.id,
+        //   status: "delivered",
+        // });
 
         msg.status = "delivered";
       }
@@ -831,10 +831,10 @@ if (document) {
           `https://chat-box-1-4g7s.onrender.com/api/group-messages/seen/${msg.id}`
         );
 
-        socket.emit("group_message_seen", {
-          id: msg.id,
-          status: "seen",
-        });
+        // socket.emit("group_message_seen", {
+        //   id: msg.id,
+        //   status: "seen",
+        // });
 
         msg.status = "seen";
       }

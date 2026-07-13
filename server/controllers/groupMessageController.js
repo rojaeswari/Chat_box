@@ -220,6 +220,34 @@ const updateGroupSeenStatus = async (req, res) => {
   }
 };
 
+const updateGroupMessageStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      "UPDATE group_messages SET status='delivered' WHERE id=$1",
+      [id]
+    );
+
+    const io = getIO();
+
+    io.emit("group_message_delivered", {
+      id,
+      status: "delivered",
+    });
+
+    res.json({
+      message: "Delivered Updated",
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
 const markGroupMessageSeen = async (req, res) => {
   try {
     const { message_id, user_id } = req.body;
