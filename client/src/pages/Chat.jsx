@@ -1379,25 +1379,34 @@ onChange={(e)=>setDocument(e.target.files[0])}
           </button> */}
         </div>
 
-        {showSeenPopup && (
-  <div className="seen-popup">
-    <div className="seen-popup-content">
-      <h3>Seen By</h3>
+     {showSeenPopup && (
+    <div className="seen-popup">
+      <div className="seen-popup-content">
 
-      {seenUsers.length === 0 ? (
-        <p>No one has seen this message yet.</p>
-      ) : (
-        seenUsers.map((u) => (
-          <p key={u.id}>✓ {u.name}</p>
-        ))
-      )}
+        <h3>Seen By ({seenUsers.length})</h3>
 
-      <button onClick={() => setShowSeenPopup(false)}>
-        Close
-      </button>
+        {seenUsers.length === 0 ? (
+          <p>No one has seen this message yet.</p>
+        ) : (
+          seenUsers.map((u) => (
+            <div key={u.id} className="seen-user">
+              <strong>✓ {u.name}</strong>
+              <br />
+              <small>
+                {new Date(u.seen_at).toLocaleTimeString()}
+              </small>
+            </div>
+          ))
+        )}
+
+        <button onClick={() => setShowSeenPopup(false)}>
+          Close
+        </button>
+
+      </div>
     </div>
-  </div>
-)}
+  )}
+
 
       </div>
 

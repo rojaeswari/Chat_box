@@ -246,12 +246,13 @@ const getSeenUsers = async (req, res) => {
       `
       SELECT
         users.id,
-        users.name
+        users.name,
+        group_message_seen.seen_at
       FROM group_message_seen
       JOIN users
       ON group_message_seen.user_id = users.id
       WHERE group_message_seen.message_id = $1
-      ORDER BY users.name
+      ORDER BY group_message_seen.seen_at ASC
       `,
       [messageId]
     );
@@ -261,10 +262,11 @@ const getSeenUsers = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: "Server Error"
+      message: "Server Error",
     });
   }
 };
+
 module.exports = {
   sendGroupMessage,
   getGroupMessages,
