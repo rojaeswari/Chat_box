@@ -20,6 +20,8 @@ function Chat() {
   const [groupMessages, setGroupMessages] = useState([]);
   const [mentionUsers, setMentionUsers] = useState([]);
   const [showMentionBox, setShowMentionBox] = useState(false);
+  const [seenUsers, setSeenUsers] = useState([]);
+  const [showSeenPopup, setShowSeenPopup] = useState(false);
 
 
   const navigate = useNavigate();
@@ -465,6 +467,33 @@ useEffect(() => {
 // }, []);
 
 
+
+useEffect(() => {
+  if (!selectedGroup || !user) return;
+
+  groupMessages.forEach(async (msg) => {
+
+    // தன்னுடைய message-க்கு seen save பண்ண வேண்டாம்
+    if (msg.sender_id === user.id) return;
+
+    try {
+      await axios.post(
+        "https://chat-box-1-4g7s.onrender.com/api/group-messages/seen",
+        {
+          message_id: msg.id,
+          user_id: user.id,
+          group_id: selectedGroup.id,
+        }
+      );
+    } catch (err) {
+      console.log(err);
+    }
+
+  });
+
+}, [groupMessages, selectedGroup, user]);
+
+
   const fetchUsers = async () => {
     try {
       const data = JSON.parse(localStorage.getItem("user"));
@@ -787,6 +816,20 @@ if (document) {
   }
 };
 
+const openSeenPopup = async (messageId) => {
+  try {
+    const res = await axios.get(
+      `https://chat-box-1-4g7s.onrender.com/api/group-messages/seen/${messageId}`
+    );
+
+    setSeenUsers(res.data);
+    setShowSeenPopup(true);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
   const removeMember = async (groupId, userId) => {
     try {
       await axios.delete(
@@ -1049,6 +1092,12 @@ if (document) {
               ? "sent"
               : "received"
           }`}
+
+           onClick={() => {
+    if (msg.sender_id === user?.id) {
+      openSeenPopup(msg.id);
+    }
+  }}
         >
 
           <strong>
@@ -1329,6 +1378,26 @@ onChange={(e)=>setDocument(e.target.files[0])}
             Change Password
           </button> */}
         </div>
+
+        {showSeenPopup && (
+  <div className="seen-popup">
+    <div className="seen-popup-content">
+      <h3>Seen By</h3>
+
+      {seenUsers.length === 0 ? (
+        <p>No one has seen this message yet.</p>
+      ) : (
+        seenUsers.map((u) => (
+          <p key={u.id}>✓ {u.name}</p>
+        ))
+      )}
+
+      <button onClick={() => setShowSeenPopup(false)}>
+        Close
+      </button>
+    </div>
+  </div>
+)}
 
       </div>
 

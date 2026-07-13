@@ -7,6 +7,8 @@ const {
   deleteGroupMessage,
    updateGroupSeenStatus,
    updateGroupMessageStatus,
+   markGroupMessageSeen,
+   getSeenUsers,
  
 } = require("../controllers/groupMessageController");
 
@@ -18,5 +20,13 @@ router.delete("/:id", deleteGroupMessage);
 router.put("/status/:id", updateGroupMessageStatus);
 
 router.put("/seen/:id", updateGroupSeenStatus);
+router.post(
+  "/seen",
+  markGroupMessageSeen
+);
+router.get(
+  "/seen/:messageId",
+  getSeenUsers
+);
 
 module.exports = router;

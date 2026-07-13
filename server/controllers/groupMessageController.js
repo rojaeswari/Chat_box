@@ -150,30 +150,6 @@ const deleteGroupMessage = async (req, res) => {
   }
 };
 
-// const updateGroupDelivered = async (req, res) => {
-
-//   const { id } = req.params;
-
-//   await pool.query(
-//     "UPDATE group_messages SET status='delivered' WHERE id=$1",
-//     [id]
-//   );
-
-//   res.json({ message: "Delivered" });
-// };
-
-// const updateGroupSeen = async (req, res) => {
-
-//   const { id } = req.params;
-
-//   await pool.query(
-//     "UPDATE group_messages SET status='seen' WHERE id=$1",
-//     [id]
-//   );
-
-//   res.json({ message: "Seen" });
-// };
-
 
 const updateGroupMessageStatus = async (req, res) => {
   try {
@@ -214,11 +190,88 @@ const updateGroupSeenStatus = async (req, res) => {
     });
   }
 };
+
+const markGroupMessageSeen = async (req, res) => {
+  try {
+    const { message_id, user_id } = req.body;
+
+    // Duplicate insert ஆகாத மாதிரி
+    const exists = await pool.query(
+      `SELECT * FROM group_message_seen
+       WHERE message_id = $1 AND user_id = $2`,
+      [message_id, user_id]
+    );
+
+    if (exists.rows.length > 0) {
+      return res.json({
+        message: "Already seen"
+      });
+    }
+
+    await pool.query(
+      `INSERT INTO group_message_seen
+      (message_id, user_id)
+      VALUES($1,$2)`,
+      [message_id, user_id]
+    );
+
+    const io = getIO();
+
+    io.to(`group_${req.body.group_id}`).emit(
+      "group_message_seen_update",
+      {
+        message_id,
+        user_id,
+      }
+    );
+
+    res.json({
+      message: "Seen saved"
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
+
+const getSeenUsers = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT
+        users.id,
+        users.name
+      FROM group_message_seen
+      JOIN users
+      ON group_message_seen.user_id = users.id
+      WHERE group_message_seen.message_id = $1
+      ORDER BY users.name
+      `,
+      [messageId]
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server Error"
+    });
+  }
+};
 module.exports = {
   sendGroupMessage,
   getGroupMessages,
   updateGroupMessageStatus,
   deleteGroupMessage,
    updateGroupSeenStatus,
+   markGroupMessageSeen,
+    getSeenUsers,
   
 };
