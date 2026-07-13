@@ -457,19 +457,19 @@ useEffect(() => {
 }, []);
 
 
-useEffect(() => {
+// useEffect(() => {
 
-  socket.on("mention_notification", (data) => {
+//   socket.on("mention_notification", (data) => {
 
-    alert(`${data.sender_name} mentioned you`);
+//     alert(`${data.sender_name} mentioned you`);
 
-  });
+//   });
 
-  return () => {
-    socket.off("mention_notification");
-  };
+//   return () => {
+//     socket.off("mention_notification");
+//   };
 
-}, []);
+// }, []);
 
 
 useEffect(() => {
