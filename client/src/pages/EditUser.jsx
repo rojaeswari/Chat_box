@@ -60,6 +60,13 @@ function EditUser() {
 
       <h2>Edit User</h2>
 
+      <button
+  className="back-btn"
+  onClick={() => navigate("/manage-users")}
+>
+  ⬅ Go Back
+</button>
+
       <form onSubmit={updateUser}>
 
         <input

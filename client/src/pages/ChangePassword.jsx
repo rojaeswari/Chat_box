@@ -55,6 +55,12 @@ return (
     <form onSubmit={changePassword}>
 
       <h2>Reset Password</h2>
+      <button
+  className="back-btn"
+  onClick={() => navigate("/manage-users")}
+>
+  ⬅ Go Back
+</button>
 
       <input
         type="password"
