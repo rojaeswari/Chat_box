@@ -24,3 +24,17 @@
     padding:8px 12px;
     cursor:pointer;
 }
+.back-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  margin-right: 10px;
+}
+
+.back-btn:hover {
+  background: #545b62;
+}

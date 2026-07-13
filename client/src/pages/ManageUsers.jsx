@@ -43,6 +43,12 @@ function ManageUsers() {
     <div className="manage-users">
 
       <h1>Manage Users</h1>
+      <button
+      className="back-btn"
+      onClick={() => navigate("/admin")}
+    >
+      ⬅ Go Back
+    </button>
 
       <button
         className="add-user-btn"
