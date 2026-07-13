@@ -43,6 +43,13 @@ function AddUser() {
 
       <h2>Add New User</h2>
 
+      <button
+  className="back-btn"
+  onClick={() => navigate("/manage-users")}
+>
+  ⬅ Go Back
+</button>
+
       <form onSubmit={saveUser}>
 
         <input
