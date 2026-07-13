@@ -267,6 +267,29 @@ const getSeenUsers = async (req, res) => {
   }
 };
 
+const getSeenCount = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT COUNT(*)::int AS seen_count
+      FROM group_message_seen
+      WHERE message_id = $1
+      `,
+      [messageId]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
 module.exports = {
   sendGroupMessage,
   getGroupMessages,
@@ -275,5 +298,6 @@ module.exports = {
    updateGroupSeenStatus,
    markGroupMessageSeen,
     getSeenUsers,
+    getSeenCount,
   
 };

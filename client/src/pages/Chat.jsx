@@ -22,6 +22,8 @@ function Chat() {
   const [showMentionBox, setShowMentionBox] = useState(false);
   const [seenUsers, setSeenUsers] = useState([]);
   const [showSeenPopup, setShowSeenPopup] = useState(false);
+  const [seenCounts, setSeenCounts] = useState({});
+  const [memberCount, setMemberCount] = useState(0);
 
 
   const navigate = useNavigate();
@@ -499,6 +501,12 @@ useEffect(() => {
   }
 }, [selectedGroup]);
 
+useEffect(() => {
+  if (selectedGroup) {
+    fetchMemberCount(selectedGroup.id);
+  }
+}, [selectedGroup]);
+
 
   const fetchUsers = async () => {
     try {
@@ -833,6 +841,39 @@ if (document) {
     }
 
     setGroupMessages(res.data);
+    res.data.forEach((msg) => {
+  fetchSeenCount(msg.id);
+});
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const fetchSeenCount = async (messageId) => {
+  try {
+
+    const res = await axios.get(
+      `https://chat-box-1-4g7s.onrender.com/api/group-messages/seen-count/${messageId}`
+    );
+
+    setSeenCounts((prev) => ({
+      ...prev,
+      [messageId]: res.data.seen_count,
+    }));
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const fetchMemberCount = async (groupId) => {
+  try {
+    const res = await axios.get(
+      `https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/member-count`
+    );
+
+    setMemberCount(res.data.member_count);
 
   } catch (err) {
     console.log(err);
@@ -1195,17 +1236,41 @@ const openSeenPopup = async (messageId) => {
       <span>✓ Sent</span>
     )}
 
-    {msg.status === "delivered" && (
+    {/* {msg.status === "delivered" && (
       <span>✓✓ Delivered</span>
     )}
 
     {msg.status === "seen" && (
-      <span className="seen-status">
-        ✓✓ Seen
-      </span>
+      // <span className="seen-status">
+      //   ✓✓ Seen
+      // </span>
+      <span
+  className="seen-status"
+  onClick={() => openSeenPopup(msg.id)}
+>
+  👁 Seen ({seenCounts[msg.id] || 0})
+</span>
     )}
   </div>
+)} 
+ */}
+
+ {msg.status === "seen" && (
+      seenCounts[msg.id] >= memberCount - 1 ? (
+        <span className="seen-status">
+          🔵 ✓✓ Seen
+        </span>
+      ) : (
+        <span>
+          ✓✓ Delivered
+        </span>
+      )
+    )}
+
+  </div>
 )}
+
+
         </div>
       ))}
 

@@ -227,6 +227,29 @@ const addMember = async (req, res) => {
   }
 };
 
+const getGroupMemberCount = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT COUNT(*)::int AS member_count
+      FROM group_members
+      WHERE group_id = $1
+      `,
+      [groupId]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
 
 
 module.exports = {
@@ -237,5 +260,6 @@ module.exports = {
      deleteGroup,
       removeMember,
       addMember,
+      getGroupMemberCount,
 
 };

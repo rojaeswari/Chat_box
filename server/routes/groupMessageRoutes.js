@@ -9,6 +9,7 @@ const {
    updateGroupMessageStatus,
    markGroupMessageSeen,
    getSeenUsers,
+   getSeenCount
  
 } = require("../controllers/groupMessageController");
 
@@ -28,5 +29,6 @@ router.get(
   "/seen/:messageId",
   getSeenUsers
 );
+router.get("/seen-count/:messageId", getSeenCount);
 
 module.exports = router;
