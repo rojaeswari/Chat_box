@@ -418,11 +418,21 @@ useEffect(() => {
   };
 }, []);
 
+// useEffect(() => {
+//   if (user) {
+//     socket.emit("join", user.id);
+//   }
+// }, []);
+
+
 useEffect(() => {
-  if (user) {
-    socket.emit("join", user.id);
-  }
-}, []);
+  if (!user) return;
+
+  console.log("Joining room:", user.id);
+
+  socket.emit("join", user.id);
+
+}, [user]);
 
 useEffect(() => {
   const handleSeenUpdate = (data) => {
@@ -461,6 +471,20 @@ useEffect(() => {
 
 }, []);
 
+
+useEffect(() => {
+  const handleMention = (data) => {
+    console.log("Mention received:", data);
+
+    alert(`${data.sender_name} mentioned you`);
+  };
+
+  socket.on("mention_notification", handleMention);
+
+  return () => {
+    socket.off("mention_notification", handleMention);
+  };
+}, []);
 
 // useEffect(() => {
 

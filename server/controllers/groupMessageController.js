@@ -69,6 +69,15 @@ io.to(`group_${group_id}`).emit("receive_group_message", {
             ]
           );
 
+            console.log("Sending mention to room:", `user_${mentionedUser.id}`);
+
+  console.log({
+    user_id: mentionedUser.id,
+    sender_name: senderName,
+    group_id,
+    message,
+  });
+
           const io = getIO();
 
           io.to(`user_${mentionedUser.id}`).emit("mention_notification", {
