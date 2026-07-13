@@ -170,6 +170,27 @@ const updateGroupMessageStatus = async (req, res) => {
 };
 
 
+// const updateGroupSeenStatus = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     await pool.query(
+//       "UPDATE group_messages SET status='seen' WHERE id=$1",
+//       [id]
+//     );
+
+//     res.json({
+//       message: "Seen Updated",
+//     });
+
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({
+//       message: "Server Error",
+//     });
+//   }
+// };
+
 const updateGroupSeenStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -178,6 +199,14 @@ const updateGroupSeenStatus = async (req, res) => {
       "UPDATE group_messages SET status='seen' WHERE id=$1",
       [id]
     );
+
+    // Realtime event
+    const io = getIO();
+
+    io.emit("group_message_seen", {
+      id,
+      status: "seen",
+    });
 
     res.json({
       message: "Seen Updated",
