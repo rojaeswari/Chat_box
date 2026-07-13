@@ -514,14 +514,31 @@ useEffect(() => {
     }
   };
 
+  // const fetchGroups = async () => {
+  //   try {
+  //     const res = await axios.get("https://chat-box-1-4g7s.onrender.com/api/groups");
+  //     setGroups(res.data);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
   const fetchGroups = async () => {
-    try {
-      const res = await axios.get("https://chat-box-1-4g7s.onrender.com/api/groups");
-      setGroups(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  try {
+    const currentUser = JSON.parse(
+      localStorage.getItem("user")
+    );
+
+    const res = await axios.get(
+      `https://chat-box-1-4g7s.onrender.com/api/groups?userId=${currentUser.id}`
+    );
+
+    setGroups(res.data);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const fetchMessages = async (receiverId) => {
   try {
