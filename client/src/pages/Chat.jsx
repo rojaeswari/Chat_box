@@ -990,6 +990,28 @@ const openSeenPopup = async (messageId) => {
   }
 };
 
+const handleGroupSeen = (data) => {
+  console.log("Seen Event:", data);
+
+  setGroupMessages((prev) => {
+    const updated = prev.map((msg) => {
+      if (Number(msg.id) === Number(data.id)) {
+        console.log("Updating message:", msg.id);
+        return {
+          ...msg,
+          status: "seen",
+        };
+      }
+
+      return msg;
+    });
+
+    console.log(updated);
+
+    return updated;
+  });
+};
+
   return (
     <div className="container">
 
