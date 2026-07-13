@@ -403,12 +403,12 @@ useEffect(() => {
     console.log("Received group_message_seen:", data);
 
     setGroupMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === data.id
-          ? { ...msg, status: "seen" }
-          : msg
-      )
-    );
+  prev.map((msg) =>
+    Number(msg.id) === Number(data.id)
+      ? { ...msg, status: "seen" }
+      : msg
+  )
+);
   };
 
   socket.on("group_message_seen", handleGroupSeen);
