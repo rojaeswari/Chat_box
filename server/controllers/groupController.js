@@ -29,17 +29,29 @@ const createGroup = async (req, res) => {
 // Get all groups
 const getGroups = async (req, res) => {
   try {
+    const { userId } = req.query;
+
     const result = await pool.query(
-      "SELECT * FROM groups ORDER BY id DESC"
+      `
+      SELECT g.*
+      FROM groups g
+      JOIN group_members gm
+      ON g.id = gm.group_id
+      WHERE gm.user_id = $1
+      ORDER BY g.id DESC
+      `,
+      [userId]
     );
 
     res.json(result.rows);
+
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({
+      message: "Server Error",
+    });
   }
 };
-
 
 
 // Add Member to Group

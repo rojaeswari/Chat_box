@@ -473,7 +473,7 @@ useEffect(() => {
 
   groupMessages.forEach(async (msg) => {
 
-    // தன்னுடைய message-க்கு seen save பண்ண வேண்டாம்
+   
     if (msg.sender_id === user.id) return;
 
     try {
@@ -492,6 +492,12 @@ useEffect(() => {
   });
 
 }, [groupMessages, selectedGroup, user]);
+
+useEffect(() => {
+  if (selectedGroup) {
+    socket.emit("join_group", selectedGroup.id);
+  }
+}, [selectedGroup]);
 
 
   const fetchUsers = async () => {

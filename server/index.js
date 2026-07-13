@@ -78,9 +78,16 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("receive_message", data);
   });
 
-   socket.on("send_group_message", (data) => {
-    io.emit("receive_group_message", data);
-  });
+  //  socket.on("send_group_message", (data) => {
+  //   io.emit("receive_group_message", data);
+  // });
+
+  socket.on("send_group_message", (data) => {
+    io.to(`group_${data.group_id}`).emit(
+        "receive_group_message",
+        data
+    );
+});
 
   socket.on("mention_notification", (data) => {
   io.to(`user_${data.user_id}`).emit("mention_notification", data);
