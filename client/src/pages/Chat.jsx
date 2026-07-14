@@ -108,9 +108,9 @@ useEffect(() => {
        data.receiver_id === selectedUser.id);
 
     // Current open chat இல்லனா add பண்ணாதீங்க
-    // if (!isCurrentChat) {
-    //   return;
-    // }
+    if (!isCurrentChat) {
+      return;
+    }
 
     setMessages((prev) => {
 
@@ -1027,7 +1027,7 @@ const handleGroupSeen = (data) => {
                  setMessages([]);  
                 setSelectedUser(u);
                 setSelectedGroup(null);
-                fetchMessages(u.id);
+                // fetchMessages(u.id);
               }}
             >
               {u.name}
