@@ -476,6 +476,13 @@ useEffect(() => {
   const handleMention = (data) => {
     console.log("Mention received:", data);
 
+     if (Notification.permission === "granted") {
+      new Notification("Chat Box", {
+        body: `${data.sender_name} mentioned you`,
+        icon: "/chat.png",
+      });
+    }
+
     alert(`${data.sender_name} mentioned you`);
   };
 
@@ -515,10 +522,14 @@ useEffect(() => {
 // }, []);
 
 useEffect(() => {
-  if (Notification.permission !== "granted") {
-    Notification.requestPermission();
+  if ("Notification" in window) {
+    Notification.requestPermission().then((permission) => {
+      console.log(permission);
+    });
   }
 }, []);
+
+
 
 
 
