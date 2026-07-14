@@ -12,6 +12,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const groupRoutes = require("./routes/groupRoutes");
 const groupMessageRoutes = require("./routes/groupMessageRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 
 app.use(cors());
@@ -22,6 +23,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/groups", groupRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/group-messages", groupMessageRoutes);
+
+app.use("/api/notifications", notificationRoutes);
 
 
 app.get("/", async (req, res) => {

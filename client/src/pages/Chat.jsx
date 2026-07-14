@@ -514,6 +514,12 @@ useEffect(() => {
 //   }
 // }, []);
 
+useEffect(() => {
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+}, []);
+
 
 
 useEffect(() => {
