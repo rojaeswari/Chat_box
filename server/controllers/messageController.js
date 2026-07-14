@@ -173,9 +173,10 @@ const getUnreadCounts = async (req, res) => {
     res.json(result.rows);
 
   } catch (err) {
-    console.log(err);
+    console.error("Unread Count Error:", err);
+
     res.status(500).json({
-      message: "Server Error",
+      error: err.message,
     });
   }
 };
