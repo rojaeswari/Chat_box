@@ -157,29 +157,34 @@ const getUnreadCounts = async (req, res) => {
   try {
     const { userId } = req.params;
 
+    console.log("UserId:", userId);
+
     const result = await pool.query(
       `
       SELECT
         sender_id,
-        COUNT(*)::int AS unread_count
+        COUNT(*) AS unread_count
       FROM messages
       WHERE receiver_id = $1
-        AND status != 'seen'
+      AND status <> 'seen'
       GROUP BY sender_id
       `,
       [userId]
     );
 
+    console.log(result.rows);
+
     res.json(result.rows);
 
   } catch (err) {
-    console.error("Unread Count Error:", err);
+    console.log("Unread Error:", err);
 
     res.status(500).json({
-      error: err.message,
+      message: err.message,
     });
   }
 };
+
 
 module.exports = {
   sendMessage,
