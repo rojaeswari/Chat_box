@@ -375,3 +375,21 @@ body{
     border-radius:10px;
     width:300px;
 }
+.user{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.unread-badge{
+  background:#25D366;
+  color:white;
+  min-width:22px;
+  height:22px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:12px;
+  font-weight:bold;
+}

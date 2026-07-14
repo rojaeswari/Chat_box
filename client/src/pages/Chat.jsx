@@ -24,6 +24,7 @@ function Chat() {
   const [showSeenPopup, setShowSeenPopup] = useState(false);
   const [seenCounts, setSeenCounts] = useState({});
   const [memberCount, setMemberCount] = useState(0);
+  const [unreadCounts, setUnreadCounts] = useState({});
 
 
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ function Chat() {
   setUser(data);
   fetchUsers();
   fetchGroups();
+   fetchUnreadCounts();
 }, []);
 
 
@@ -121,6 +123,8 @@ useEffect(() => {
 
       return [...prev, data];
     });
+
+     await fetchUnreadCounts();
 
     // Receiverstatus update
     if (
@@ -596,6 +600,7 @@ for (const msg of res.data) {
   }
 }
     setMessages(res.data);
+    fetchUnreadCounts();
 
   } catch (err) {
     console.log(err);
@@ -1031,7 +1036,14 @@ const handleGroupSeen = (data) => {
                 fetchMessages(u.id);
               }}
             >
-              {u.name}
+              {/* {u.name} */}
+               <span>{u.name}</span>
+
+    {unreadCounts[u.id] > 0 && (
+      <span className="unread-badge">
+        {unreadCounts[u.id]}
+      </span>
+    )}
             </div>
           ))
         ) : (
