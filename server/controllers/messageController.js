@@ -153,38 +153,6 @@ const updateSeenStatus = async (req, res) => {
 };
 
 
-const getUnreadCounts = async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    console.log("UserId:", userId);
-
-    const result = await pool.query(
-      `
-      SELECT
-        sender_id,
-        COUNT(*) AS unread_count
-      FROM messages
-      WHERE receiver_id = $1
-      AND status <> 'seen'
-      GROUP BY sender_id
-      `,
-      [userId]
-    );
-
-    console.log(result.rows);
-
-    res.json(result.rows);
-
-  } catch (err) {
-    console.log("Unread Error:", err);
-
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
-
 
 module.exports = {
   sendMessage,
@@ -192,5 +160,5 @@ module.exports = {
   deleteMessage,
    updateMessageStatus,
   updateSeenStatus,
-  getUnreadCounts
+  
 };

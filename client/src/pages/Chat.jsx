@@ -47,7 +47,6 @@ function Chat() {
   setUser(data);
   fetchUsers();
   fetchGroups();
-   fetchUnreadCounts();
 }, []);
 
 
@@ -124,7 +123,7 @@ useEffect(() => {
       return [...prev, data];
     });
 
-     await fetchUnreadCounts();
+    
 
     // Receiverstatus update
     if (
@@ -600,7 +599,6 @@ for (const msg of res.data) {
   }
 }
     setMessages(res.data);
-    fetchUnreadCounts();
 
   } catch (err) {
     console.log(err);
@@ -628,28 +626,6 @@ for (const msg of res.data) {
       console.log(err);
     }
   };
-
-  const fetchUnreadCounts = async () => {
-  try {
-    const currentUser = JSON.parse(localStorage.getItem("user"));
-
-    const res = await axios.get(
-      `https://chat-box-1-4g7s.onrender.com/api/messages/unread/${currentUser.id}`
-    );
-
-    const counts = {};
-
-    res.data.forEach((item) => {
-      counts[item.sender_id] = item.unread_count;
-    });
-
-    setUnreadCounts(counts);
-
-  } catch (err) {
-    console.log(err);
-  }
-};
-
 
   const deleteGroup = async (id) => {
 

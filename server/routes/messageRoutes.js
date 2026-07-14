@@ -7,12 +7,11 @@ const {
   getMessages,
   deleteMessage,
   updateMessageStatus,
-  updateSeenStatus,
-  getUnreadCounts
+  updateSeenStatus
+
 } = require("../controllers/messageController");
 
 router.post("/", sendMessage);
-router.get("/unread/:userId", getUnreadCounts);
 router.delete("/:id", deleteMessage);
 router.put("/status/:id", updateMessageStatus);
 router.put("/seen/:id", updateSeenStatus);
