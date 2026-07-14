@@ -108,9 +108,9 @@ useEffect(() => {
        data.receiver_id === selectedUser.id);
 
     // Current open chat இல்லனா add பண்ணாதீங்க
-    // if (!isCurrentChat) {
-    //   return;
-    // }
+    if (!isCurrentChat) {
+      return;
+    }
 
     setMessages((prev) => {
 
@@ -567,10 +567,10 @@ useEffect(() => {
       }
     );
 
-    // socket.emit("message_delivered", {
-    //   id: msg.id,
-    //   status: "delivered",
-    // });
+    socket.emit("message_delivered", {
+      id: msg.id,
+      status: "delivered",
+    });
 
     msg.status = "delivered";
   }
@@ -587,10 +587,10 @@ for (const msg of res.data) {
       `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${msg.id}`
     );
 
-    // socket.emit("message_seen", {
-    //   id: msg.id,
-    //   status: "seen",
-    // });
+    socket.emit("message_seen", {
+      id: msg.id,
+      status: "seen",
+    });
 
     msg.status = "seen";
   }
@@ -743,6 +743,7 @@ if (document) {
 
 
       // Private Chat
+      if (!selectedUser?.id) return;
       await axios.post("https://chat-box-1-4g7s.onrender.com/api/messages", {
         sender_id: currentUser.id,
         receiver_id: selectedUser.id,
@@ -764,7 +765,7 @@ if (document) {
       setMessage("");
       setImage(null);
       setDocument(null);
-      fetchMessages(selectedUser.id);
+      // fetchMessages(selectedUser.id);
 
     } catch (err) {
       console.log(err);
