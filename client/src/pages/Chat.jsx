@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import axios from "axios";
 import "./chat.css";
 import socket from "../socket";
@@ -13,6 +13,7 @@ function Chat() {
   const [groupMembers, setGroupMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const bottomRef = useRef(null);
   const [image, setImage] = useState(null);
   const [availableUsers, setAvailableUsers] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -507,6 +508,13 @@ useEffect(() => {
     fetchMemberCount(selectedGroup.id);
   }
 }, [selectedGroup]);
+
+
+useEffect(() => {
+  bottomRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [messages, groupMessages]);
 
 
   const fetchUsers = async () => {
@@ -1033,14 +1041,14 @@ const handleGroupSeen = (data) => {
                 fetchMessages(u.id);
               }}
             >
-              {/* {u.name} */}
-               <span>{u.name}</span>
+              {u.name}
+               {/* <span>{u.name}</span>
 
     {unreadCounts[u.id] > 0 && (
       <span className="unread-badge">
         {unreadCounts[u.id]}
       </span>
-    )}
+    )} */}
             </div>
           ))
         ) : (
@@ -1303,6 +1311,7 @@ const handleGroupSeen = (data) => {
 
         </div>
       ))}
+       <div ref={bottomRef}></div>
 
     </div>
 
@@ -1406,6 +1415,8 @@ const handleGroupSeen = (data) => {
 
     </div>
   ))}
+
+  <div ref={bottomRef}></div>
 </div>
           </>
 
@@ -1427,6 +1438,13 @@ const handleGroupSeen = (data) => {
       ? handleGroupMessageChange
       : (e) => setMessage(e.target.value)
   }
+
+   onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendMessage();
+    }
+  }}
              disabled={!selectedUser && !selectedGroup}
           />
           {selectedGroup && showMentionBox && (
