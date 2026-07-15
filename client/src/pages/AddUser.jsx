@@ -25,7 +25,7 @@ function AddUser() {
 
     try {
       await axios.post(
-        "https://chat-box-1-4g7s.onrender.com/api/auth/register",
+        "https://chat-box-2-hyl4.onrender.com/api/auth/register",
         form
       );
 

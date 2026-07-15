@@ -14,7 +14,7 @@ function ManageUsers() {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("https://chat-box-1-4g7s.onrender.com/api/users/all");
+      const res = await axios.get("https://chat-box-2-hyl4.onrender.com/api/users/all");
 
       setUsers(res.data);
     } catch (err) {
@@ -27,7 +27,7 @@ function ManageUsers() {
 
     try {
       await axios.delete(
-        `https://chat-box-1-4g7s.onrender.com/api/users/${id}`
+        `https://chat-box-2-hyl4.onrender.com/api/users/${id}`
       );
 
       alert("User Deleted");

@@ -64,7 +64,7 @@ function Chat() {
 //     ) {
 //       // Delivered
 //       await axios.put(
-//         `https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`,
+//         `https://chat-box-2-hyl4.onrender.com/api/messages/status/${data.id}`,
 //         {
 //           status: "delivered",
 //         }
@@ -77,7 +77,7 @@ function Chat() {
 
 //       // Seen
 //       await axios.put(
-//         `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
+//         `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
 //       );
 
 //       socket.emit("message_seen", {
@@ -133,11 +133,11 @@ function Chat() {
 //     ) {
 
 //       await axios.put(
-//         `https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`
+//         `https://chat-box-2-hyl4.onrender.com/api/messages/status/${data.id}`
 //       );
 
 //       await axios.put(
-//         `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
+//         `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
 //       );
 //     }
 
@@ -214,7 +214,7 @@ function Chat() {
 
 //       // Delivered
 //       await axios.put(
-//         `https://chat-box-1-4g7s.onrender.com/api/group-messages/status/${data.id}`
+//         `https://chat-box-2-hyl4.onrender.com/api/group-messages/status/${data.id}`
 //       );
 
 //       socket.emit("group_message_delivered", {
@@ -223,7 +223,7 @@ function Chat() {
 
 //       // Seen
 //       await axios.put(
-//         `https://chat-box-1-4g7s.onrender.com/api/group-messages/seen/${data.id}`
+//         `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen/${data.id}`
 //       );
 //       console.log("Received:", data);
 
@@ -288,7 +288,7 @@ useEffect(() => {
       try {
 
         await axios.put(
-          `https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`,
+          `https://chat-box-2-hyl4.onrender.com/api/messages/status/${data.id}`,
           {
             status: "delivered",
           }
@@ -300,7 +300,7 @@ useEffect(() => {
         });
 
         await axios.put(
-          `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
+          `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
         );
 
         socket.emit("message_seen", {
@@ -548,7 +548,7 @@ useEffect(() => {
 
     try {
       await axios.post(
-        "https://chat-box-1-4g7s.onrender.com/api/group-messages/seen",
+        "https://chat-box-2-hyl4.onrender.com/api/group-messages/seen",
         {
           message_id: msg.id,
           user_id: user.id,
@@ -588,7 +588,7 @@ useEffect(() => {
       const data = JSON.parse(localStorage.getItem("user"));
 
       const res = await axios.get(
-        `https://chat-box-1-4g7s.onrender.com/api/users?email=${data.email}`
+        `https://chat-box-2-hyl4.onrender.com/api/users?email=${data.email}`
       );
 
       setUsers(res.data);
@@ -599,7 +599,7 @@ useEffect(() => {
 
   // const fetchGroups = async () => {
   //   try {
-  //     const res = await axios.get("https://chat-box-1-4g7s.onrender.com/api/groups");
+  //     const res = await axios.get("https://chat-box-2-hyl4.onrender.com/api/groups");
   //     setGroups(res.data);
   //   } catch (err) {
   //     console.log(err);
@@ -613,7 +613,7 @@ useEffect(() => {
     );
 
     const res = await axios.get(
-      `https://chat-box-1-4g7s.onrender.com/api/groups?userId=${currentUser.id}`
+      `https://chat-box-2-hyl4.onrender.com/api/groups?userId=${currentUser.id}`
     );
 
     setGroups(res.data);
@@ -628,7 +628,7 @@ useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem("user"));
 
     const res = await axios.get(
-      `https://chat-box-1-4g7s.onrender.com/api/messages/${currentUser.id}/${receiverId}`
+      `https://chat-box-2-hyl4.onrender.com/api/messages/${currentUser.id}/${receiverId}`
     );
 
 //     // Update delivered status
@@ -638,7 +638,7 @@ useEffect(() => {
 //     msg.status === "sent"
 //   ) {
 //     await axios.put(
-//       `https://chat-box-1-4g7s.onrender.com/api/messages/status/${msg.id}`,
+//       `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
 //       {
 //         status: "delivered",
 //       }
@@ -662,7 +662,7 @@ useEffect(() => {
 //   ) {
 
 //     await axios.put(
-//       `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${msg.id}`
+//       `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`
 //     );
 
 //     // socket.emit("message_seen", {
@@ -687,7 +687,7 @@ useEffect(() => {
 
     try {
       await axios.put(
-        `https://chat-box-1-4g7s.onrender.com/api/groups/${id}`,
+        `https://chat-box-2-hyl4.onrender.com/api/groups/${id}`,
         {
           group_name: newName,
         }
@@ -710,7 +710,7 @@ useEffect(() => {
     try {
 
       await axios.delete(
-        `https://chat-box-1-4g7s.onrender.com/api/groups/${id}`
+        `https://chat-box-2-hyl4.onrender.com/api/groups/${id}`
       );
 
       alert("Group Deleted");
@@ -767,7 +767,7 @@ useEffect(() => {
       formData.append("image", image);
 
       const uploadRes = await axios.post(
-        "https://chat-box-1-4g7s.onrender.com/api/messages/upload",
+        "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
         formData
       );
 
@@ -784,7 +784,7 @@ if (document) {
   formData.append("image", document);
 
   const res = await axios.post(
-    "https://chat-box-1-4g7s.onrender.com/api/messages/upload",
+    "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
     formData
   );
 
@@ -793,7 +793,7 @@ if (document) {
 
       // Group Chat
       if (selectedGroup) {
-        await axios.post("https://chat-box-1-4g7s.onrender.com/api/group-messages", {
+        await axios.post("https://chat-box-2-hyl4.onrender.com/api/group-messages", {
           group_id: selectedGroup.id,
           sender_id: currentUser.id,
           message,
@@ -821,7 +821,7 @@ if (document) {
 
       // Private Chat
       if (!selectedUser?.id) return;
-      await axios.post("https://chat-box-1-4g7s.onrender.com/api/messages", {
+      await axios.post("https://chat-box-2-hyl4.onrender.com/api/messages", {
         sender_id: currentUser.id,
         receiver_id: selectedUser.id,
         message,
@@ -853,7 +853,7 @@ if (document) {
   const fetchGroupMembers = async (groupId) => {
     try {
       const res = await axios.get(
-        `https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/members`
+        `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/members`
       );
 
       setGroupMembers(res.data);
@@ -869,7 +869,7 @@ if (document) {
     const currentUser = JSON.parse(localStorage.getItem("user"));
 
     const res = await axios.get(
-      `https://chat-box-1-4g7s.onrender.com/api/group-messages/${groupId}`
+      `https://chat-box-2-hyl4.onrender.com/api/group-messages/${groupId}`
     );
 
     // Delivered
@@ -880,7 +880,7 @@ if (document) {
       ) {
 
         await axios.put(
-          `https://chat-box-1-4g7s.onrender.com/api/group-messages/status/${msg.id}`,
+          `https://chat-box-2-hyl4.onrender.com/api/group-messages/status/${msg.id}`,
           {
             status: "delivered",
           }
@@ -904,7 +904,7 @@ if (document) {
       ) {
 
         await axios.put(
-          `https://chat-box-1-4g7s.onrender.com/api/group-messages/seen/${msg.id}`
+          `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen/${msg.id}`
         );
 
         // socket.emit("group_message_seen", {
@@ -930,7 +930,7 @@ const fetchSeenCount = async (messageId) => {
   try {
 
     const res = await axios.get(
-      `https://chat-box-1-4g7s.onrender.com/api/group-messages/seen-count/${messageId}`
+      `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen-count/${messageId}`
     );
 
     setSeenCounts((prev) => ({
@@ -946,7 +946,7 @@ const fetchSeenCount = async (messageId) => {
 const fetchMemberCount = async (groupId) => {
   try {
     const res = await axios.get(
-      `https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/member-count`
+      `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/member-count`
     );
 
     setMemberCount(res.data.member_count);
@@ -959,7 +959,7 @@ const fetchMemberCount = async (groupId) => {
 const openSeenPopup = async (messageId) => {
   try {
     const res = await axios.get(
-      `https://chat-box-1-4g7s.onrender.com/api/group-messages/seen/${messageId}`
+      `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen/${messageId}`
     );
 
     setSeenUsers(res.data);
@@ -973,7 +973,7 @@ const openSeenPopup = async (messageId) => {
   const removeMember = async (groupId, userId) => {
     try {
       await axios.delete(
-        `https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/remove-member/${userId}`
+        `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/remove-member/${userId}`
       );
 
       alert("Member Removed");
@@ -989,7 +989,7 @@ const openSeenPopup = async (messageId) => {
   const addMember = async (groupId, userId) => {
     try {
       await axios.post(
-        `https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/add-member`,
+        `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/add-member`,
         {
           user_id: userId,
         }
@@ -1013,10 +1013,10 @@ const openSeenPopup = async (messageId) => {
       const currentUser = JSON.parse(localStorage.getItem("user"));
 
       const res = await axios.get(
-        `https://chat-box-1-4g7s.onrender.com/api/users?email=${currentUser.email}`
+        `https://chat-box-2-hyl4.onrender.com/api/users?email=${currentUser.email}`
       );
       const members = await axios.get(
-        `https://chat-box-1-4g7s.onrender.com/api/groups/${groupId}/members`
+        `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/members`
       );
 
       const memberIds = members.data.map((m) => m.id);
@@ -1039,7 +1039,7 @@ const openSeenPopup = async (messageId) => {
 
     if (selectedGroup) {
       await axios.delete(
-  `https://chat-box-1-4g7s.onrender.com/api/group-messages/${id}`,
+  `https://chat-box-2-hyl4.onrender.com/api/group-messages/${id}`,
   {
     data: {
       user_id: user.id,
@@ -1050,7 +1050,7 @@ const openSeenPopup = async (messageId) => {
       fetchGroupMessages(selectedGroup.id);
     } else {
      await axios.delete(
-  `https://chat-box-1-4g7s.onrender.com/api/messages/${id}`,
+  `https://chat-box-2-hyl4.onrender.com/api/messages/${id}`,
   {
     data: {
       user_id: user.id,
@@ -1292,7 +1292,7 @@ const handleGroupSeen = (data) => {
 
         {msg.image && (
   <img
-    src={`https://chat-box-1-4g7s.onrender.com/uploads/${msg.image}`}
+    src={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`}
     alt=""
     className="chat-image"
   />
@@ -1300,7 +1300,7 @@ const handleGroupSeen = (data) => {
 
 {msg.document && (
   <a
-    href={`https://chat-box-1-4g7s.onrender.com/uploads/${msg.document}`}
+    href={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.document}`}
     target="_blank"
     rel="noreferrer"
     className="document-link"
@@ -1420,7 +1420,7 @@ const handleGroupSeen = (data) => {
 
     {msg.image && (
   <img
-    src={`https://chat-box-1-4g7s.onrender.com/uploads/${msg.image}`}
+    src={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`}
     alt="Group"
     className="chat-image"
   />
@@ -1428,7 +1428,7 @@ const handleGroupSeen = (data) => {
 
 {msg.document && (
   <a
-    href={`https://chat-box-1-4g7s.onrender.com/uploads/${msg.document}`}
+    href={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.document}`}
     target="_blank"
     rel="noreferrer"
     className="document-link"

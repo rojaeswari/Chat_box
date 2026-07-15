@@ -18,7 +18,7 @@ function CreateGroup() {
 
   try {
     const res = await axios.post(
-      "https://chat-box-1-4g7s.onrender.com/api/groups",
+      "https://chat-box-2-hyl4.onrender.com/api/groups",
       {
         group_name: groupName,
         created_by: user.id,

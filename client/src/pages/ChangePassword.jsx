@@ -35,7 +35,7 @@ function ChangePassword() {
 
     try {
     const res = await axios.put(
-  `https://chat-box-1-4g7s.onrender.com/api/users/reset-password/${id}`,
+  `https://chat-box-2-hyl4.onrender.com/api/users/reset-password/${id}`,
   {
     newPassword: form.newPassword,
   }

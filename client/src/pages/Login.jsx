@@ -23,7 +23,7 @@ function Login() {
 
     try {
       const res = await axios.post(
-        "https://chat-box-1-4g7s.onrender.com/api/auth/login",
+        "https://chat-box-2-hyl4.onrender.com/api/auth/login",
         form
       );
 

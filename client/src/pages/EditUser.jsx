@@ -20,7 +20,7 @@ function EditUser() {
   const fetchUser = async () => {
     try {
       const res = await axios.get(
-        `https://chat-box-1-4g7s.onrender.com/api/users/${id}`
+        `https://chat-box-2-hyl4.onrender.com/api/users/${id}`
       );
 
       setForm(res.data);
@@ -42,7 +42,7 @@ function EditUser() {
 
     try {
       await axios.put(
-        `https://chat-box-1-4g7s.onrender.com/api/users/${id}`,
+        `https://chat-box-2-hyl4.onrender.com/api/users/${id}`,
         form
       );
 
