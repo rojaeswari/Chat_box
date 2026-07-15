@@ -566,24 +566,47 @@ useEffect(() => {
     );
 
     // Update delivered status
-   for (const msg of res.data) {
+//    for (const msg of res.data) {
+//   if (
+//     msg.receiver_id === currentUser.id &&
+//     msg.status === "sent"
+//   ) {
+//     await axios.put(
+//       `https://chat-box-1-4g7s.onrender.com/api/messages/status/${msg.id}`,
+//       {
+//         status: "delivered",
+//       }
+//     );
+
+//     socket.emit("message_delivered", {
+//       id: msg.id,
+//       status: "delivered",
+//     });
+
+//     msg.status = "delivered";
+//   }
+// }
+
+for (const msg of res.data) {
   if (
     msg.receiver_id === currentUser.id &&
     msg.status === "sent"
   ) {
-    await axios.put(
-      `https://chat-box-1-4g7s.onrender.com/api/messages/status/${msg.id}`,
-      {
+    try {
+      await axios.put(
+        `https://chat-box-1-4g7s.onrender.com/api/messages/status/${msg.id}`,
+        { status: "delivered" }
+      );
+
+      socket.emit("message_delivered", {
+        id: msg.id,
         status: "delivered",
-      }
-    );
+      });
 
-    socket.emit("message_delivered", {
-      id: msg.id,
-      status: "delivered",
-    });
-
-    msg.status = "delivered";
+      msg.status = "delivered";
+    } catch (err) {
+      console.error("Delivered update failed:", err.response?.data || err);
+    }
   }
 }
 

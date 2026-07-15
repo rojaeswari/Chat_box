@@ -132,29 +132,32 @@ const deleteMessage = async (req, res) => {
 
 const updateMessageStatus = async (req, res) => {
   try {
-    console.log("ID:", req.params.id);
-    console.log("BODY:", req.body);
+    console.log("Params:", req.params);
+    console.log("Body:", req.body);
 
     const { id } = req.params;
     const { status } = req.body;
 
-    await pool.query(
-      "UPDATE messages SET status=$1 WHERE id=$2",
+    const result = await pool.query(
+      "UPDATE messages SET status = $1 WHERE id = $2 RETURNING *",
       [status, id]
     );
 
-    res.json({
-      message: "Status Updated"
-    });
+    console.log("Updated:", result.rows);
 
+    res.json({
+      message: "Status Updated",
+      data: result.rows[0],
+    });
   } catch (err) {
-    console.log("ERROR:", err);
+    console.error("updateMessageStatus Error:", err);
 
     res.status(500).json({
-      message: err.message
+      message: err.message,
     });
   }
 };
+
 
 const updateSeenStatus = async (req, res) => {
   try {
