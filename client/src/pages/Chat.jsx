@@ -1557,6 +1557,24 @@ accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
 onChange={(e)=>setDocument(e.target.files[0])}
 />
 
+{image && (
+  <div className="selected-file">
+    📷 {image.name}
+    <button onClick={() => setImage(null)}>
+      ✖
+      </button>
+  </div>
+)}
+
+{document && (
+  <div className="selected-file">
+    📄 {document.name}
+    <button onClick={() => setDocument(null)}>
+      ✖
+      </button>
+  </div>
+)}
+
 <button
   className="link-btn"
   onClick={() => {
