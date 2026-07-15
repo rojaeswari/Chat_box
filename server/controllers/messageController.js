@@ -132,6 +132,7 @@ const updateMessageStatus = async (req, res) => {
 
 const updateSeenStatus = async (req, res) => {
   try {
+     console.log("Seen API Called:", req.params.id);
 
     const { id } = req.params;
 

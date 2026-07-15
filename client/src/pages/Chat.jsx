@@ -588,6 +588,7 @@ useEffect(() => {
 }
 
 for (const msg of res.data) {
+   console.log("Checking Seen:", msg);
 
   if (
     msg.receiver_id === currentUser.id &&
