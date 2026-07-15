@@ -160,23 +160,23 @@ const deleteGroupMessage = async (req, res) => {
 };
 
 
-const updateGroupMessageStatus = async (req, res) => {
-  try {
+// const updateGroupMessageStatus = async (req, res) => {
+//   try {
 
-    const { id } = req.params;
+//     const { id } = req.params;
 
-    await pool.query(
-      "UPDATE group_messages SET status='delivered' WHERE id=$1",
-      [id]
-    );
+//     await pool.query(
+//       "UPDATE group_messages SET status='delivered' WHERE id=$1",
+//       [id]
+//     );
 
-    res.json({ message: "Delivered Updated" });
+//     res.json({ message: "Delivered Updated" });
 
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Server Error" });
-  }
-};
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ message: "Server Error" });
+//   }
+// };
 
 
 // const updateGroupSeenStatus = async (req, res) => {
