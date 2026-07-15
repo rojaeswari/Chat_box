@@ -598,10 +598,10 @@ for (const msg of res.data) {
         { status: "delivered" }
       );
 
-      socket.emit("message_delivered", {
-        id: msg.id,
-        status: "delivered",
-      });
+      // socket.emit("message_delivered", {
+      //   id: msg.id,
+      //   status: "delivered",
+      // });
 
       msg.status = "delivered";
     } catch (err) {
@@ -622,10 +622,10 @@ for (const msg of res.data) {
       `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${msg.id}`
     );
 
-    socket.emit("message_seen", {
-      id: msg.id,
-      status: "seen",
-    });
+    // socket.emit("message_seen", {
+    //   id: msg.id,
+    //   status: "seen",
+    // });
 
     msg.status = "seen";
   }
