@@ -108,8 +108,33 @@ const deleteMessage = async (req, res) => {
   }
 };
 
+// const updateMessageStatus = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { status } = req.body;
+
+//     await pool.query(
+//       "UPDATE messages SET status=$1 WHERE id=$2",
+//       [status, id]
+//     );
+
+//     res.json({
+//       message: "Status Updated"
+//     });
+
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({
+//       message: "Server Error"
+//     });
+//   }
+// };
+
 const updateMessageStatus = async (req, res) => {
   try {
+    console.log("ID:", req.params.id);
+    console.log("BODY:", req.body);
+
     const { id } = req.params;
     const { status } = req.body;
 
@@ -123,9 +148,10 @@ const updateMessageStatus = async (req, res) => {
     });
 
   } catch (err) {
-    console.log(err);
+    console.log("ERROR:", err);
+
     res.status(500).json({
-      message: "Server Error"
+      message: err.message
     });
   }
 };
