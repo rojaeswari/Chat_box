@@ -97,6 +97,168 @@ function Chat() {
 
 
 
+// useEffect(() => {
+//   const handleMessage = async (data) => {
+
+//     if (!selectedUser || !user) return;
+
+//     const isCurrentChat =
+//       (data.sender_id === selectedUser.id &&
+//        data.receiver_id === user.id) ||
+
+//       (data.sender_id === user.id &&
+//        data.receiver_id === selectedUser.id);
+
+    
+//     if (!isCurrentChat) {
+//       return;
+//     }
+
+//     setMessages((prev) => {
+
+      
+//       if (prev.some(msg => msg.id === data.id)) {
+//         return prev;
+//       }
+
+//       return [...prev, data];
+//     });
+
+    
+
+//     // Receiverstatus update
+//     if (
+//       data.receiver_id === user.id &&
+//       data.sender_id === selectedUser.id
+//     ) {
+
+//       await axios.put(
+//         `https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`
+//       );
+
+//       await axios.put(
+//         `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
+//       );
+//     }
+
+//   };
+
+//   socket.off("receive_message");
+//   socket.on("receive_message", handleMessage);
+
+//   return () => {
+//     socket.off("receive_message", handleMessage);
+//   };
+
+// }, [user, selectedUser]);
+
+
+
+// // useEffect(() => {
+// //   const handleMessage = (data) => {
+// //         console.log("Received socket message:", data);
+// //     if (
+// //       selectedUser &&
+// //       (
+// //         (data.sender_id === user.id &&
+// //          data.receiver_id === selectedUser.id) ||
+
+// //         (data.sender_id === selectedUser.id &&
+// //          data.receiver_id === user.id)
+// //       )
+// //     ) {
+// //       setMessages(prev => {
+// //         if (prev.some(msg => msg.id === data.id)) {
+// //           return prev;
+// //         }
+// //         return [...prev, data];
+// //       });
+// //     }
+// //   };
+
+// //   socket.off("receive_message", handleMessage);
+// //   socket.on("receive_message", handleMessage);
+
+// //   return () => {
+// //     socket.off("receive_message", handleMessage);
+// //   };
+// // }, [selectedUser, user]);
+// // useEffect(() => {
+
+// //     const handleMessage = (data) => {
+
+// //         if (
+// //             selectedUser &&
+// //             data.sender_id === selectedUser.id
+// //         ) {
+// //             setMessages(prev => [...prev, data]);
+// //         }
+// //     };
+
+// //     socket.on("receive_message", handleMessage);
+
+// //     return () => socket.off("receive_message", handleMessage);
+
+// // }, [selectedUser]);
+
+//   useEffect(() => {
+//   const handleGroupMessage = async (data) => {
+//     console.log("Received:", data);
+
+//     if (selectedGroup?.id !== data.group_id) return;
+
+//     setGroupMessages((prev) => [...prev, data]);
+
+//     // Only receiver updates status
+//     if (data.sender_id !== user.id) {
+
+//       // Delivered
+//       await axios.put(
+//         `https://chat-box-1-4g7s.onrender.com/api/group-messages/status/${data.id}`
+//       );
+
+//       socket.emit("group_message_delivered", {
+//         id: data.id,
+//       });
+
+//       // Seen
+//       await axios.put(
+//         `https://chat-box-1-4g7s.onrender.com/api/group-messages/seen/${data.id}`
+//       );
+//       console.log("Received:", data);
+
+//       socket.emit("group_message_seen", {
+//         id: data.id,
+//       });
+//     }
+//   };
+
+//   socket.off("receive_group_message", handleGroupMessage);
+//   socket.on("receive_group_message", handleGroupMessage);
+
+//   return () => {
+//     socket.off("receive_group_message", handleGroupMessage);
+//   };
+// }, [selectedGroup, user]);
+
+
+
+// useEffect(() => {
+//   socket.on("message_delivered", (data) => {
+//     setMessages((prev) =>
+//       prev.map((msg) =>
+//         msg.id === data.id
+//           ? { ...msg, status: "delivered" }
+//           : msg
+//       )
+//     );
+//   });
+
+//   return () => {
+//     socket.off("message_delivered");
+//   };
+// }, []);
+
 useEffect(() => {
   const handleMessage = async (data) => {
 
@@ -109,36 +271,47 @@ useEffect(() => {
       (data.sender_id === user.id &&
        data.receiver_id === selectedUser.id);
 
-    // Current open chat இல்லனா add பண்ணாதீங்க
-    if (!isCurrentChat) {
-      return;
-    }
+    if (!isCurrentChat) return;
 
     setMessages((prev) => {
-
-      // Duplicate avoid
       if (prev.some(msg => msg.id === data.id)) {
         return prev;
       }
-
       return [...prev, data];
     });
 
-    
-
-    // Receiverstatus update
     if (
       data.receiver_id === user.id &&
       data.sender_id === selectedUser.id
     ) {
 
-      await axios.put(
-        `https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`
-      );
+      try {
 
-      await axios.put(
-        `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
-      );
+        await axios.put(
+          `https://chat-box-1-4g7s.onrender.com/api/messages/status/${data.id}`,
+          {
+            status: "delivered",
+          }
+        );
+
+        socket.emit("message_delivered", {
+          id: data.id,
+          status: "delivered",
+        });
+
+        await axios.put(
+          `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${data.id}`
+        );
+
+        socket.emit("message_seen", {
+          id: data.id,
+          status: "seen",
+        });
+
+      } catch (err) {
+        console.log(err);
+      }
+
     }
 
   };
@@ -151,113 +324,6 @@ useEffect(() => {
   };
 
 }, [user, selectedUser]);
-
-
-
-// useEffect(() => {
-//   const handleMessage = (data) => {
-//         console.log("Received socket message:", data);
-//     if (
-//       selectedUser &&
-//       (
-//         (data.sender_id === user.id &&
-//          data.receiver_id === selectedUser.id) ||
-
-//         (data.sender_id === selectedUser.id &&
-//          data.receiver_id === user.id)
-//       )
-//     ) {
-//       setMessages(prev => {
-//         if (prev.some(msg => msg.id === data.id)) {
-//           return prev;
-//         }
-//         return [...prev, data];
-//       });
-//     }
-//   };
-
-//   socket.off("receive_message", handleMessage);
-//   socket.on("receive_message", handleMessage);
-
-//   return () => {
-//     socket.off("receive_message", handleMessage);
-//   };
-// }, [selectedUser, user]);
-// useEffect(() => {
-
-//     const handleMessage = (data) => {
-
-//         if (
-//             selectedUser &&
-//             data.sender_id === selectedUser.id
-//         ) {
-//             setMessages(prev => [...prev, data]);
-//         }
-//     };
-
-//     socket.on("receive_message", handleMessage);
-
-//     return () => socket.off("receive_message", handleMessage);
-
-// }, [selectedUser]);
-
-  useEffect(() => {
-  const handleGroupMessage = async (data) => {
-    console.log("Received:", data);
-
-    if (selectedGroup?.id !== data.group_id) return;
-
-    setGroupMessages((prev) => [...prev, data]);
-
-    // Only receiver updates status
-    if (data.sender_id !== user.id) {
-
-      // Delivered
-      await axios.put(
-        `https://chat-box-1-4g7s.onrender.com/api/group-messages/status/${data.id}`
-      );
-
-      socket.emit("group_message_delivered", {
-        id: data.id,
-      });
-
-      // Seen
-      await axios.put(
-        `https://chat-box-1-4g7s.onrender.com/api/group-messages/seen/${data.id}`
-      );
-      console.log("Received:", data);
-
-      socket.emit("group_message_seen", {
-        id: data.id,
-      });
-    }
-  };
-
-  socket.off("receive_group_message", handleGroupMessage);
-  socket.on("receive_group_message", handleGroupMessage);
-
-  return () => {
-    socket.off("receive_group_message", handleGroupMessage);
-  };
-}, [selectedGroup, user]);
-
-
-
-useEffect(() => {
-  socket.on("message_delivered", (data) => {
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === data.id
-          ? { ...msg, status: "delivered" }
-          : msg
-      )
-    );
-  });
-
-  return () => {
-    socket.off("message_delivered");
-  };
-}, []);
 
 
 // useEffect(() => {
@@ -565,7 +631,7 @@ useEffect(() => {
       `https://chat-box-1-4g7s.onrender.com/api/messages/${currentUser.id}/${receiverId}`
     );
 
-    // Update delivered status
+//     // Update delivered status
 //    for (const msg of res.data) {
 //   if (
 //     msg.receiver_id === currentUser.id &&
@@ -587,49 +653,26 @@ useEffect(() => {
 //   }
 // }
 
-for (const msg of res.data) {
-  if (
-    msg.receiver_id === currentUser.id &&
-    msg.status === "sent"
-  ) {
-    try {
-      await axios.put(
-        `https://chat-box-1-4g7s.onrender.com/api/messages/status/${msg.id}`,
-        { status: "delivered" }
-      );
+// for (const msg of res.data) {
+//    console.log("Checking Seen:", msg);
 
-      // socket.emit("message_delivered", {
-      //   id: msg.id,
-      //   status: "delivered",
-      // });
+//   if (
+//     msg.receiver_id === currentUser.id &&
+//     msg.status === "delivered"
+//   ) {
 
-      msg.status = "delivered";
-    } catch (err) {
-      console.error("Delivered update failed:", err.response?.data || err);
-    }
-  }
-}
+//     await axios.put(
+//       `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${msg.id}`
+//     );
 
-for (const msg of res.data) {
-   console.log("Checking Seen:", msg);
+//     // socket.emit("message_seen", {
+//     //   id: msg.id,
+//     //   status: "seen",
+//     // });
 
-  if (
-    msg.receiver_id === currentUser.id &&
-    msg.status === "delivered"
-  ) {
-
-    await axios.put(
-      `https://chat-box-1-4g7s.onrender.com/api/messages/seen/${msg.id}`
-    );
-
-    // socket.emit("message_seen", {
-    //   id: msg.id,
-    //   status: "seen",
-    // });
-
-    msg.status = "seen";
-  }
-}
+//     msg.status = "seen";
+//   }
+// }
     setMessages(res.data);
 
   } catch (err) {
