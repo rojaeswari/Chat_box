@@ -311,19 +311,19 @@ function Chat() {
   //           }
   //         );
 
-  //         // socket.emit("message_delivered", {
-  //         //   id: data.id,
-  //         //   status: "delivered",
-  //         // });
+  //         socket.emit("message_delivered", {
+  //           id: data.id,
+  //           status: "delivered",
+  //         });
 
   //         await axios.put(
   //           `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
   //         );
 
-  //         // socket.emit("message_seen", {
-  //         //   id: data.id,
-  //         //   status: "seen",
-  //         // });
+  //         socket.emit("message_seen", {
+  //           id: data.id,
+  //           status: "seen",
+  //         });
 
   //       } catch (err) {
   //         console.log(err);
@@ -352,21 +352,23 @@ function Chat() {
   // }, [user, selectedUser]);
 
 
-  // useEffect(() => {
-  //   socket.on("message_seen", (data) => {
-  //     setMessages((prev) =>
-  //       prev.map((msg) =>
-  //         msg.id === data.id
-  //           ? { ...msg, status: "seen" }
-  //           : msg
-  //       )
-  //     );
-  //   });
+  useEffect(() => {
+    socket.on("message_seen", (data) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === data.id
+            ? { ...msg, status: "seen" }
+            : msg
+        )
+      );
+    });
 
-  //   return () => {
-  //     socket.off("message_seen");
-  //   };
-  // }, []);
+    return () => {
+      socket.off("message_seen");
+    };
+  }, []);
+
+
   useEffect(() => {
   const handleMessage = async (data) => {
 
@@ -421,11 +423,21 @@ function Chat() {
             status: "delivered",
           }
         );
+        socket.emit("message_delivered", {
+            id: data.id,
+            status: "delivered",
+          });
+
 
         // Seen
         await axios.put(
           `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
         );
+        socket.emit("message_seen", {
+            id: data.id,
+            status: "seen",
+          });
+        
 
       } catch (err) {
         console.log(err);
