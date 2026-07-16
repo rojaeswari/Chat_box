@@ -423,20 +423,20 @@ function Chat() {
             status: "delivered",
           }
         );
-        socket.emit("message_delivered", {
-            id: data.id,
-            status: "delivered",
-          });
+        // socket.emit("message_delivered", {
+        //     id: data.id,
+        //     status: "delivered",
+        //   });
 
 
         // Seen
         await axios.put(
           `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
         );
-        socket.emit("message_seen", {
-            id: data.id,
-            status: "seen",
-          });
+        // socket.emit("message_seen", {
+        //     id: data.id,
+        //     status: "seen",
+        //   });
         
 
       } catch (err) {
