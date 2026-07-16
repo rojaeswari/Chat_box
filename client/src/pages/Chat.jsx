@@ -369,21 +369,21 @@ function Chat() {
   }, [user, selectedUser]);
 
 
-  useEffect(() => {
-    socket.on("message_seen", (data) => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === data.id
-            ? { ...msg, status: "seen" }
-            : msg
-        )
-      );
-    });
+  // useEffect(() => {
+  //   socket.on("message_seen", (data) => {
+  //     setMessages((prev) =>
+  //       prev.map((msg) =>
+  //         msg.id === data.id
+  //           ? { ...msg, status: "seen" }
+  //           : msg
+  //       )
+  //     );
+  //   });
 
-    return () => {
-      socket.off("message_seen");
-    };
-  }, []);
+  //   return () => {
+  //     socket.off("message_seen");
+  //   };
+  // }, []);
 
 
   //   useEffect(() => {
