@@ -478,20 +478,13 @@ if (selectedUser) {
     const handleSeen = (data) => {
       console.log("Received message_seen:", data);
 
-      // setMessages((prev) =>
-      //   prev.map((msg) =>
-      //     msg.id === data.id
-      //       ? { ...msg, status: "seen" }
-      //       : msg
-      //   )
-      // );
       setMessages((prev) =>
-  prev.map((msg) =>
-    Number(msg.id) === Number(data.id)
-      ? { ...msg, status: "seen" }
-      : msg
-  )
-);
+        prev.map((msg) =>
+          msg.id === data.id
+            ? { ...msg, status: "seen" }
+            : msg
+        )
+      );
     };
 
     socket.on("message_seen", handleSeen);
@@ -989,7 +982,7 @@ if (selectedUser) {
         image: imageName,
         document: documentName
       });
-      setMessages((prev) => [...prev, res.data]);
+      
 
       // socket.emit("send_message", {
       //   sender_id: currentUser.id,
@@ -1004,7 +997,7 @@ if (selectedUser) {
       setMessage("");
       setImage(null);
       setDocument(null);
-      fetchMessages(selectedUser.id);
+      // fetchMessages(selectedUser.id);
 
     } catch (err) {
       console.log(err);
