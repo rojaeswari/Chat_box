@@ -779,7 +779,6 @@ useEffect(() => {
     let documentName = "";
 
 if (document) {
-
   const formData = new FormData();
   formData.append("image", document);
 
@@ -787,6 +786,8 @@ if (document) {
     "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
     formData
   );
+
+  console.log("Document upload response:", res.data);
 
   documentName = res.data.image;
 }
