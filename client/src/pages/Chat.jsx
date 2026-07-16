@@ -715,7 +715,7 @@ function Chat() {
     const currentUser = JSON.parse(localStorage.getItem("user"));
 
     const res = await axios.get(
-      `https://chat-box-1-4g7s.onrender.com/api/messages/unread/${currentUser.id}`
+      `https://chat-box-2-hyl4.onrender.comapi/messages/unread/${currentUser.id}`
     );
 
     const counts = {};
