@@ -259,96 +259,97 @@ function Chat() {
   //   };
   // }, []);
 
-  useEffect(() => {
-    const handleMessage = async (data) => {
+  //old handle msg
 
-      // if (!selectedUser || !user) return;
-        if (!user) return;
+  // useEffect(() => {
+  //   const handleMessage = async (data) => {
 
-      const isCurrentChat =
-        (data.sender_id === selectedUser.id &&
-          data.receiver_id === user.id) ||
+  //     if (!selectedUser || !user) return;
+      
+  //     const isCurrentChat =
+  //       (data.sender_id === selectedUser.id &&
+  //         data.receiver_id === user.id) ||
 
-        (data.sender_id === user.id &&
-          data.receiver_id === selectedUser.id);
+  //       (data.sender_id === user.id &&
+  //         data.receiver_id === selectedUser.id);
 
-      // if (!isCurrentChat) return;
-       if (!isCurrentChat) {
+  //     // if (!isCurrentChat) return;
+  //      if (!isCurrentChat) {
 
-      if (
-        data.receiver_id === user.id &&
-        data.sender_id !== user.id
-      ) {
-        setUnreadCounts((prev) => ({
-          ...prev,
-          [data.sender_id]:
-            (prev[data.sender_id] || 0) + 1,
-        }));
-      }
+  //     if (
+  //       data.receiver_id === user.id &&
+  //       data.sender_id !== user.id
+  //     ) {
+  //       setUnreadCounts((prev) => ({
+  //         ...prev,
+  //         [data.sender_id]:
+  //           (prev[data.sender_id] || 0) + 1,
+  //       }));
+  //     }
 
-      return;
-    }
+  //     return;
+  //   }
 
-      setMessages((prev) => {
-        if (prev.some(msg => msg.id === data.id)) {
-          return prev;
-        }
-        return [...prev, data];
-      });
+  //     setMessages((prev) => {
+  //       if (prev.some(msg => msg.id === data.id)) {
+  //         return prev;
+  //       }
+  //       return [...prev, data];
+  //     });
 
-      if (
-        data.receiver_id === user.id &&
-        data.sender_id === selectedUser.id
-      ) {
+  //     if (
+  //       data.receiver_id === user.id &&
+  //       data.sender_id === selectedUser.id
+  //     ) {
 
-        try {
+  //       try {
 
-          await axios.put(
-            `https://chat-box-2-hyl4.onrender.com/api/messages/status/${data.id}`,
-            {
-              status: "delivered",
-            }
-          );
+  //         await axios.put(
+  //           `https://chat-box-2-hyl4.onrender.com/api/messages/status/${data.id}`,
+  //           {
+  //             status: "delivered",
+  //           }
+  //         );
 
-          socket.emit("message_delivered", {
-            id: data.id,
-            status: "delivered",
-          });
+  //         // socket.emit("message_delivered", {
+  //         //   id: data.id,
+  //         //   status: "delivered",
+  //         // });
 
-          await axios.put(
-            `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
-          );
+  //         await axios.put(
+  //           `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
+  //         );
 
-          socket.emit("message_seen", {
-            id: data.id,
-            status: "seen",
-          });
+  //         // socket.emit("message_seen", {
+  //         //   id: data.id,
+  //         //   status: "seen",
+  //         // });
 
-        } catch (err) {
-          console.log(err);
-        }
+  //       } catch (err) {
+  //         console.log(err);
+  //       }
 
-      }
+  //     }
 
-    };
+  //   };
 
-    socket.off("receive_message");
-    socket.on("receive_message", handleMessage);
+  //   socket.off("receive_message");
+  //   socket.on("receive_message", handleMessage);
 
-    // socket.off("unread_count");
-    // socket.on("unread_count", (data) => {
-    //   setUnreadCounts((prev) => ({
-    //     ...prev,
-    //     [data.sender_id]: data.unread_count,
-    //   }));
-    // })
+  //   // socket.off("unread_count");
+  //   // socket.on("unread_count", (data) => {
+  //   //   setUnreadCounts((prev) => ({
+  //   //     ...prev,
+  //   //     [data.sender_id]: data.unread_count,
+  //   //   }));
+  //   // })
 
-    return () => {
-      socket.off("receive_message", handleMessage);
-      socket.off("unread_count");
-    };
+  //   return () => {
+  //     socket.off("receive_message", handleMessage);
+  //     socket.off("unread_count");
+  //   };
 
-  }, [user, selectedUser]);
+  // }, [user, selectedUser]);
 
 
   // useEffect(() => {
@@ -366,6 +367,80 @@ function Chat() {
   //     socket.off("message_seen");
   //   };
   // }, []);
+  useEffect(() => {
+  const handleMessage = async (data) => {
+
+    if (!user) return;
+
+    const isCurrentChat =
+      selectedUser &&
+      (
+        (data.sender_id === selectedUser.id &&
+          data.receiver_id === user.id) ||
+
+        (data.sender_id === user.id &&
+          data.receiver_id === selectedUser.id)
+      );
+
+    // Message belongs to another chat
+    if (!isCurrentChat) {
+
+      if (
+        data.receiver_id === user.id &&
+        data.sender_id !== user.id
+      ) {
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [data.sender_id]:
+            (prev[data.sender_id] || 0) + 1,
+        }));
+      }
+
+      return;
+    }
+
+    // Prevent duplicate messages
+    setMessages((prev) => {
+      if (prev.some((msg) => msg.id === data.id)) {
+        return prev;
+      }
+      return [...prev, data];
+    });
+
+    // Receiver opened this chat
+    if (
+      data.receiver_id === user.id &&
+      data.sender_id === selectedUser.id
+    ) {
+      try {
+
+        // Delivered
+        await axios.put(
+          `https://chat-box-2-hyl4.onrender.com/api/messages/status/${data.id}`,
+          {
+            status: "delivered",
+          }
+        );
+
+        // Seen
+        await axios.put(
+          `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
+        );
+
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+  socket.off("receive_message");
+  socket.on("receive_message", handleMessage);
+
+  return () => {
+    socket.off("receive_message", handleMessage);
+  };
+
+}, [user, selectedUser]);
 
 
   useEffect(() => {
