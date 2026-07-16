@@ -32,6 +32,8 @@ router.get("/:senderId/:receiverId", getMessages);
 // });
 router.post("/upload", upload.single("image"), (req, res) => {
   try {
+    console.log("Uploaded file:", req.file);
+
     res.json({
       message: "Image uploaded successfully",
       image: req.file.path,
