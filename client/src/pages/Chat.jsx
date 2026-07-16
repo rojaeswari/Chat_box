@@ -472,25 +472,50 @@ function Chat() {
   // }, [user, selectedUser]);
 
 
+  // useEffect(() => {
+  //   const handleSeen = (data) => {
+  //     console.log("Received message_seen:", data);
+
+  //     setMessages((prev) =>
+  //       prev.map((msg) =>
+  //         msg.id === data.id
+  //           ? { ...msg, status: "seen" }
+  //           : msg
+  //       )
+  //     );
+  //   };
+
+  //   socket.on("message_seen", handleSeen);
+
+  //   return () => {
+  //     socket.off("message_seen", handleSeen);
+  //   };
+  // }, []);
   useEffect(() => {
-    const handleSeen = (data) => {
-      console.log("Received message_seen:", data);
+  const handleSeen = (data) => {
+    console.log("Received message_seen:", data);
 
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === data.id
-            ? { ...msg, status: "seen" }
-            : msg
-        )
+    setMessages((prev) => {
+      console.log("Before:", prev);
+
+      const updated = prev.map((msg) =>
+        Number(msg.id) === Number(data.id)
+          ? { ...msg, status: "seen" }
+          : msg
       );
-    };
 
-    socket.on("message_seen", handleSeen);
+      console.log("After:", updated);
 
-    return () => {
-      socket.off("message_seen", handleSeen);
-    };
-  }, []);
+      return updated;
+    });
+  };
+
+  socket.on("message_seen", handleSeen);
+
+  return () => {
+    socket.off("message_seen", handleSeen);
+  };
+}, []);
 
 
   useEffect(() => {

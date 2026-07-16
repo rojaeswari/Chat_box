@@ -167,11 +167,32 @@ const updateSeenStatus = async (req, res) => {
       "UPDATE messages SET status='seen' WHERE id=$1",
       [id]
     );
+      const result = await pool.query(
+      `
+      SELECT sender_id, receiver_id
+      FROM messages
+      WHERE id=$1
+      `,
+      [id]
+    );
+
+    const senderId = result.rows[0].sender_id;
+    const receiverId = result.rows[0].receiver_id;
 
     const io = getIO();
 
-    io.emit("message_seen", {
-      id,
+    // io.emit("message_seen", {
+    //   id,
+    //   status: "seen",
+    // });
+     io.to(`user_${senderId}`).emit("message_seen", {
+      id: Number(id),
+      status: "seen",
+    });
+
+    // Notify receiver
+    io.to(`user_${receiverId}`).emit("message_seen", {
+      id: Number(id),
       status: "seen",
     });
 
