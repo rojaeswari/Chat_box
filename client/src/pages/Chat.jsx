@@ -267,12 +267,22 @@ function Chat() {
       // if (!selectedUser || !user) return;
        if (!user) return;
       
-      const isCurrentChat =
-        (data.sender_id === selectedUser.id &&
-          data.receiver_id === user.id) ||
+      // const isCurrentChat =
+      //   (data.sender_id === selectedUser.id &&
+      //     data.receiver_id === user.id) ||
 
-        (data.sender_id === user.id &&
-          data.receiver_id === selectedUser.id);
+      //   (data.sender_id === user.id &&
+      //     data.receiver_id === selectedUser.id);
+      let isCurrentChat = false;
+
+if (selectedUser) {
+  isCurrentChat =
+    (data.sender_id === selectedUser.id &&
+      data.receiver_id === user.id) ||
+
+    (data.sender_id === user.id &&
+      data.receiver_id === selectedUser.id);
+}
 
       // if (!isCurrentChat) return;
        if (!isCurrentChat) {
@@ -298,10 +308,18 @@ function Chat() {
         return [...prev, data];
       });
 
+
+      // if (
+      //   data.receiver_id === user.id &&
+      //   data.sender_id === selectedUser.id
+      // ) 
       if (
-        data.receiver_id === user.id &&
-        data.sender_id === selectedUser.id
-      ) {
+  selectedUser &&
+  data.receiver_id === user.id &&
+  data.sender_id === selectedUser.id
+)
+      
+      {
 
         try {
 
