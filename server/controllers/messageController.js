@@ -30,6 +30,29 @@ io.to(`user_${sender_id}`).emit(
   savedMessage
 );
 
+
+const unreadResult = await pool.query(
+  `
+  SELECT COUNT(*) AS unread_count
+  FROM messages
+  WHERE receiver_id = $1
+    AND sender_id = $2
+    AND status != 'seen'
+  `,
+  [receiver_id, sender_id]
+);
+
+io.to(`user_${receiver_id}`).emit("unread_count", {
+  sender_id,
+  unread_count: Number(unreadResult.rows[0].unread_count),
+});
+
+// Sender
+io.to(`user_${sender_id}`).emit(
+  "receive_message",
+  savedMessage
+);
+
 return res.status(201).json(savedMessage);  
 
   } catch (err) {
@@ -184,6 +207,32 @@ const updateSeenStatus = async (req, res) => {
 };
 
 
+const getUnreadCounts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT
+        sender_id,
+        COUNT(*) AS unread_count
+      FROM messages
+      WHERE receiver_id = $1
+        AND status != 'seen'
+      GROUP BY sender_id
+      `,
+      [userId]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
 
 module.exports = {
   sendMessage,
@@ -191,5 +240,6 @@ module.exports = {
   deleteMessage,
    updateMessageStatus,
   updateSeenStatus,
+  getUnreadCounts,
   
 };
