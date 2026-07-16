@@ -265,8 +265,8 @@ function Chat() {
     const handleMessage = async (data) => {
 
       // if (!selectedUser || !user) return;
-       if (!user) return;
-      
+      if (!user) return;
+
       // const isCurrentChat =
       //   (data.sender_id === selectedUser.id &&
       //     data.receiver_id === user.id) ||
@@ -275,31 +275,31 @@ function Chat() {
       //     data.receiver_id === selectedUser.id);
       let isCurrentChat = false;
 
-if (selectedUser) {
-  isCurrentChat =
-    (data.sender_id === selectedUser.id &&
-      data.receiver_id === user.id) ||
+      if (selectedUser) {
+        isCurrentChat =
+          (data.sender_id === selectedUser.id &&
+            data.receiver_id === user.id) ||
 
-    (data.sender_id === user.id &&
-      data.receiver_id === selectedUser.id);
-}
-
-      // if (!isCurrentChat) return;
-       if (!isCurrentChat) {
-
-      if (
-        data.receiver_id === user.id &&
-        data.sender_id !== user.id
-      ) {
-        setUnreadCounts((prev) => ({
-          ...prev,
-          [data.sender_id]:
-            (prev[data.sender_id] || 0) + 1,
-        }));
+          (data.sender_id === user.id &&
+            data.receiver_id === selectedUser.id);
       }
 
-      return;
-    }
+      // if (!isCurrentChat) return;
+      if (!isCurrentChat) {
+
+        if (
+          data.receiver_id === user.id &&
+          data.sender_id !== user.id
+        ) {
+          setUnreadCounts((prev) => ({
+            ...prev,
+            [data.sender_id]:
+              (prev[data.sender_id] || 0) + 1,
+          }));
+        }
+
+        return;
+      }
 
       setMessages((prev) => {
         if (prev.some(msg => msg.id === data.id)) {
@@ -314,12 +314,10 @@ if (selectedUser) {
       //   data.sender_id === selectedUser.id
       // ) 
       if (
-  selectedUser &&
-  data.receiver_id === user.id &&
-  data.sender_id === selectedUser.id
-)
-      
-      {
+        selectedUser &&
+        data.receiver_id === user.id &&
+        data.sender_id === selectedUser.id
+      ) {
 
         try {
 
@@ -388,90 +386,90 @@ if (selectedUser) {
   }, []);
 
 
-//   useEffect(() => {
-//   const handleMessage = async (data) => {
+  //   useEffect(() => {
+  //   const handleMessage = async (data) => {
 
-//     if (!user) return;
+  //     if (!user) return;
 
-//     const isCurrentChat =
-//       selectedUser &&
-//       (
-//         (data.sender_id === selectedUser.id &&
-//           data.receiver_id === user.id) ||
+  //     const isCurrentChat =
+  //       selectedUser &&
+  //       (
+  //         (data.sender_id === selectedUser.id &&
+  //           data.receiver_id === user.id) ||
 
-//         (data.sender_id === user.id &&
-//           data.receiver_id === selectedUser.id)
-//       );
+  //         (data.sender_id === user.id &&
+  //           data.receiver_id === selectedUser.id)
+  //       );
 
-//     // Message belongs to another chat
-//     if (!isCurrentChat) {
+  //     // Message belongs to another chat
+  //     if (!isCurrentChat) {
 
-//       if (
-//         data.receiver_id === user.id &&
-//         data.sender_id !== user.id
-//       ) {
-//         setUnreadCounts((prev) => ({
-//           ...prev,
-//           [data.sender_id]:
-//             (prev[data.sender_id] || 0) + 1,
-//         }));
-//       }
+  //       if (
+  //         data.receiver_id === user.id &&
+  //         data.sender_id !== user.id
+  //       ) {
+  //         setUnreadCounts((prev) => ({
+  //           ...prev,
+  //           [data.sender_id]:
+  //             (prev[data.sender_id] || 0) + 1,
+  //         }));
+  //       }
 
-//       return;
-//     }
+  //       return;
+  //     }
 
-//     // Prevent duplicate messages
-//     setMessages((prev) => {
-//       if (prev.some((msg) => msg.id === data.id)) {
-//         return prev;
-//       }
-//       return [...prev, data];
-//     });
+  //     // Prevent duplicate messages
+  //     setMessages((prev) => {
+  //       if (prev.some((msg) => msg.id === data.id)) {
+  //         return prev;
+  //       }
+  //       return [...prev, data];
+  //     });
 
-//     // Receiver opened this chat
-//     if (
-//       data.receiver_id === user.id &&
-//       data.sender_id === selectedUser.id
-//     ) {
-//       try {
+  //     // Receiver opened this chat
+  //     if (
+  //       data.receiver_id === user.id &&
+  //       data.sender_id === selectedUser.id
+  //     ) {
+  //       try {
 
-//         // Delivered
-//         await axios.put(
-//           `https://chat-box-2-hyl4.onrender.com/api/messages/status/${data.id}`,
-//           {
-//             status: "delivered",
-//           }
-//         );
-//         // socket.emit("message_delivered", {
-//         //     id: data.id,
-//         //     status: "delivered",
-//         //   });
+  //         // Delivered
+  //         await axios.put(
+  //           `https://chat-box-2-hyl4.onrender.com/api/messages/status/${data.id}`,
+  //           {
+  //             status: "delivered",
+  //           }
+  //         );
+  //         // socket.emit("message_delivered", {
+  //         //     id: data.id,
+  //         //     status: "delivered",
+  //         //   });
 
 
-//         // Seen
-//         await axios.put(
-//           `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
-//         );
-//         // socket.emit("message_seen", {
-//         //     id: data.id,
-//         //     status: "seen",
-//         //   });
-        
+  //         // Seen
+  //         await axios.put(
+  //           `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${data.id}`
+  //         );
+  //         // socket.emit("message_seen", {
+  //         //     id: data.id,
+  //         //     status: "seen",
+  //         //   });
 
-//       } catch (err) {
-//         console.log(err);
-//       }
-//     }
-//   };
 
-//   socket.off("receive_message");
-//   socket.on("receive_message", handleMessage);
+  //       } catch (err) {
+  //         console.log(err);
+  //       }
+  //     }
+  //   };
 
-//   return () => {
-//     socket.off("receive_message", handleMessage);
-//   };
+  //   socket.off("receive_message");
+  //   socket.on("receive_message", handleMessage);
 
-// }, [user, selectedUser]);
+  //   return () => {
+  //     socket.off("receive_message", handleMessage);
+  //   };
+
+  // }, [user, selectedUser]);
 
 
   useEffect(() => {
@@ -758,62 +756,106 @@ if (selectedUser) {
     }
   };
 
+  // const fetchMessages = async (receiverId) => {
+  //   try {
+  //     const currentUser = JSON.parse(localStorage.getItem("user"));
+
+  //     const res = await axios.get(
+  //       `https://chat-box-2-hyl4.onrender.com/api/messages/${currentUser.id}/${receiverId}`
+  //     );
+
+  //     //     // Update delivered status
+  //     //    for (const msg of res.data) {
+  //     //   if (
+  //     //     msg.receiver_id === currentUser.id &&
+  //     //     msg.status === "sent"
+  //     //   ) {
+  //     //     await axios.put(
+  //     //       `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
+  //     //       {
+  //     //         status: "delivered",
+  //     //       }
+  //     //     );
+
+  //     //     socket.emit("message_delivered", {
+  //     //       id: msg.id,
+  //     //       status: "delivered",
+  //     //     });
+
+  //     //     msg.status = "delivered";
+  //     //   }
+  //     // }
+
+  //     // for (const msg of res.data) {
+  //     //    console.log("Checking Seen:", msg);
+
+  //     //   if (
+  //     //     msg.receiver_id === currentUser.id &&
+  //     //     msg.status === "delivered"
+  //     //   ) {
+
+  //     //     await axios.put(
+  //     //       `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`
+  //     //     );
+
+  //     //     // socket.emit("message_seen", {
+  //     //     //   id: msg.id,
+  //     //     //   status: "seen",
+  //     //     // });
+
+  //     //     msg.status = "seen";
+  //     //   }
+  //     // }
+  //     setMessages(res.data);
+
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
   const fetchMessages = async (receiverId) => {
-    try {
-      const currentUser = JSON.parse(localStorage.getItem("user"));
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
 
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/messages/${currentUser.id}/${receiverId}`
-      );
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/messages/${currentUser.id}/${receiverId}`
+    );
 
-      //     // Update delivered status
-      //    for (const msg of res.data) {
-      //   if (
-      //     msg.receiver_id === currentUser.id &&
-      //     msg.status === "sent"
-      //   ) {
-      //     await axios.put(
-      //       `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
-      //       {
-      //         status: "delivered",
-      //       }
-      //     );
+    for (const msg of res.data) {
 
-      //     socket.emit("message_delivered", {
-      //       id: msg.id,
-      //       status: "delivered",
-      //     });
+      if (
+        msg.receiver_id === currentUser.id &&
+        msg.status === "sent"
+      ) {
 
-      //     msg.status = "delivered";
-      //   }
-      // }
+        await axios.put(
+          `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
+          {
+            status: "delivered",
+          }
+        );
 
-      // for (const msg of res.data) {
-      //    console.log("Checking Seen:", msg);
+        msg.status = "delivered";
+      }
 
-      //   if (
-      //     msg.receiver_id === currentUser.id &&
-      //     msg.status === "delivered"
-      //   ) {
+      if (
+        msg.receiver_id === currentUser.id &&
+        msg.status === "delivered"
+      ) {
 
-      //     await axios.put(
-      //       `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`
-      //     );
+        await axios.put(
+          `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`
+        );
 
-      //     // socket.emit("message_seen", {
-      //     //   id: msg.id,
-      //     //   status: "seen",
-      //     // });
-
-      //     msg.status = "seen";
-      //   }
-      // }
-      setMessages(res.data);
-
-    } catch (err) {
-      console.log(err);
+        msg.status = "seen";
+      }
     }
-  };
+
+    setMessages(res.data);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 
 
@@ -982,7 +1024,7 @@ if (selectedUser) {
         image: imageName,
         document: documentName
       });
-      
+
 
       // socket.emit("send_message", {
       //   sender_id: currentUser.id,
