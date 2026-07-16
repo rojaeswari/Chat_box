@@ -1290,15 +1290,28 @@ const handleGroupSeen = (data) => {
   )
 )}
 
-        {msg.image && (
+        {/* {msg.image && (
   <img
     src={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`}
     alt=""
     className="chat-image"
   />
+ 
+)} */}
+
+{msg.image && (
+  <img
+    src={
+      msg.image.startsWith("http")
+        ? msg.image
+        : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+    }
+    alt=""
+    className="chat-image"
+  />
 )}
 
-{msg.document && (
+{/* {msg.document && (
   <a
     href={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.document}`}
     target="_blank"
@@ -1307,7 +1320,25 @@ const handleGroupSeen = (data) => {
   >
     📄 {msg.document}
   </a>
+
+  
+)} */}
+
+{msg.document && (
+  <a
+    href={
+      msg.document.startsWith("http")
+        ? msg.document
+        : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.document}`
+    }
+    target="_blank"
+    rel="noreferrer"
+    className="document-link"
+  >
+    📄 Open Document
+  </a>
 )}
+
 
 {msg.sender_id === user?.id && (
   <button
@@ -1418,15 +1449,26 @@ const handleGroupSeen = (data) => {
 )}
 
 
-    {msg.image && (
+    {/* {msg.image && (
   <img
     src={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`}
     alt="Group"
     className="chat-image"
   />
+)} */}
+{msg.image && (
+  <img
+    src={
+      msg.image.startsWith("http")
+        ? msg.image
+        : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+    }
+    alt="Group"
+    className="chat-image"
+  />
 )}
 
-{msg.document && (
+{/* {msg.document && (
   <a
     href={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.document}`}
     target="_blank"
@@ -1434,6 +1476,21 @@ const handleGroupSeen = (data) => {
     className="document-link"
   >
     📄 {msg.document}
+  </a>
+)} */}
+
+{msg.document && (
+  <a
+    href={
+      msg.document.startsWith("http")
+        ? msg.document
+        : `https://chat-box-1-4g7s.onrender.com/uploads/${msg.document}`
+    }
+    target="_blank"
+    rel="noreferrer"
+    className="document-link"
+  >
+    📄 Open Document
   </a>
 )}
 
