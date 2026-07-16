@@ -29,30 +29,6 @@ io.to(`user_${sender_id}`).emit(
   "receive_message",
   savedMessage
 );
-
-
-// const unreadResult = await pool.query(
-//   `
-//   SELECT COUNT(*) AS unread_count
-//   FROM messages
-//   WHERE receiver_id = $1
-//     AND sender_id = $2
-//     AND status != 'seen'
-//   `,
-//   [receiver_id, sender_id]
-// );
-
-// io.to(`user_${receiver_id}`).emit("unread_count", {
-//   sender_id,
-//   unread_count: Number(unreadResult.rows[0].unread_count),
-// });
-
-// // Sender
-// io.to(`user_${sender_id}`).emit(
-//   "receive_message",
-//   savedMessage
-// );
-
 return res.status(201).json(savedMessage);  
 
   } catch (err) {
@@ -185,8 +161,6 @@ const updateMessageStatus = async (req, res) => {
 
 const updateSeenStatus = async (req, res) => {
   try {
-     console.log("Seen API Called:", req.params.id);
-
     const { id } = req.params;
 
     await pool.query(
@@ -194,46 +168,24 @@ const updateSeenStatus = async (req, res) => {
       [id]
     );
 
+    const io = getIO();
 
-  //  const senderId = result.rows[0].sender_id;
-  //   const receiverId = result.rows[0].receiver_id;
-
-  //   const unread = await pool.query(
-  //     `
-  //     SELECT COUNT(*) AS unread_count
-  //     FROM messages
-  //     WHERE receiver_id=$1
-  //       AND sender_id=$2
-  //       AND status!='seen'
-  //     `,
-  //     [receiverId, senderId]
-  //   );
-
-  //   const io = getIO();
-
-  //   io.to(`user_${receiverId}`).emit("unread_count", {
-  //     sender_id: senderId,
-  //     unread_count: Number(unread.rows[0].unread_count),
-  //   });
-
-  //   io.emit("message_seen", {
-  //     id,
-  //     status: "seen",
-  //   });
-
+    io.emit("message_seen", {
+      id,
+      status: "seen",
+    });
 
     res.json({
-      message: "Seen Updated"
+      message: "Seen Updated",
     });
 
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: "Server Error"
+      message: err.message,
     });
   }
 };
-
 
 const getUnreadCounts = async (req, res) => {
   try {
@@ -243,7 +195,7 @@ const getUnreadCounts = async (req, res) => {
       `
       SELECT
         sender_id,
-        COUNT(*)::int AS unread_count
+        COUNT(*) AS unread_count
       FROM messages
       WHERE receiver_id = $1
         AND status != 'seen'
@@ -253,15 +205,13 @@ const getUnreadCounts = async (req, res) => {
     );
 
     res.json(result.rows);
-
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).json({
-      message: "Server Error",
+      message: err.message,
     });
   }
 };
-
 
 module.exports = {
   sendMessage,

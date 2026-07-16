@@ -48,7 +48,6 @@ function Chat() {
     setUser(data);
     fetchUsers();
     fetchGroups();
-     fetchUnreadCounts();
   }, []);
 
 
@@ -263,7 +262,8 @@ function Chat() {
   useEffect(() => {
     const handleMessage = async (data) => {
 
-      if (!selectedUser || !user) return;
+      // if (!selectedUser || !user) return;
+        if (!user) return;
 
       const isCurrentChat =
         (data.sender_id === selectedUser.id &&
@@ -272,7 +272,22 @@ function Chat() {
         (data.sender_id === user.id &&
           data.receiver_id === selectedUser.id);
 
-      if (!isCurrentChat) return;
+      // if (!isCurrentChat) return;
+       if (!isCurrentChat) {
+
+      if (
+        data.receiver_id === user.id &&
+        data.sender_id !== user.id
+      ) {
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [data.sender_id]:
+            (prev[data.sender_id] || 0) + 1,
+        }));
+      }
+
+      return;
+    }
 
       setMessages((prev) => {
         if (prev.some(msg => msg.id === data.id)) {
@@ -280,7 +295,6 @@ function Chat() {
         }
         return [...prev, data];
       });
-       fetchUnreadCounts();
 
       if (
         data.receiver_id === user.id &&
@@ -593,9 +607,9 @@ function Chat() {
     });
   }, [messages, groupMessages]);
 
-  // useEffect(() => {
-  //   fetchUnreadCounts();
-  // }, []);
+  useEffect(() => {
+    fetchUnreadCounts();
+  }, []);
 
 
   const fetchUsers = async () => {
@@ -698,21 +712,20 @@ function Chat() {
 
 
   const fetchUnreadCounts = async () => {
-  const currentUser =
-    JSON.parse(localStorage.getItem("user"));
+    const currentUser = JSON.parse(localStorage.getItem("user"));
 
-  const res = await axios.get(
-    `https://chat-box-2-hyl4.onrender.com/api/messages/unread/${currentUser.id}`
-  );
+    const res = await axios.get(
+      `https://chat-box-1-4g7s.onrender.com/api/messages/unread/${currentUser.id}`
+    );
 
-  const counts = {};
+    const counts = {};
 
-  res.data.forEach((item) => {
-    counts[item.sender_id] = item.unread_count;
-  });
+    res.data.forEach((row) => {
+      counts[row.sender_id] = Number(row.unread_count);
+    });
 
-  setUnreadCounts(counts);
-};
+    setUnreadCounts(counts);
+  };
 
   const renameGroup = async (id) => {
     const newName = prompt("Enter New Group Name");
@@ -1140,6 +1153,11 @@ function Chat() {
                 setMessages([]);
                 setSelectedUser(u);
                 setSelectedGroup(null);
+                setUnreadCounts((prev) => ({
+                  ...prev,
+                  [u.id]: 0,
+                }));
+
                 fetchMessages(u.id);
               }}
             >
@@ -1292,8 +1310,8 @@ function Chat() {
                   <div
                     key={`${msg.id}-${index}`}
                     className={`message ${msg.sender_id === user?.id
-                        ? "sent"
-                        : "received"
+                      ? "sent"
+                      : "received"
                       }`}
 
                     onClick={() => {
