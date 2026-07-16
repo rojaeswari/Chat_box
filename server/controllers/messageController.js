@@ -194,6 +194,34 @@ const updateSeenStatus = async (req, res) => {
       [id]
     );
 
+
+   const senderId = result.rows[0].sender_id;
+    const receiverId = result.rows[0].receiver_id;
+
+    const unread = await pool.query(
+      `
+      SELECT COUNT(*) AS unread_count
+      FROM messages
+      WHERE receiver_id=$1
+        AND sender_id=$2
+        AND status!='seen'
+      `,
+      [receiverId, senderId]
+    );
+
+    const io = getIO();
+
+    io.to(`user_${receiverId}`).emit("unread_count", {
+      sender_id: senderId,
+      unread_count: Number(unread.rows[0].unread_count),
+    });
+
+    io.emit("message_seen", {
+      id,
+      status: "seen",
+    });
+
+
     res.json({
       message: "Seen Updated"
     });
