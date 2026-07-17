@@ -209,6 +209,7 @@ body{
 /* Input */
 
 .inputBox{
+     position: relative; 
     display:flex;
     gap:10px;
     margin-top:15px;
@@ -338,7 +339,7 @@ body{
     color:#2196F3 !important;
 }
 
-.mention-box{
+/* .mention-box{
   position:absolute;
   bottom:60px;
   width:250px;
@@ -348,6 +349,23 @@ body{
   max-height:180px;
   overflow-y:auto;
   z-index:1000;
+} */
+ .mention-box{
+    position:absolute;
+    left:0;
+    bottom:55px;
+
+    width:250px;
+    max-height:180px;
+    overflow-y:auto;
+
+    background:#fff;
+    border:1px solid #ccc;
+    border-radius:8px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+
+    z-index:99999;
 }
 
 .mention-item{
