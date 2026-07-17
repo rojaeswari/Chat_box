@@ -22,12 +22,48 @@ const senderName = sender.rows[0].name;
 
 const savedMessage = result.rows[0];
 
+const members = await pool.query(
+  `
+  SELECT user_id
+  FROM group_members
+  WHERE group_id = $1
+  `,
+  [group_id]
+);
+
 const io = getIO();
 
 io.to(`group_${group_id}`).emit("receive_group_message", {
   ...savedMessage,
   name: senderName,
 });
+
+// Calculate unread count for every member except sender
+for (const member of members.rows) {
+
+  if (Number(member.user_id) === Number(sender_id)) continue;
+
+  const unread = await pool.query(
+    `
+    SELECT COUNT(*) AS unread_count
+    FROM group_messages gm
+    WHERE gm.group_id = $1
+      AND gm.sender_id != $2
+      AND NOT EXISTS (
+        SELECT 1
+        FROM group_message_seen gms
+        WHERE gms.message_id = gm.id
+          AND gms.user_id = $2
+      )
+    `,
+    [group_id, member.user_id]
+  );
+
+  io.to(`user_${member.user_id}`).emit("group_unread_count", {
+    group_id,
+    unread_count: Number(unread.rows[0].unread_count),
+  });
+}
 
 
     if (message && message.trim()) {
@@ -281,7 +317,39 @@ const markGroupMessageSeen = async (req, res) => {
       [message_id, user_id]
     );
 
+    const group = await pool.query(
+  `
+  SELECT group_id
+  FROM group_messages
+  WHERE id = $1
+  `,
+  [message_id]
+);
+
+const groupId = group.rows[0].group_id;
+
+const unread = await pool.query(
+  `
+  SELECT COUNT(*) AS unread_count
+  FROM group_messages gm
+  WHERE gm.group_id = $1
+    AND gm.sender_id != $2
+    AND NOT EXISTS (
+      SELECT 1
+      FROM group_message_seen gms
+      WHERE gms.message_id = gm.id
+        AND gms.user_id = $2
+    )
+  `,
+  [groupId, user_id]
+)
+
     const io = getIO();
+
+    io.to(`user_${user_id}`).emit("group_unread_count", {
+  group_id: groupId,
+  unread_count: Number(unread.rows[0].unread_count),
+});
 
     io.to(`group_${req.body.group_id}`).emit(
       "group_message_seen_update",
@@ -356,6 +424,40 @@ const getSeenCount = async (req, res) => {
   }
 };
 
+
+const getGroupUnreadCounts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT
+          gm.group_id,
+          COUNT(*) AS unread_count
+      FROM group_messages gm
+      WHERE
+          gm.sender_id != $1
+          AND NOT EXISTS (
+              SELECT 1
+              FROM group_message_seen gms
+              WHERE gms.message_id = gm.id
+                AND gms.user_id = $1
+          )
+      GROUP BY gm.group_id
+      `,
+      [userId]
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: err.message
+    });
+  }
+};
+
 module.exports = {
   sendGroupMessage,
   getGroupMessages,
@@ -365,5 +467,6 @@ module.exports = {
    markGroupMessageSeen,
     getSeenUsers,
     getSeenCount,
+     getGroupUnreadCounts,
   
 };

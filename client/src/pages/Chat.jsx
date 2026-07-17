@@ -26,6 +26,7 @@ function Chat() {
   const [seenCounts, setSeenCounts] = useState({});
   const [memberCount, setMemberCount] = useState(0);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [groupUnreadCounts, setGroupUnreadCounts] = useState({});
 
 
   const navigate = useNavigate();
@@ -492,30 +493,30 @@ function Chat() {
   //   };
   // }, []);
   useEffect(() => {
-  const handleSeen = (data) => {
-    console.log("Received message_seen:", data);
+    const handleSeen = (data) => {
+      console.log("Received message_seen:", data);
 
-    setMessages((prev) => {
-      console.log("Before:", prev);
+      setMessages((prev) => {
+        console.log("Before:", prev);
 
-      const updated = prev.map((msg) =>
-        Number(msg.id) === Number(data.id)
-          ? { ...msg, status: "seen" }
-          : msg
-      );
+        const updated = prev.map((msg) =>
+          Number(msg.id) === Number(data.id)
+            ? { ...msg, status: "seen" }
+            : msg
+        );
 
-      console.log("After:", updated);
+        console.log("After:", updated);
 
-      return updated;
-    });
-  };
+        return updated;
+      });
+    };
 
-  socket.on("message_seen", handleSeen);
+    socket.on("message_seen", handleSeen);
 
-  return () => {
-    socket.off("message_seen", handleSeen);
-  };
-}, []);
+    return () => {
+      socket.off("message_seen", handleSeen);
+    };
+  }, []);
 
 
   useEffect(() => {
@@ -740,6 +741,29 @@ function Chat() {
     fetchUnreadCounts();
   }, []);
 
+  useEffect(() => {
+    fetchGroupUnreadCounts();
+  }, []);
+
+  useEffect(() => {
+
+    const handleGroupUnread = (data) => {
+
+      setGroupUnreadCounts((prev) => ({
+        ...prev,
+        [data.group_id]: data.unread_count,
+      }));
+
+    };
+
+    socket.on("group_unread_count", handleGroupUnread);
+
+    return () => {
+      socket.off("group_unread_count", handleGroupUnread);
+    };
+
+  }, []);
+
 
   const fetchUsers = async () => {
     try {
@@ -775,6 +799,27 @@ function Chat() {
       );
 
       setGroups(res.data);
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchGroupUnreadCounts = async () => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("user"));
+
+      const res = await axios.get(
+        `https://chat-box-2-hyl4.onrender.com/api/group-messages/unread/${currentUser.id}`
+      );
+
+      const counts = {};
+
+      res.data.forEach((row) => {
+        counts[row.group_id] = Number(row.unread_count);
+      });
+
+      setGroupUnreadCounts(counts);
 
     } catch (err) {
       console.log(err);
@@ -838,49 +883,49 @@ function Chat() {
   //   }
   // };
   const fetchMessages = async (receiverId) => {
-  try {
-    const currentUser = JSON.parse(localStorage.getItem("user"));
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("user"));
 
-    const res = await axios.get(
-      `https://chat-box-2-hyl4.onrender.com/api/messages/${currentUser.id}/${receiverId}`
-    );
+      const res = await axios.get(
+        `https://chat-box-2-hyl4.onrender.com/api/messages/${currentUser.id}/${receiverId}`
+      );
 
-    for (const msg of res.data) {
+      for (const msg of res.data) {
 
-      if (
-        msg.receiver_id === currentUser.id &&
-        msg.status === "sent"
-      ) {
+        if (
+          msg.receiver_id === currentUser.id &&
+          msg.status === "sent"
+        ) {
 
-        await axios.put(
-          `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
-          {
-            status: "delivered",
-          }
-        );
+          await axios.put(
+            `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
+            {
+              status: "delivered",
+            }
+          );
 
-        msg.status = "delivered";
+          msg.status = "delivered";
+        }
+
+        if (
+          msg.receiver_id === currentUser.id &&
+          msg.status === "delivered"
+        ) {
+
+          await axios.put(
+            `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`
+          );
+
+          msg.status = "seen";
+        }
       }
 
-      if (
-        msg.receiver_id === currentUser.id &&
-        msg.status === "delivered"
-      ) {
+      setMessages(res.data);
 
-        await axios.put(
-          `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`
-        );
-
-        msg.status = "seen";
-      }
+    } catch (err) {
+      console.log(err);
     }
-
-    setMessages(res.data);
-
-  } catch (err) {
-    console.log(err);
-  }
-};
+  };
 
 
 
@@ -1357,7 +1402,7 @@ function Chat() {
           groups.map((group) => (
             <div key={group.id} className="group-item">
 
-              <span
+              {/* <span
                 className="group-name"
                 onClick={() => {
                   setGroupMessages([]);
@@ -1367,10 +1412,43 @@ function Chat() {
                   fetchGroupMembers(group.id);
                   fetchGroupMessages(group.id);
                   fetchAvailableUsers(group.id);
+                  setGroupUnreadCounts((prev) => ({
+                    ...prev,
+                    [group.id]: 0,
+                  }));
                 }}
               >
                 {group.group_name}
-              </span>
+              </span> */}
+
+              <div
+  className="group-name"
+  onClick={() => {
+    setGroupMessages([]);
+    setSelectedGroup(group);
+    setSelectedUser(null);
+
+    socket.emit("join_group", group.id);
+
+    fetchGroupMembers(group.id);
+    fetchGroupMessages(group.id);
+    fetchAvailableUsers(group.id);
+
+    setGroupUnreadCounts((prev) => ({
+      ...prev,
+      [group.id]: 0,
+    }));
+  }}
+>
+  <span>{group.group_name}</span>
+
+  {groupUnreadCounts[group.id] > 0 && (
+    <span className="unread-badge">
+      {groupUnreadCounts[group.id]}
+    </span>
+  )}
+</div>
+              
 
               {user?.role === "admin" && (
                 <div className="group-actions">
