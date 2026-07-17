@@ -764,6 +764,33 @@ function Chat() {
 
   }, []);
 
+  useEffect(() => {
+  const handleGroupMessage = (data) => {
+
+    if (!selectedGroup) return;
+
+    // Current opened group மட்டும் update ஆகணும்
+    if (Number(data.group_id) !== Number(selectedGroup.id)) {
+      return;
+    }
+
+    setGroupMessages((prev) => {
+      // Duplicate avoid
+      if (prev.some((msg) => Number(msg.id) === Number(data.id))) {
+        return prev;
+      }
+
+      return [...prev, data];
+    });
+  };
+
+  socket.on("receive_group_message", handleGroupMessage);
+
+  return () => {
+    socket.off("receive_group_message", handleGroupMessage);
+  };
+}, [selectedGroup]);
+
 
   const fetchUsers = async () => {
     try {
@@ -1422,33 +1449,33 @@ function Chat() {
               </span> */}
 
               <div
-  className="group-name"
-  onClick={() => {
-    setGroupMessages([]);
-    setSelectedGroup(group);
-    setSelectedUser(null);
+                className="group-name"
+                onClick={() => {
+                  setGroupMessages([]);
+                  setSelectedGroup(group);
+                  setSelectedUser(null);
 
-    socket.emit("join_group", group.id);
+                  socket.emit("join_group", group.id);
 
-    fetchGroupMembers(group.id);
-    fetchGroupMessages(group.id);
-    fetchAvailableUsers(group.id);
+                  fetchGroupMembers(group.id);
+                  fetchGroupMessages(group.id);
+                  fetchAvailableUsers(group.id);
 
-    setGroupUnreadCounts((prev) => ({
-      ...prev,
-      [group.id]: 0,
-    }));
-  }}
->
-  <span>{group.group_name}</span>
+                  setGroupUnreadCounts((prev) => ({
+                    ...prev,
+                    [group.id]: 0,
+                  }));
+                }}
+              >
+                <span>{group.group_name}</span>
 
-  {groupUnreadCounts[group.id] > 0 && (
-    <span className="unread-badge">
-      {groupUnreadCounts[group.id]}
-    </span>
-  )}
-</div>
-              
+                {groupUnreadCounts[group.id] > 0 && (
+                  <span className="unread-badge">
+                    {groupUnreadCounts[group.id]}
+                  </span>
+                )}
+              </div>
+
 
               {user?.role === "admin" && (
                 <div className="group-actions">
