@@ -1630,7 +1630,7 @@ function Chat() {
  
 )} */}
 
-                    {msg.image && (
+                    {/* {msg.image && (
                       <img
                         src={
                           msg.image.startsWith("http")
@@ -1640,7 +1640,41 @@ function Chat() {
                         alt=""
                         className="chat-image"
                       />
-                    )}
+                    )} */}
+
+                    {msg.image && (
+  <>
+    <img
+      src={
+        msg.image.startsWith("http")
+          ? msg.image
+          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+      }
+      alt=""
+      className="chat-image"
+      onClick={() =>
+        setSelectedImage(
+          msg.image.startsWith("http")
+            ? msg.image
+            : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+        )
+      }
+      style={{ cursor: "pointer" }}
+    />
+
+    <a
+      href={
+        msg.image.startsWith("http")
+          ? msg.image
+          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+      }
+      download
+      className="download-image-btn"
+    >
+      ⬇ Download
+    </a>
+  </>
+)}
 
                     {/* {msg.document && (
   <a
@@ -1786,7 +1820,7 @@ function Chat() {
     className="chat-image"
   />
 )} */}
-                  {msg.image && (
+                  {/* {msg.image && (
                     <img
                       src={
                         msg.image.startsWith("http")
@@ -1796,7 +1830,41 @@ function Chat() {
                       alt="Group"
                       className="chat-image"
                     />
-                  )}
+                  )} */}
+
+                  {msg.image && (
+  <>
+    <img
+      src={
+        msg.image.startsWith("http")
+          ? msg.image
+          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+      }
+      alt=""
+      className="chat-image"
+      onClick={() =>
+        setSelectedImage(
+          msg.image.startsWith("http")
+            ? msg.image
+            : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+        )
+      }
+      style={{ cursor: "pointer" }}
+    />
+
+    <a
+      href={
+        msg.image.startsWith("http")
+          ? msg.image
+          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+      }
+      download
+      className="download-image-btn"
+    >
+      ⬇ Download
+    </a>
+  </>
+)}
 
                   {/* {msg.document && (
   <a
@@ -2017,6 +2085,36 @@ function Chat() {
 
 
       </div>
+
+
+       {selectedImage && (
+      <div
+        className="image-modal"
+        onClick={() => setSelectedImage(null)}
+      >
+        <img
+          src={selectedImage}
+          alt="Preview"
+          className="zoom-image"
+          onClick={(e) => e.stopPropagation()}
+        />
+
+        <a
+          href={selectedImage}
+          download
+          className="download-btn"
+        >
+          ⬇ Download
+        </a>
+
+        <button
+          className="close-btn"
+          onClick={() => setSelectedImage(null)}
+        >
+          ✕
+        </button>
+      </div>
+    )}
 
     </div>
   );
