@@ -1996,7 +1996,7 @@ function Chat() {
           )}
 
           <label htmlFor="imageUpload" className="file-btn">
-            📷 Choose Image
+            📷
           </label>
 
           <input
@@ -2008,7 +2008,7 @@ function Chat() {
           />
 
           <label htmlFor="docUpload" className="file-btn">
-            📄 Document
+            📄
           </label>
 
           <input
@@ -2044,7 +2044,7 @@ function Chat() {
               if (link) setMessage(link);
             }}
           >
-            🔗 Link
+            🔗
           </button>
 
           <button
