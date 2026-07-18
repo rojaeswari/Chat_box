@@ -1847,7 +1847,7 @@ function Chat() {
       </PhotoView>
     </PhotoProvider>
 
-    <a
+    {/* <a
       href={
         msg.image.startsWith("http")
           ? msg.image
@@ -1857,7 +1857,19 @@ function Chat() {
       className="download-image-btn"
     >
       ⬇ Download
-    </a>
+    </a> */}
+     <button
+  className="download-image-btn"
+  onClick={() => {
+    const imageUrl = msg.image.startsWith("http")
+      ? getDownloadUrl(msg.image)
+      : `https://chat-box-2-hyl4.onrender.com/download/${msg.image}`;
+
+    window.open(imageUrl, "_blank");
+  }}
+>
+  ⬇ Download
+</button>
   </>
 )}
 
