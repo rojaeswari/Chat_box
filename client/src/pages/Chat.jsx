@@ -3,6 +3,8 @@ import axios from "axios";
 import "./chat.css";
 import socket from "../socket";
 import { useNavigate } from "react-router-dom";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import "react-photo-view/dist/react-photo-view.css";
 
 function Chat() {
   const [user, setUser] = useState(null);
@@ -1621,15 +1623,7 @@ function Chat() {
                       )
                     )}
 
-                    {/* {msg.image && (
-  <img
-    src={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`}
-    alt=""
-    className="chat-image"
-  />
- 
-)} */}
-
+                 
                     {/* {msg.image && (
                       <img
                         src={
@@ -1644,23 +1638,26 @@ function Chat() {
 
                     {msg.image && (
   <>
-    <img
-      src={
-        msg.image.startsWith("http")
-          ? msg.image
-          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
-      }
-      alt=""
-      className="chat-image"
-      onClick={() =>
-        setSelectedImage(
+    <PhotoProvider>
+      <PhotoView
+        src={
           msg.image.startsWith("http")
             ? msg.image
             : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
-        )
-      }
-      style={{ cursor: "pointer" }}
-    />
+        }
+      >
+        <img
+          src={
+            msg.image.startsWith("http")
+              ? msg.image
+              : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+          }
+          alt=""
+          className="chat-image"
+          style={{ cursor: "zoom-in" }}
+        />
+      </PhotoView>
+    </PhotoProvider>
 
     <a
       href={
@@ -1675,19 +1672,6 @@ function Chat() {
     </a>
   </>
 )}
-
-                    {/* {msg.document && (
-  <a
-    href={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.document}`}
-    target="_blank"
-    rel="noreferrer"
-    className="document-link"
-  >
-    📄 {msg.document}
-  </a>
-
-  
-)} */}
 
                     {msg.document && (
                       <a
@@ -1812,14 +1796,6 @@ function Chat() {
                     )
                   )}
 
-
-                  {/* {msg.image && (
-  <img
-    src={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`}
-    alt="Group"
-    className="chat-image"
-  />
-)} */}
                   {/* {msg.image && (
                     <img
                       src={
@@ -1832,25 +1808,28 @@ function Chat() {
                     />
                   )} */}
 
-                  {msg.image && (
+                 {msg.image && (
   <>
-    <img
-      src={
-        msg.image.startsWith("http")
-          ? msg.image
-          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
-      }
-      alt=""
-      className="chat-image"
-      onClick={() =>
-        setSelectedImage(
+    <PhotoProvider>
+      <PhotoView
+        src={
           msg.image.startsWith("http")
             ? msg.image
             : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
-        )
-      }
-      style={{ cursor: "pointer" }}
-    />
+        }
+      >
+        <img
+          src={
+            msg.image.startsWith("http")
+              ? msg.image
+              : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
+          }
+          alt=""
+          className="chat-image"
+          style={{ cursor: "zoom-in" }}
+        />
+      </PhotoView>
+    </PhotoProvider>
 
     <a
       href={
@@ -2085,36 +2064,6 @@ function Chat() {
 
 
       </div>
-
-
-       {selectedImage && (
-      <div
-        className="image-modal"
-        onClick={() => setSelectedImage(null)}
-      >
-        <img
-          src={selectedImage}
-          alt="Preview"
-          className="zoom-image"
-          onClick={(e) => e.stopPropagation()}
-        />
-
-        <a
-          href={selectedImage}
-          download
-          className="download-btn"
-        >
-          ⬇ Download
-        </a>
-
-        <button
-          className="close-btn"
-          onClick={() => setSelectedImage(null)}
-        >
-          ✕
-        </button>
-      </div>
-    )}
 
     </div>
   );
