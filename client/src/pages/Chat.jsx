@@ -34,11 +34,13 @@ function Chat() {
   const navigate = useNavigate();
 
   const logout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      localStorage.removeItem("user");
-      navigate("/login");
-    }
-  };
+  if (window.confirm("Are you sure you want to logout?")) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/login");
+  }
+};
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("user"));
