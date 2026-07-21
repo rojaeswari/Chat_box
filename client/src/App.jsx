@@ -9,6 +9,7 @@ import Chat from "./pages/Chat";
 import CreateGroup from "./pages/CreateGroup";
 import SelectMembers from "./pages/SelectMembers";
 // import Register from "./pages/Register";
+import PrivateRoute from "./PrivateRoute";
 
 
 
@@ -17,17 +18,17 @@ function App() {
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/manage-users" element={<ManageUsers />}/>
-      <Route path="/add-user" element={<AddUser />} />
-      <Route path="/edit-user/:id" element={<EditUser />}/>
+      <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+      <Route path="/manage-users" element={<PrivateRoute><ManageUsers /></PrivateRoute>}/>
+      <Route path="/add-user" element={<PrivateRoute><AddUser /></PrivateRoute>} />
+      <Route path="/edit-user/:id" element={<PrivateRoute><EditUser /></PrivateRoute>}/>
       <Route
   path="/change-password/:id"
-  element={<ChangePassword />}
+  element={<PrivateRoute><ChangePassword /></PrivateRoute>}
 />
-       <Route path="/chat" element={<Chat />} />
-      <Route path="/create-group" element={<CreateGroup />} />
-      <Route path="/select-members/:groupId" element={<SelectMembers />}/>
+       <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
+      <Route path="/create-group" element={<PrivateRoute><CreateGroup /></PrivateRoute>} />
+      <Route path="/select-members/:groupId" element={<PrivateRoute><SelectMembers /></PrivateRoute>}/>
      {/* <Route path="/register" element={<Register />} /> */}
     </Routes>
   );
