@@ -1055,7 +1055,7 @@ function Chat() {
 
 
   const sendMessage = async () => {
-    if (!message.trim() && !image && !document) return;
+    if (!message.trim() && !image && !video && !document) return;
     console.log(image);
 
     try {
@@ -1077,23 +1077,8 @@ function Chat() {
         console.log(uploadRes.data);
       }
 
-      let documentName = "";
 
-      if (document) {
-        const formData = new FormData();
-        formData.append("image", document);
-
-        const res = await axios.post(
-          "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
-          formData
-        );
-
-        console.log("Document upload response:", res.data);
-
-        documentName = res.data.image;
-      }
-
-      let videoName = "";
+         let videoName = "";
 
 if (video) {
   const formData = new FormData();
@@ -1110,6 +1095,23 @@ if (video) {
   videoName = res.data.image;
 }
 
+      let documentName = "";
+
+      if (document) {
+        const formData = new FormData();
+        formData.append("image", document);
+
+        const res = await axios.post(
+          "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
+          formData
+        );
+
+        console.log("Document upload response:", res.data);
+
+        documentName = res.data.image;
+      }
+
+
       // Group Chat
       if (selectedGroup) {
         await axios.post("https://chat-box-2-hyl4.onrender.com/api/group-messages", {
@@ -1117,8 +1119,8 @@ if (video) {
           sender_id: currentUser.id,
           message,
           image: imageName,
-          document: documentName,
-          video: videoName
+          video: videoName,
+          document: documentName
         });
 
         // socket.emit("send_group_message", {
@@ -1132,8 +1134,9 @@ if (video) {
 
         setMessage("");
         setImage(null);
-        setDocument(null);
         setVideo(null);
+        setDocument(null);
+        
         // fetchGroupMessages(selectedGroup.id);
 
         return;
@@ -1147,8 +1150,8 @@ if (video) {
         receiver_id: selectedUser.id,
         message,
         image: imageName,
-        document: documentName,
-        video: videoName
+        video: videoName,
+        document: documentName
 
       });
 
@@ -1165,8 +1168,9 @@ if (video) {
 
       setMessage("");
       setImage(null);
-      setDocument(null);
       setVideo(null);
+      setDocument(null);
+      
       // fetchMessages(selectedUser.id);
 
     } catch (err) {
