@@ -20,6 +20,7 @@ function Chat() {
   const [availableUsers, setAvailableUsers] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [document, setDocument] = useState(null);
+  const [video, setVideo] = useState(null);
   const [groupMessages, setGroupMessages] = useState([]);
   const [mentionUsers, setMentionUsers] = useState([]);
   const [showMentionBox, setShowMentionBox] = useState(false);
@@ -1092,6 +1093,23 @@ function Chat() {
         documentName = res.data.image;
       }
 
+      let videoName = "";
+
+if (video) {
+  const formData = new FormData();
+
+  formData.append("image", video);
+
+  const res = await axios.post(
+    "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
+    formData
+  );
+
+  console.log("Video upload response:", res.data);
+
+  videoName = res.data.image;
+}
+
       // Group Chat
       if (selectedGroup) {
         await axios.post("https://chat-box-2-hyl4.onrender.com/api/group-messages", {
@@ -1099,7 +1117,8 @@ function Chat() {
           sender_id: currentUser.id,
           message,
           image: imageName,
-          document: documentName
+          document: documentName,
+          video: videoName
         });
 
         // socket.emit("send_group_message", {
@@ -1114,6 +1133,7 @@ function Chat() {
         setMessage("");
         setImage(null);
         setDocument(null);
+        setVideo(null);
         // fetchGroupMessages(selectedGroup.id);
 
         return;
@@ -1127,7 +1147,9 @@ function Chat() {
         receiver_id: selectedUser.id,
         message,
         image: imageName,
-        document: documentName
+        document: documentName,
+        video: videoName
+
       });
 
 
@@ -1144,6 +1166,7 @@ function Chat() {
       setMessage("");
       setImage(null);
       setDocument(null);
+      setVideo(null);
       // fetchMessages(selectedUser.id);
 
     } catch (err) {
@@ -1691,6 +1714,37 @@ function Chat() {
   </>
 )}
 
+
+
+
+
+{msg.video && (
+  <div className="chat-video-container">
+    <video
+      controls
+      className="chat-video"
+      src={
+        msg.video.startsWith("http")
+          ? msg.video
+          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.video}`
+      }
+    />
+
+    <button
+      className="download-image-btn"
+      onClick={() => {
+        const videoUrl = msg.video.startsWith("http")
+          ? getDownloadUrl(msg.video)
+          : `https://chat-box-2-hyl4.onrender.com/download/${msg.video}`;
+
+        window.open(videoUrl, "_blank");
+      }}
+    >
+      ⬇ Download
+    </button>
+  </div>
+)}
+
                     {msg.document && (
                       <a
                         href={
@@ -1875,6 +1929,35 @@ function Chat() {
   </>
 )}
 
+
+
+{msg.video && (
+  <div className="chat-video-container">
+    <video
+      controls
+      className="chat-video"
+      src={
+        msg.video.startsWith("http")
+          ? msg.video
+          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.video}`
+      }
+    />
+
+    <button
+      className="download-image-btn"
+      onClick={() => {
+        const videoUrl = msg.video.startsWith("http")
+          ? getDownloadUrl(msg.video)
+          : `https://chat-box-2-hyl4.onrender.com/download/${msg.video}`;
+
+        window.open(videoUrl, "_blank");
+      }}
+    >
+      ⬇ Download
+    </button>
+  </div>
+)}
+
                   {/* {msg.document && (
   <a
     href={`https://chat-box-2-hyl4.onrender.com/uploads/${msg.document}`}
@@ -2009,6 +2092,19 @@ function Chat() {
             onChange={(e) => setImage(e.target.files[0])}
           />
 
+
+          <label htmlFor="videoUpload" className="file-btn">
+  🎥
+</label>
+
+<input
+  id="videoUpload"
+  type="file"
+  accept="video/*"
+  className="file-input"
+  onChange={(e) => setVideo(e.target.files[0])}
+/>
+
           <label htmlFor="docUpload" className="file-btn">
             📄
           </label>
@@ -2038,6 +2134,15 @@ function Chat() {
               </button>
             </div>
           )}
+
+          {video && (
+  <div className="selected-file">
+    🎥 {video.name}
+    <button onClick={() => setVideo(null)}>
+      ✖
+    </button>
+  </div>
+)}
 
           <button
             className="link-btn"

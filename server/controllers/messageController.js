@@ -4,14 +4,14 @@ const { getIO } = require("../socket");
 // Send Message
 const sendMessage = async (req, res) => {
   try {
-    const { sender_id, receiver_id, message, image, document,status } = req.body;
+    const { sender_id, receiver_id, message, image, document, video, status } = req.body;
 
     const result = await pool.query(
       `INSERT INTO messages
-      (sender_id, receiver_id, message, image, document, status)
-      VALUES ($1,$2,$3,$4,$5,$6)
+      (sender_id, receiver_id, message, image, document, video, status)
+      VALUES ($1,$2,$3,$4,$5,$6,$7)
       RETURNING *`,
-      [sender_id, receiver_id, message, image, document, "sent"]
+      [sender_id, receiver_id, message, image, document, video, "sent"]
     );
 
     const savedMessage = result.rows[0];
