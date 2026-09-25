@@ -14,6 +14,9 @@ function SelectMembers() {
     fetchUsers();
   }, []);
 
+  // =====================================================
+  // FETCH USERS
+  // =====================================================
   const fetchUsers = async () => {
     const currentUser = JSON.parse(localStorage.getItem("user"));
 
@@ -22,27 +25,51 @@ function SelectMembers() {
         `https://chat-box-2-hyl4.onrender.com/api/users?email=${currentUser.email}`
       );
 
+      console.log("USERS:", res.data);
+
       setUsers(res.data);
     } catch (err) {
-      console.log(err);
+      console.log("FETCH USERS ERROR:", err);
     }
   };
 
+  // =====================================================
+  // SELECT / UNSELECT USER
+  // =====================================================
   const handleSelect = (id) => {
-    if (selectedUsers.includes(id)) {
-      setSelectedUsers(selectedUsers.filter((userId) => userId !== id));
-    } else {
-      setSelectedUsers([...selectedUsers, id]);
-    }
+    setSelectedUsers((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((userId) => userId !== id);
+      }
+
+      return [...prev, id];
+    });
   };
 
+  // =====================================================
+  // SAVE MEMBERS
+  // =====================================================
   const saveMembers = async () => {
+    if (selectedUsers.length === 0) {
+      alert("Please select at least one member");
+      return;
+    }
+
+    if (!groupId) {
+      alert("Group ID not found");
+      return;
+    }
+
     try {
+      console.log("Group ID:", groupId);
+      console.log("Selected Users:", selectedUsers);
+
       for (const userId of selectedUsers) {
+        console.log("Adding User:", userId);
+
         await axios.post(
-          "https://chat-box-2-hyl4.onrender.com/api/groups/add-member",
+          `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/add-member`,
           {
-            group_id: groupId,
             user_id: userId,
           }
         );
@@ -51,8 +78,20 @@ function SelectMembers() {
       alert("Members Added Successfully");
 
       navigate("/chat");
+
     } catch (err) {
-      console.log(err);
+      console.log("ADD MEMBER ERROR:", err);
+
+      console.log("STATUS:", err.response?.status);
+
+      console.log("URL:", err.config?.url);
+
+      console.log("RESPONSE:", err.response?.data);
+
+      alert(
+        err.response?.data?.message ||
+        "Failed to add members"
+      );
     }
   };
 
@@ -61,26 +100,33 @@ function SelectMembers() {
 
       <h2>Select Members</h2>
 
-      {users.map((user) => (
-        <div key={user.id} className="member-card">
+      {users.length === 0 ? (
+        <p>No users found</p>
+      ) : (
+        users.map((user) => (
+          <div
+            key={user.id}
+            className="member-card"
+          >
+            <label>
 
-          <label>
+              <input
+                type="checkbox"
+                checked={selectedUsers.includes(user.id)}
+                onChange={() => handleSelect(user.id)}
+              />
 
-            <input
-              type="checkbox"
-              onChange={() => handleSelect(user.id)}
-            />
+              {user.name}
 
-            {user.name}
-
-          </label>
-
-        </div>
-      ))}
+            </label>
+          </div>
+        ))
+      )}
 
       <button
         className="save-btn"
         onClick={saveMembers}
+        disabled={selectedUsers.length === 0}
       >
         Save Members
       </button>
