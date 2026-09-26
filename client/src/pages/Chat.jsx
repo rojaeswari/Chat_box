@@ -30,6 +30,7 @@ function Chat() {
   const [memberCount, setMemberCount] = useState(0);
   const [unreadCounts, setUnreadCounts] = useState({});
   const [groupUnreadCounts, setGroupUnreadCounts] = useState({});
+  const [isSending, setIsSending] = useState(false);
 
 
   const navigate = useNavigate();
@@ -1055,11 +1056,13 @@ function Chat() {
 
 
   const sendMessage = async () => {
+     if (isSending) return;
     if (!message.trim() && !image && !video && !document) return;
     console.log(image);
 
     try {
       const currentUser = JSON.parse(localStorage.getItem("user"));
+      setIsSending(true);
 
       let imageName = "";
 
@@ -1137,6 +1140,7 @@ if (video) {
         setVideo(null);
         setDocument(null);
         
+        
         // fetchGroupMessages(selectedGroup.id);
 
         return;
@@ -1171,12 +1175,16 @@ if (video) {
       setVideo(null);
       setDocument(null);
       
-      // fetchMessages(selectedUser.id);
+      } catch (err) {
 
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    console.log("Send message error:", err);
+
+  } finally {
+
+    // API complete ஆனதும் button மீண்டும் enable
+    setIsSending(false);
+  }
+};
 
 
   const fetchGroupMembers = async (groupId) => {
@@ -2159,12 +2167,12 @@ if (video) {
           </button>
 
           <button
-            className="button"
-            onClick={sendMessage}
-            disabled={!selectedUser && !selectedGroup}
-          >
-            Send
-          </button>
+  className="button"
+  onClick={sendMessage}
+  disabled={isSending || (!selectedUser && !selectedGroup)}
+>
+  {isSending ? "Sending..." : "Send"}
+</button>
 
           {/* <button
             onClick={() =>  navigate(`/change-password/${user.id}`)}
