@@ -1928,10 +1928,7 @@ if (video) {
         ) : selectedUser ? (
           <>
             <h2>Chat with {selectedUser.name}</h2>
-
-            <div className="messages">
-
-              {selectedMessages.length > 0 && (
+             {selectedMessages.length > 0 && (
   <button
     className="delete-selected-btn"
     onClick={deleteSelectedMessages}
@@ -1939,6 +1936,9 @@ if (video) {
     🗑 Delete Selected ({selectedMessages.length})
   </button>
 )}
+
+            <div className="messages">
+
               {messages.map((msg, index) => (
                 <div
                   key={`${msg.id}-${index}`}
