@@ -31,6 +31,7 @@ function Chat() {
   const [unreadCounts, setUnreadCounts] = useState({});
   const [groupUnreadCounts, setGroupUnreadCounts] = useState({});
   const [isSending, setIsSending] = useState(false);
+  const [selectedMessages, setSelectedMessages] = useState([]);
 
 
   const navigate = useNavigate();
@@ -798,6 +799,15 @@ function Chat() {
 }, [selectedGroup]);
 
 
+
+const toggleMessageSelection = (id) => {
+  setSelectedMessages((prev) =>
+    prev.includes(id)
+      ? prev.filter((messageId) => messageId !== id)
+      : [...prev, id]
+  );
+};
+
   const fetchUsers = async () => {
     try {
       const data = JSON.parse(localStorage.getItem("user"));
@@ -1403,6 +1413,55 @@ if (video) {
     }
   };
 
+
+
+  const deleteSelectedMessages = async () => {
+  if (selectedMessages.length === 0) return;
+
+  if (
+    !window.confirm(
+      `Delete ${selectedMessages.length} selected message(s)?`
+    )
+  ) {
+    return;
+  }
+
+  try {
+    for (const id of selectedMessages) {
+      if (selectedGroup) {
+        await axios.delete(
+          `https://chat-box-2-hyl4.onrender.com/api/group-messages/${id}`,
+          {
+            data: {
+              user_id: user.id,
+            },
+          }
+        );
+      } else {
+        await axios.delete(
+          `https://chat-box-2-hyl4.onrender.com/api/messages/${id}`,
+          {
+            data: {
+              user_id: user.id,
+            },
+          }
+        );
+      }
+    }
+
+    setSelectedMessages([]);
+
+    if (selectedGroup) {
+      fetchGroupMessages(selectedGroup.id);
+    } else if (selectedUser?.id) {
+      fetchMessages(selectedUser.id);
+    }
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
   const handleGroupSeen = (data) => {
     console.log("Seen Event:", data);
 
@@ -1628,6 +1687,15 @@ if (video) {
               {/* Right Panel */}
               <div className="messages">
 
+                {selectedMessages.length > 0 && (
+  <button
+    className="delete-selected-btn"
+    onClick={deleteSelectedMessages}
+  >
+    🗑 Delete Selected ({selectedMessages.length})
+  </button>
+)}
+
                 {groupMessages.map((msg, index) => (
                   <div
                     key={`${msg.id}-${index}`}
@@ -1774,14 +1842,21 @@ if (video) {
 
 
                     {msg.sender_id === user?.id && (
-                      <button
-                        className="delete-btn"
-                        onClick={() => deleteMessage(msg.id)}
-                      >
-                        Delete
-                      </button>
-                    )}
+  <>
+    <input
+      type="checkbox"
+      checked={selectedMessages.includes(msg.id)}
+      onChange={() => toggleMessageSelection(msg.id)}
+    />
 
+    <button
+      className="delete-btn"
+      onClick={() => deleteMessage(msg.id)}
+    >
+      Delete
+    </button>
+  </>
+)}
                     {/* <div className="status">
   {msg.status === "sent" && (
     <span>✓ Sent</span>
@@ -1855,6 +1930,15 @@ if (video) {
             <h2>Chat with {selectedUser.name}</h2>
 
             <div className="messages">
+
+              {selectedMessages.length > 0 && (
+  <button
+    className="delete-selected-btn"
+    onClick={deleteSelectedMessages}
+  >
+    🗑 Delete Selected ({selectedMessages.length})
+  </button>
+)}
               {messages.map((msg, index) => (
                 <div
                   key={`${msg.id}-${index}`}
@@ -1997,13 +2081,21 @@ if (video) {
                   )}
 
                   {msg.sender_id === user?.id && (
-                    <button
-                      className="delete-btn"
-                      onClick={() => deleteMessage(msg.id)}
-                    >
-                      Delete
-                    </button>
-                  )}
+  <>
+    <input
+      type="checkbox"
+      checked={selectedMessages.includes(msg.id)}
+      onChange={() => toggleMessageSelection(msg.id)}
+    />
+
+    <button
+      className="delete-btn"
+      onClick={() => deleteMessage(msg.id)}
+    >
+      Delete
+    </button>
+  </>
+)}
 
                   {/* <div className="status">
   {msg.status === "sent" && (

@@ -175,14 +175,45 @@ const getGroupMessages = async (req, res) => {
 };
 
 
+// const deleteGroupMessage = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     await pool.query(
+//       "DELETE FROM group_messages WHERE id = $1",
+//       [id]
+//     );
+
+//     res.json({
+//       message: "Group Message Deleted Successfully",
+//     });
+
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({
+//       message: "Server Error",
+//     });
+//   }
+// };
+
 const deleteGroupMessage = async (req, res) => {
   try {
     const { id } = req.params;
+    const { user_id } = req.body;
 
-    await pool.query(
-      "DELETE FROM group_messages WHERE id = $1",
-      [id]
+    const result = await pool.query(
+      `DELETE FROM group_messages
+       WHERE id = $1
+       AND sender_id = $2
+       RETURNING *`,
+      [id, user_id]
     );
+
+    if (result.rowCount === 0) {
+      return res.status(403).json({
+        message: "You can delete only your own messages",
+      });
+    }
 
     res.json({
       message: "Group Message Deleted Successfully",
