@@ -1903,16 +1903,19 @@ if (video) {
       Delete
     </button>
 
-     <button
-  className="edit-btn"
-  onClick={(e) => {
-    e.stopPropagation();
-    setEditingMessageId(msg.id);
-    setEditMessageText(msg.message || "");
-  }}
->
-  Edit
-</button>
+     {new Date(msg.created_at).getTime() >=
+  Date.now() - 15 * 60 * 1000 && (
+    <button
+      className="edit-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        setEditingMessageId(msg.id);
+        setEditMessageText(msg.message || "");
+      }}
+    >
+      Edit
+    </button>
+)}
   </>
 
   
@@ -2188,6 +2191,7 @@ if (video) {
                   )}
 
                   {msg.sender_id === user?.id && (
+                    
   <>
     <input
       type="checkbox"
@@ -2201,15 +2205,19 @@ if (video) {
     >
       Delete
     </button>
+
+    {new Date(msg.created_at).getTime() >=
+  Date.now() - 15 * 60 * 1000 && (
     <button
-  className="edit-btn"
-  onClick={() => {
-    setEditingMessageId(msg.id);
-    setEditMessageText(msg.message || "");
-  }}
->
-  Edit
-</button>
+      className="edit-btn"
+      onClick={() => {
+        setEditingMessageId(msg.id);
+        setEditMessageText(msg.message || "");
+      }}
+    >
+      Edit
+    </button>
+)}
   </>
 )}
 

@@ -234,7 +234,8 @@ const getUnreadCounts = async (req, res) => {
   }
 };
 
-// Edit Private Message
+
+// Edit Private Message - 15 Minutes Restriction
 const editMessage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -249,14 +250,16 @@ const editMessage = async (req, res) => {
     const result = await pool.query(
       `UPDATE messages
        SET message = $1
-       WHERE id = $2 AND sender_id = $3
+       WHERE id = $2
+       AND sender_id = $3
+       AND created_at >= NOW() - INTERVAL '15 minutes'
        RETURNING *`,
       [message.trim(), id, user_id]
     );
 
     if (result.rowCount === 0) {
       return res.status(403).json({
-        message: "You can edit only your own messages",
+        message: "Message cannot be edited. Only your own messages sent within 15 minutes can be edited.",
       });
     }
 
