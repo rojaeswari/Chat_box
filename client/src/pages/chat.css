@@ -495,4 +495,47 @@ body{
 .delete-selected-btn:hover {
   background: #b91c1c;
 }
+.edit-btn {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 5px;
+}
 
+.edit-btn:hover {
+  background-color: #0b7dda;
+}
+
+.edit-message-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.edit-message-box input {
+  padding: 7px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+.edit-message-box button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.edit-message-box button:first-of-type {
+  background-color: #28a745;
+  color: white;
+}
+
+.edit-message-box button:last-of-type {
+  background-color: #dc3545;
+  color: white;
+}
