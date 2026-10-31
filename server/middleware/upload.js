@@ -61,6 +61,15 @@ const storage = new CloudinaryStorage({
       "mov",
       "avi",
 
+
+      // Audio / Voice Notes
+    "mp3",
+    "wav",
+    "ogg",
+    "m4a",
+    "aac",
+    "webma",
+
       // Documents
       "pdf",
       "doc",

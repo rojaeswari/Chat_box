@@ -35,6 +35,9 @@ function Chat() {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editMessageText, setEditMessageText] = useState("");
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [audio, setAudio] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
 
 
   const navigate = useNavigate();
@@ -1072,11 +1075,60 @@ const toggleMessageSelection = (id) => {
 
     }
   };
+  
 
+
+  const startRecording = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    });
+
+    const recorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = recorder;
+
+    const chunks = [];
+
+    recorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        chunks.push(event.data);
+      }
+    };
+
+    recorder.onstop = () => {
+      const audioBlob = new Blob(chunks, {
+        type: recorder.mimeType || "audio/webm",
+      });
+
+      const audioFile = new File(
+        [audioBlob],
+        `voice-${Date.now()}.webm`,
+        { type: audioBlob.type }
+      );
+
+      setAudio(audioFile);
+
+      stream.getTracks().forEach((track) => track.stop());
+    };
+
+    recorder.start();
+    setIsRecording(true);
+  } catch (error) {
+    console.error("Microphone error:", error);
+    alert("Microphone access permission is required.");
+  }
+};
+
+const stopRecording = () => {
+  if (mediaRecorderRef.current && isRecording) {
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+  }
+};
 
   const sendMessage = async () => {
      if (isSending) return;
-    if (!message.trim() && !image && !video && !document) return;
+    if (!message.trim() && !image && !video && !document && !audio) return;
     console.log(image);
 
     try {
@@ -1117,6 +1169,22 @@ if (video) {
   videoName = res.data.image;
 }
 
+
+
+
+
+let audioName = "";
+
+if (audio) {
+  const formData = new FormData();
+  formData.append("audio", audio);
+
+  const res = await axios.post(
+  "https://chat-box-2-hyl4.onrender.com/api/messages/upload-audio",
+  formData
+);
+  audioName = res.data.audio;
+}
       let documentName = "";
 
       if (document) {
@@ -1142,7 +1210,8 @@ if (video) {
           message,
           image: imageName,
           video: videoName,
-          document: documentName
+          document: documentName,
+          audio: audioName
         });
 
         // socket.emit("send_group_message", {
@@ -1158,6 +1227,7 @@ if (video) {
         setImage(null);
         setVideo(null);
         setDocument(null);
+        setAudio(null);
         
         
         // fetchGroupMessages(selectedGroup.id);
@@ -1174,7 +1244,8 @@ if (video) {
         message,
         image: imageName,
         video: videoName,
-        document: documentName
+        document: documentName,
+        audio: audioName
 
       });
 
@@ -1193,6 +1264,7 @@ if (video) {
       setImage(null);
       setVideo(null);
       setDocument(null);
+      setAudio(null);
       
       } catch (err) {
 
@@ -2379,6 +2451,34 @@ if (video) {
   </div>
 )}
 
+{audio && (
+  <div className="selected-file">
+    🎙️ {audio.name}
+    <audio controls src={URL.createObjectURL(audio)} />
+    <button onClick={() => setAudio(null)}>
+      ✖
+    </button>
+  </div>
+)}
+
+{!isRecording ? (
+  <button
+    type="button"
+    className="link-btn"
+    onClick={startRecording}
+    disabled={!selectedUser && !selectedGroup}
+  >
+    🎙️
+  </button>
+) : (
+  <button
+    type="button"
+    className="link-btn"
+    onClick={stopRecording}
+  >
+    ⏹
+  </button>
+)}
           <button
             className="link-btn"
             onClick={() => {

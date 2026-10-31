@@ -5,13 +5,13 @@ const { getIO } = require("../socket");
 const sendGroupMessage = async (req, res) => {
   try {
     console.log(req.body);
-    const { group_id, sender_id, message, image, document, video, status } = req.body;
+    const { group_id, sender_id, message, image, document, video, audio, status } = req.body;
 
      const result = await pool.query(
-      `INSERT INTO group_messages(group_id, sender_id, message,image, document,video, status)
-       VALUES($1,$2,$3,$4, $5, $6, $7)
+      `INSERT INTO group_messages(group_id, sender_id, message,image, document,video,audio, status)
+       VALUES($1,$2,$3,$4, $5, $6, $7,$8)
        RETURNING *`,
-      [group_id, sender_id, message, image, document,video, "sent"]
+      [group_id, sender_id, message, image, document,video, audio, "sent"]
     );
 
     const sender = await pool.query(

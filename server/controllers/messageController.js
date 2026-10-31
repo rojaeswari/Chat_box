@@ -1,35 +1,54 @@
 const pool = require("../db");
 const { getIO } = require("../socket");
 
-// Send Message
+
 const sendMessage = async (req, res) => {
   try {
-    const { sender_id, receiver_id, message, image, document, video, status } = req.body;
+    const {
+      sender_id,
+      receiver_id,
+      message,
+      image,
+      document,
+      video,
+      audio,
+      status
+    } = req.body;
 
     const result = await pool.query(
       `INSERT INTO messages
-      (sender_id, receiver_id, message, image, document, video, status)
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      (sender_id, receiver_id, message, image, document, video, audio, status)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       RETURNING *`,
-      [sender_id, receiver_id, message, image, document, video, "sent"]
+      [
+        sender_id,
+        receiver_id,
+        message,
+        image,
+        document,
+        video,
+        audio,
+        "sent"
+      ]
     );
 
     const savedMessage = result.rows[0];
 
-   const io = getIO();
+    const io = getIO();
 
-// Receiver
-io.to(`user_${receiver_id}`).emit(
-  "receive_message",
-  savedMessage
-);
+    // Receiver
+    io.to(`user_${receiver_id}`).emit(
+      "receive_message",
+      savedMessage
+    );
 
-// Sender
-io.to(`user_${sender_id}`).emit(
-  "receive_message",
-  savedMessage
-);
-return res.status(201).json(savedMessage);  
+    // Sender
+    io.to(`user_${sender_id}`).emit(
+      "receive_message",
+      savedMessage
+    );
+
+    return res.status(201).json(savedMessage);
 
   } catch (err) {
     console.error(err);
@@ -38,6 +57,9 @@ return res.status(201).json(savedMessage);
     });
   }
 };
+
+
+
 // Get Messages
 const getMessages = async (req, res) => {
   try {

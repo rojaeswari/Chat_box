@@ -50,5 +50,28 @@ router.post("/upload", upload.single("image"), (req, res) => {
     });
   }
 });
+router.post("/upload-audio", upload.single("audio"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Audio file not received",
+      });
+    }
+
+    console.log("Uploaded audio:", req.file);
+
+    res.json({
+      message: "Audio uploaded successfully",
+      audio: req.file.path,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Audio upload failed",
+    });
+  }
+});
+
+
 
 module.exports = router;
