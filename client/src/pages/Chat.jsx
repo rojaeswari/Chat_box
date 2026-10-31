@@ -1343,14 +1343,7 @@ if (audio) {
           msg.status = "seen";
         }
       }
-     console.log(
-  "GROUP AUDIO DATA:",
-  res.data.map((msg) => ({
-    id: msg.id,
-    message: msg.message,
-    audio: msg.audio
-  }))
-);
+    
       setGroupMessages(res.data);
       res.data.forEach((msg) => {
         fetchSeenCount(msg.id);
