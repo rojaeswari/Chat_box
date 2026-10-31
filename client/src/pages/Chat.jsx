@@ -1896,7 +1896,14 @@ if (video) {
       checked={selectedMessages.includes(msg.id)}
       onChange={() => toggleMessageSelection(msg.id)}
     />
-   <button
+    <button
+      className="delete-btn"
+      onClick={() => deleteMessage(msg.id)}
+    >
+      Delete
+    </button>
+
+     <button
   className="edit-btn"
   onClick={(e) => {
     e.stopPropagation();
@@ -1906,13 +1913,6 @@ if (video) {
 >
   Edit
 </button>
-
-    <button
-      className="delete-btn"
-      onClick={() => deleteMessage(msg.id)}
-    >
-      Delete
-    </button>
   </>
 
   
@@ -2194,6 +2194,13 @@ if (video) {
       checked={selectedMessages.includes(msg.id)}
       onChange={() => toggleMessageSelection(msg.id)}
     />
+
+    <button
+      className="delete-btn"
+      onClick={() => deleteMessage(msg.id)}
+    >
+      Delete
+    </button>
     <button
   className="edit-btn"
   onClick={() => {
@@ -2203,13 +2210,6 @@ if (video) {
 >
   Edit
 </button>
-
-    <button
-      className="delete-btn"
-      onClick={() => deleteMessage(msg.id)}
-    >
-      Delete
-    </button>
   </>
 )}
 
