@@ -6,6 +6,7 @@ const {
   sendMessage,
   getMessages,
   deleteMessage,
+  editMessage,
   updateMessageStatus,
   updateSeenStatus,
   getUnreadCounts
@@ -13,11 +14,13 @@ const {
 } = require("../controllers/messageController");
 
 router.post("/", sendMessage);
+router.put("/edit/:id", editMessage);
 router.delete("/:id", deleteMessage);
 router.put("/status/:id", updateMessageStatus);
 router.put("/seen/:id", updateSeenStatus);
 router.get("/unread/:userId", getUnreadCounts);
 router.get("/:senderId/:receiverId", getMessages);
+
 
 // router.post("/upload", upload.single("image"), (req, res) => {
 //   try {

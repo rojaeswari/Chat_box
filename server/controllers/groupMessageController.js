@@ -490,11 +490,56 @@ const getGroupUnreadCounts = async (req, res) => {
   }
 };
 
+// Edit Group Message
+const editGroupMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id, message } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({
+        message: "Message cannot be empty",
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE group_messages
+       SET message = $1
+       WHERE id = $2 AND sender_id = $3
+       RETURNING *`,
+      [message.trim(), id, user_id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(403).json({
+        message: "You can edit only your own messages",
+      });
+    }
+
+    const updatedMessage = result.rows[0];
+    const io = getIO();
+
+    io.to(`group_${updatedMessage.group_id}`).emit(
+      "group_message_edited",
+      updatedMessage
+    );
+
+    return res.json(updatedMessage);
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   sendGroupMessage,
   getGroupMessages,
   updateGroupMessageStatus,
   deleteGroupMessage,
+  editGroupMessage,
    updateGroupSeenStatus,
    markGroupMessageSeen,
     getSeenUsers,

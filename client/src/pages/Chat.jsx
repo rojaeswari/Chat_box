@@ -32,6 +32,8 @@ function Chat() {
   const [groupUnreadCounts, setGroupUnreadCounts] = useState({});
   const [isSending, setIsSending] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState([]);
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editMessageText, setEditMessageText] = useState("");
 
 
   const navigate = useNavigate();
@@ -1718,20 +1720,66 @@ if (video) {
                     </strong>
 
                     {msg.message && (
-                      /^https?:\/\//.test(msg.message) ? (
-                        <a
-                          href={msg.message}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="document-link"
-                        >
-                          🔗 Open Document
-                        </a>
-                      ) : (
-                        <p>{msg.message}</p>
-                      )
-                    )}
+  editingMessageId === msg.id ? (
+    <div className="edit-message-box">
+      <input
+        type="text"
+        value={editMessageText}
+        onChange={(e) => setEditMessageText(e.target.value)}
+      />
 
+      <button
+        onClick={async () => {
+          try {
+            const response = await axios.put(
+              `https://chat-box-2-hyl4.onrender.com/api/group-messages/edit/${msg.id}`,
+              {
+                user_id: user.id,
+                message: editMessageText
+              }
+            );
+
+            setGroupMessages((prev) =>
+              prev.map((item) =>
+                item.id === msg.id ? response.data : item
+              )
+            );
+
+            setEditingMessageId(null);
+            setEditMessageText("");
+          } catch (err) {
+            console.error(err);
+            alert("Group message edit failed");
+          }
+        }}
+      >
+        Save
+      </button>
+
+      <button
+        onClick={() => {
+          setEditingMessageId(null);
+          setEditMessageText("");
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  ) : (
+    /^https?:\/\//.test(msg.message) ? (
+      <a
+        href={msg.message}
+        target="_blank"
+        rel="noreferrer"
+        className="document-link"
+      >
+        🔗 Open Document
+      </a>
+    ) : (
+      <p>{msg.message}</p>
+    )
+  )
+)}
                  
                     {/* {msg.image && (
                       <img
@@ -1848,6 +1896,16 @@ if (video) {
       checked={selectedMessages.includes(msg.id)}
       onChange={() => toggleMessageSelection(msg.id)}
     />
+   <button
+  className="edit-btn"
+  onClick={(e) => {
+    e.stopPropagation();
+    setEditingMessageId(msg.id);
+    setEditMessageText(msg.message || "");
+  }}
+>
+  Edit
+</button>
 
     <button
       className="delete-btn"
@@ -1856,6 +1914,8 @@ if (video) {
       Delete
     </button>
   </>
+
+  
 )}
                     {/* <div className="status">
   {msg.status === "sent" && (
@@ -1950,19 +2010,66 @@ if (video) {
                   </strong>
 
                   {msg.message && (
-                    /^https?:\/\//.test(msg.message) ? (
-                      <a
-                        href={msg.message}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="document-link"
-                      >
-                        🔗 Open Document
-                      </a>
-                    ) : (
-                      <p>{msg.message}</p>
-                    )
-                  )}
+  editingMessageId === msg.id ? (
+    <div className="edit-message-box">
+      <input
+        type="text"
+        value={editMessageText}
+        onChange={(e) => setEditMessageText(e.target.value)}
+      />
+
+      <button
+        onClick={async () => {
+          try {
+            const response = await axios.put(
+              `https://chat-box-2-hyl4.onrender.com/api/messages/edit/${msg.id}`,
+              {
+                user_id: user.id,
+                message: editMessageText
+              }
+            );
+
+            setMessages((prev) =>
+              prev.map((item) =>
+                item.id === msg.id ? response.data : item
+              )
+            );
+
+            setEditingMessageId(null);
+            setEditMessageText("");
+          } catch (err) {
+            console.error(err);
+            alert("Message edit failed");
+          }
+        }}
+      >
+        Save
+      </button>
+
+      <button
+        onClick={() => {
+          setEditingMessageId(null);
+          setEditMessageText("");
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  ) : (
+    /^https?:\/\//.test(msg.message) ? (
+      <a
+        href={msg.message}
+        target="_blank"
+        rel="noreferrer"
+        className="document-link"
+      >
+        🔗 Open Document
+      </a>
+    ) : (
+      <p>{msg.message}</p>
+    )
+  )
+)}
 
                   {/* {msg.image && (
                     <img
@@ -2087,6 +2194,15 @@ if (video) {
       checked={selectedMessages.includes(msg.id)}
       onChange={() => toggleMessageSelection(msg.id)}
     />
+    <button
+  className="edit-btn"
+  onClick={() => {
+    setEditingMessageId(msg.id);
+    setEditMessageText(msg.message || "");
+  }}
+>
+  Edit
+</button>
 
     <button
       className="delete-btn"
