@@ -1952,6 +1952,21 @@ if (audio) {
   </div>
 )}
 
+{msg.audio && (
+  <div className="chat-audio-container">
+    <div className="chat-audio-icon">🎙️</div>
+
+    <div className="chat-audio-player">
+      <audio
+        controls
+        preload="metadata"
+        src={msg.audio}
+      />
+      <span>Voice message</span>
+    </div>
+  </div>
+)}
+
                     {msg.document && (
                       <a
                         href={
@@ -2253,6 +2268,22 @@ if (audio) {
     📄 {msg.document}
   </a>
 )} */}
+
+
+{msg.audio && (
+  <div className="chat-audio-container">
+    <div className="chat-audio-icon">🎙️</div>
+
+    <div className="chat-audio-player">
+      <audio
+        controls
+        preload="metadata"
+        src={msg.audio}
+      />
+      <span>Voice message</span>
+    </div>
+  </div>
+)}
 
                   {msg.document && (
                     <a
