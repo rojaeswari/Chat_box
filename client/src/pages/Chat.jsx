@@ -2452,11 +2452,28 @@ if (audio) {
 )}
 
 {audio && (
-  <div className="selected-file">
-    🎙️ {audio.name}
-    <audio controls src={URL.createObjectURL(audio)} />
-    <button onClick={() => setAudio(null)}>
-      ✖
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+      padding: "10px",
+      background: "#f0f0f0",
+      borderRadius: "8px",
+      margin: "10px 0",
+    }}
+  >
+    <span>🎙️ {audio.name}</span>
+
+    <audio
+      controls
+      preload="auto"
+      src={URL.createObjectURL(audio)}
+      style={{ width: "100%", display: "block" }}
+    />
+
+    <button type="button" onClick={() => setAudio(null)}>
+      ✖ Remove
     </button>
   </div>
 )}
