@@ -1997,18 +1997,23 @@ if (audio) {
       Delete
     </button>
 
-   {new Date(msg.created_at).getTime() >=
-  currentTime - 15 * 60 * 1000 && (
-    <button
-      className="edit-btn"
-      onClick={(e) => {
-        e.stopPropagation();
-        setEditingMessageId(msg.id);
-        setEditMessageText(msg.message || "");
-      }}
-    >
-      Edit
-    </button>
+{msg.message?.trim() &&
+  !msg.audio &&
+  !msg.image &&
+  !msg.video &&
+  !msg.document &&
+  new Date(msg.created_at).getTime() >=
+    currentTime - 15 * 60 * 1000 && (
+      <button
+        className="edit-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+          setEditingMessageId(msg.id);
+          setEditMessageText(msg.message || "");
+        }}
+      >
+        Edit
+      </button>
 )}
   </>
 
@@ -2316,17 +2321,22 @@ if (audio) {
       Delete
     </button>
 
-   {new Date(msg.created_at).getTime() >=
-  currentTime - 15 * 60 * 1000 && (
-    <button
-      className="edit-btn"
-      onClick={() => {
-        setEditingMessageId(msg.id);
-        setEditMessageText(msg.message || "");
-      }}
-    >
-      Edit
-    </button>
+ {msg.message?.trim() &&
+  !msg.audio &&
+  !msg.image &&
+  !msg.video &&
+  !msg.document &&
+  new Date(msg.created_at).getTime() >=
+    currentTime - 15 * 60 * 1000 && (
+      <button
+        className="edit-btn"
+        onClick={() => {
+          setEditingMessageId(msg.id);
+          setEditMessageText(msg.message || "");
+        }}
+      >
+        Edit
+      </button>
 )}
   </>
 )}
