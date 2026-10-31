@@ -151,6 +151,7 @@ const getGroupMessages = async (req, res) => {
   group_messages.image,
   group_messages.document,
   group_messages.video,
+  group_messages.audio,
   group_messages.status,
   group_messages.created_at,
   users.id AS sender_id,
