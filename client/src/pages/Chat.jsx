@@ -34,6 +34,7 @@ function Chat() {
   const [selectedMessages, setSelectedMessages] = useState([]);
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editMessageText, setEditMessageText] = useState("");
+  const [currentTime, setCurrentTime] = useState(Date.now());
 
 
   const navigate = useNavigate();
@@ -60,7 +61,13 @@ function Chat() {
     fetchGroups();
   }, []);
 
+useEffect(() => {
+  const timer = setInterval(() => {
+    setCurrentTime(Date.now());
+  }, 1000);
 
+  return () => clearInterval(timer);
+}, []);
   // useEffect(() => {
   //   const handleMessage = async (data) => {
 
@@ -1903,8 +1910,8 @@ if (video) {
       Delete
     </button>
 
-     {new Date(msg.created_at).getTime() >=
-  Date.now() - 15 * 60 * 1000 && (
+   {new Date(msg.created_at).getTime() >=
+  currentTime - 15 * 60 * 1000 && (
     <button
       className="edit-btn"
       onClick={(e) => {
@@ -2206,8 +2213,8 @@ if (video) {
       Delete
     </button>
 
-    {new Date(msg.created_at).getTime() >=
-  Date.now() - 15 * 60 * 1000 && (
+   {new Date(msg.created_at).getTime() >=
+  currentTime - 15 * 60 * 1000 && (
     <button
       className="edit-btn"
       onClick={() => {
