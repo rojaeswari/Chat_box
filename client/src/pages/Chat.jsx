@@ -2467,7 +2467,7 @@ if (audio) {
 
           {image && (
             <div className="selected-file">
-              📷 {image.name}
+              📷 image {image.name}
               <button onClick={() => setImage(null)}>
                 ✖
               </button>
@@ -2476,7 +2476,7 @@ if (audio) {
 
           {document && (
             <div className="selected-file">
-              📄 {document.name}
+              📄 document {document.name}
               <button onClick={() => setDocument(null)}>
                 ✖
               </button>
@@ -2485,7 +2485,7 @@ if (audio) {
 
           {video && (
   <div className="selected-file">
-    🎥 {video.name}
+    🎥 video {video.name}
     <button onClick={() => setVideo(null)}>
       ✖
     </button>
@@ -2504,7 +2504,7 @@ if (audio) {
       margin: "10px 0",
     }}
   >
-    <span>🎙️ {audio.name}</span>
+    <span>🎙️ audio {audio.name}</span>
 
     <audio
       controls
@@ -2544,7 +2544,7 @@ if (audio) {
               if (link) setMessage(link);
             }}
           >
-            🔗
+            Link🔗
           </button>
 
           <button
