@@ -2429,7 +2429,7 @@ if (audio) {
           )}
 
           <label htmlFor="imageUpload" className="file-btn">
-            📷
+            📷 image
           </label>
 
           <input
@@ -2442,7 +2442,7 @@ if (audio) {
 
 
           <label htmlFor="videoUpload" className="file-btn">
-  🎥
+  🎥 video
 </label>
 
 <input
@@ -2454,7 +2454,7 @@ if (audio) {
 />
 
           <label htmlFor="docUpload" className="file-btn">
-            📄
+            📄 document
           </label>
 
           <input
@@ -2467,7 +2467,7 @@ if (audio) {
 
           {image && (
             <div className="selected-file">
-              📷 image {image.name}
+              📷 {image.name}
               <button onClick={() => setImage(null)}>
                 ✖
               </button>
@@ -2476,7 +2476,7 @@ if (audio) {
 
           {document && (
             <div className="selected-file">
-              📄 document {document.name}
+              📄 {document.name}
               <button onClick={() => setDocument(null)}>
                 ✖
               </button>
@@ -2485,7 +2485,7 @@ if (audio) {
 
           {video && (
   <div className="selected-file">
-    🎥 video {video.name}
+    🎥 {video.name}
     <button onClick={() => setVideo(null)}>
       ✖
     </button>
@@ -2504,7 +2504,7 @@ if (audio) {
       margin: "10px 0",
     }}
   >
-    <span>🎙️ audio {audio.name}</span>
+    <span>🎙️ {audio.name}</span>
 
     <audio
       controls
@@ -2544,7 +2544,7 @@ if (audio) {
               if (link) setMessage(link);
             }}
           >
-            Link🔗
+            🔗
           </button>
 
           <button
