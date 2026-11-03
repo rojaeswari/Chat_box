@@ -958,9 +958,16 @@ const toggleMessageSelection = (id) => {
     try {
       const data = JSON.parse(localStorage.getItem("user"));
 
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/users?email=${data.email}`
-      );
+      const token = localStorage.getItem("token");
+
+const res = await axios.get(
+  `https://chat-box-2-hyl4.onrender.com/api/users?email=${data.email}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
       setUsers(res.data);
     } catch (err) {
@@ -982,42 +989,50 @@ const toggleMessageSelection = (id) => {
   // };
 
   const fetchGroups = async () => {
-    try {
-      const currentUser = JSON.parse(
-        localStorage.getItem("user")
-      );
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
 
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/groups?userId=${currentUser.id}`
-      );
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/groups?userId=${currentUser.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      setGroups(res.data);
+    setGroups(res.data);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-    } catch (err) {
-      console.log(err);
-    }
-  };
+ const fetchGroupUnreadCounts = async () => {
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
 
-  const fetchGroupUnreadCounts = async () => {
-    try {
-      const currentUser = JSON.parse(localStorage.getItem("user"));
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/group-messages/unread/${currentUser.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/group-messages/unread/${currentUser.id}`
-      );
+    const counts = {};
 
-      const counts = {};
+    res.data.forEach((row) => {
+      counts[row.group_id] = Number(row.unread_count);
+    });
 
-      res.data.forEach((row) => {
-        counts[row.group_id] = Number(row.unread_count);
-      });
-
-      setGroupUnreadCounts(counts);
-
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    setGroupUnreadCounts(counts);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   // const fetchMessages = async (receiverId) => {
   //   try {
@@ -1075,58 +1090,69 @@ const toggleMessageSelection = (id) => {
   //     console.log(err);
   //   }
   // };
-  const fetchMessages = async (receiverId) => {
-    try {
-      const currentUser = JSON.parse(localStorage.getItem("user"));
+ const fetchMessages = async (receiverId) => {
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
 
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/messages/${currentUser.id}/${receiverId}`
-      );
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
-      for (const msg of res.data) {
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/messages/${currentUser.id}/${receiverId}`,
+      config
+    );
 
-        if (
-          msg.receiver_id === currentUser.id &&
-          msg.status === "sent"
-        ) {
+    for (const msg of res.data) {
+      if (
+        Number(msg.receiver_id) === Number(currentUser.id) &&
+        msg.status === "sent"
+      ) {
+        await axios.put(
+          `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
+          { status: "delivered" },
+          config
+        );
 
-          await axios.put(
-            `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
-            {
-              status: "delivered",
-            }
-          );
-
-          msg.status = "delivered";
-        }
-
-        if (
-          msg.receiver_id === currentUser.id &&
-          msg.status === "delivered"
-        ) {
-
-          await axios.put(
-            `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`
-          );
-
-          msg.status = "seen";
-        }
+        msg.status = "delivered";
       }
 
-      setMessages(res.data);
+      if (
+        Number(msg.receiver_id) === Number(currentUser.id) &&
+        msg.status === "delivered"
+      ) {
+        await axios.put(
+          `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`,
+          {},
+          config
+        );
 
-    } catch (err) {
-      console.log(err);
+        msg.status = "seen";
+      }
     }
-  };
 
+    setMessages(res.data);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 
   const fetchUnreadCounts = async () => {
+  try {
     const currentUser = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
 
     const res = await axios.get(
-      `https://chat-box-2-hyl4.onrender.com/api/messages/unread/${currentUser.id}`
+      `https://chat-box-2-hyl4.onrender.com/api/messages/unread/${currentUser.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
 
     const counts = {};
@@ -1136,50 +1162,59 @@ const toggleMessageSelection = (id) => {
     });
 
     setUnreadCounts(counts);
-  };
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-  const renameGroup = async (id) => {
-    const newName = prompt("Enter New Group Name");
+const renameGroup = async (id) => {
+  const newName = prompt("Enter New Group Name");
 
-    if (!newName) return;
+  if (!newName) return;
 
-    try {
-      await axios.put(
-        `https://chat-box-2-hyl4.onrender.com/api/groups/${id}`,
-        {
-          group_name: newName,
-        }
-      );
+  try {
+    const token = localStorage.getItem("token");
 
-      alert("Group Updated");
+    await axios.put(
+      `https://chat-box-2-hyl4.onrender.com/api/groups/${id}`,
+      {
+        group_name: newName,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      fetchGroups();
-
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    alert("Group Updated");
+    fetchGroups();
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const deleteGroup = async (id) => {
+  if (!window.confirm("Delete this group?")) return;
 
-    if (!window.confirm("Delete this group?"))
-      return;
+  try {
+    const token = localStorage.getItem("token");
 
-    try {
+    await axios.delete(
+      `https://chat-box-2-hyl4.onrender.com/api/groups/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      await axios.delete(
-        `https://chat-box-2-hyl4.onrender.com/api/groups/${id}`
-      );
-
-      alert("Group Deleted");
-
-      fetchGroups();
-
-    } catch (err) {
-      console.log(err);
-    }
-
-  };
+    alert("Group Deleted");
+    fetchGroups();
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const handleGroupMessageChange = (e) => {
 
@@ -1456,220 +1491,260 @@ if (document) {
 
 
   const fetchGroupMembers = async (groupId) => {
-    try {
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/members`
-      );
+  try {
+    const token = localStorage.getItem("token");
 
-      setGroupMembers(res.data);
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/members`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
+    setGroupMembers(res.data);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const fetchGroupMessages = async (groupId) => {
-    try {
-      const currentUser = JSON.parse(localStorage.getItem("user"));
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
 
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/group-messages/${groupId}`
-      );
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
-      // Delivered
-      for (const msg of res.data) {
-        if (
-          msg.sender_id !== currentUser.id &&
-          msg.status === "sent"
-        ) {
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/group-messages/${groupId}`,
+      config
+    );
 
-          await axios.put(
-            `https://chat-box-2-hyl4.onrender.com/api/group-messages/status/${msg.id}`,
-            {
-              status: "delivered",
-            }
-          );
+    // Delivered
+    for (const msg of res.data) {
+      if (
+        Number(msg.sender_id) !== Number(currentUser.id) &&
+        msg.status === "sent"
+      ) {
+        await axios.put(
+          `https://chat-box-2-hyl4.onrender.com/api/group-messages/status/${msg.id}`,
+          { status: "delivered" },
+          config
+        );
 
-          // socket.emit("group_message_delivered", {
-          //   id: msg.id,
-          //   status: "delivered",
-          // });
-
-          msg.status = "delivered";
-        }
+        msg.status = "delivered";
       }
+    }
 
-      // Seen
-      for (const msg of res.data) {
+    // Seen
+    for (const msg of res.data) {
+      if (
+        Number(msg.sender_id) !== Number(currentUser.id) &&
+        msg.status === "delivered"
+      ) {
+        await axios.put(
+          `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen/${msg.id}`,
+          {},
+          config
+        );
 
-        if (
-          msg.sender_id !== currentUser.id &&
-          msg.status === "delivered"
-        ) {
-
-          await axios.put(
-            `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen/${msg.id}`
-          );
-
-          // socket.emit("group_message_seen", {
-          //   id: msg.id,
-          //   status: "seen",
-          // });
-
-          msg.status = "seen";
-        }
+        msg.status = "seen";
       }
-    
-      setGroupMessages(res.data);
-      res.data.forEach((msg) => {
-        fetchSeenCount(msg.id);
-      });
-
-    } catch (err) {
-      console.log(err);
     }
-  };
 
-  const fetchSeenCount = async (messageId) => {
-    try {
+    setGroupMessages(res.data);
 
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen-count/${messageId}`
-      );
+    res.data.forEach((msg) => {
+      fetchSeenCount(msg.id);
+    });
 
-      setSeenCounts((prev) => ({
-        ...prev,
-        [messageId]: res.data.seen_count,
-      }));
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-    } catch (err) {
-      console.log(err);
-    }
-  };
+const fetchSeenCount = async (messageId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen-count/${messageId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setSeenCounts((prev) => ({
+      ...prev,
+      [messageId]: res.data.seen_count,
+    }));
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const fetchMemberCount = async (groupId) => {
-    try {
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/member-count`
-      );
+  try {
+    const token = localStorage.getItem("token");
 
-      setMemberCount(res.data.member_count);
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/member-count`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    setMemberCount(res.data.member_count);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const openSeenPopup = async (messageId) => {
-    try {
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen/${messageId}`
-      );
+  try {
+    const token = localStorage.getItem("token");
 
-      setSeenUsers(res.data);
-      setShowSeenPopup(true);
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen/${messageId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    setSeenUsers(res.data);
+    setShowSeenPopup(true);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const removeMember = async (groupId, userId) => {
-    try {
-      await axios.delete(
-        `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/remove-member/${userId}`
-      );
+  try {
+    const token = localStorage.getItem("token");
 
-      alert("Member Removed");
+    await axios.delete(
+      `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/remove-member/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      fetchGroupMembers(groupId);
-
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
+    alert("Member Removed");
+    fetchGroupMembers(groupId);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const addMember = async (groupId, userId) => {
-    try {
-      await axios.post(
-        `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/add-member`,
-        {
-          user_id: userId,
-        }
-      );
+  try {
+    const token = localStorage.getItem("token");
 
-      alert("Member Added Successfully");
+    await axios.post(
+      `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/add-member`,
+      {
+        user_id: userId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      // Refresh Members
-      fetchGroupMembers(groupId);
+    alert("Member Added Successfully");
 
-      // Refresh Available Users
-      fetchAvailableUsers(groupId);
+    fetchGroupMembers(groupId);
+    fetchAvailableUsers(groupId);
 
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const fetchAvailableUsers = async (groupId) => {
-    try {
-      const currentUser = JSON.parse(localStorage.getItem("user"));
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
 
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/users?email=${currentUser.email}`
-      );
-      const members = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/members`
-      );
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
-      const memberIds = members.data.map((m) => m.id);
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/users?email=${currentUser.email}`,
+      config
+    );
 
-      const filteredUsers = res.data.filter(
-        (u) => !memberIds.includes(u.id)
-      );
+    const members = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/members`,
+      config
+    );
 
-      setAvailableUsers(filteredUsers);
+    const memberIds = members.data.map((m) => Number(m.id));
 
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    const filteredUsers = res.data.filter(
+      (u) => !memberIds.includes(Number(u.id))
+    );
+
+    setAvailableUsers(filteredUsers);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 
   const deleteMessage = async (id) => {
-    try {
-      if (!window.confirm("Delete this message?")) return;
+  try {
+    if (!window.confirm("Delete this message?")) return;
 
-      if (selectedGroup) {
-        await axios.delete(
-          `https://chat-box-2-hyl4.onrender.com/api/group-messages/${id}`,
-          {
-            data: {
-              user_id: user.id,
-            },
-          }
-        );
+    const token = localStorage.getItem("token");
 
-        fetchGroupMessages(selectedGroup.id);
-      } else {
-        await axios.delete(
-          `https://chat-box-2-hyl4.onrender.com/api/messages/${id}`,
-          {
-            data: {
-              user_id: user.id,
-            },
-          }
-        );
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        user_id: user.id,
+      },
+    };
 
-        fetchMessages(selectedUser.id);
-      }
+    if (selectedGroup) {
+      await axios.delete(
+        `https://chat-box-2-hyl4.onrender.com/api/group-messages/${id}`,
+        config
+      );
 
-    } catch (err) {
-      console.log(err);
+      fetchGroupMessages(selectedGroup.id);
+    } else {
+      await axios.delete(
+        `https://chat-box-2-hyl4.onrender.com/api/messages/${id}`,
+        config
+      );
+
+      fetchMessages(selectedUser.id);
     }
-  };
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 
 
@@ -1685,24 +1760,27 @@ if (document) {
   }
 
   try {
+    const token = localStorage.getItem("token");
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        user_id: user.id,
+      },
+    };
+
     for (const id of selectedMessages) {
       if (selectedGroup) {
         await axios.delete(
           `https://chat-box-2-hyl4.onrender.com/api/group-messages/${id}`,
-          {
-            data: {
-              user_id: user.id,
-            },
-          }
+          config
         );
       } else {
         await axios.delete(
           `https://chat-box-2-hyl4.onrender.com/api/messages/${id}`,
-          {
-            data: {
-              user_id: user.id,
-            },
-          }
+          config
         );
       }
     }
