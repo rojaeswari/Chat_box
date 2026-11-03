@@ -46,18 +46,12 @@ router.post("/upload", authMiddleware, upload.single("image"), (req, res) => {
       });
     }
 
-    const mimeType = req.uploadMimeType;
+    const resourceType =
+  req.file.path.match(/\/(image|video|raw)\//)?.[1];
 
-    let resourceType = "raw";
-
-    if (mimeType.startsWith("image/")) {
-      resourceType = "image";
-    } else if (
-      mimeType.startsWith("video/") ||
-      mimeType.startsWith("audio/")
-    ) {
-      resourceType = "video";
-    }
+if (!resourceType) {
+  throw new Error("Unable to detect Cloudinary resource type");
+}
 
     res.json({
       message: "File uploaded successfully",
