@@ -847,29 +847,36 @@ useEffect(() => {
 
 
   useEffect(() => {
-    if (!selectedGroup || !user) return;
+  if (!selectedGroup || !user) return;
 
-    groupMessages.forEach(async (msg) => {
+  const markGroupMessagesSeen = async () => {
+    const token = localStorage.getItem("token");
 
+    try {
+      for (const msg of groupMessages) {
+        if (Number(msg.sender_id) === Number(user.id)) continue;
 
-      if (msg.sender_id === user.id) return;
-
-      try {
         await axios.post(
           "https://chat-box-2-hyl4.onrender.com/api/group-messages/seen",
           {
             message_id: msg.id,
             user_id: user.id,
             group_id: selectedGroup.id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
-      } catch (err) {
-        console.log(err);
       }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-    });
-
-  }, [groupMessages, selectedGroup, user]);
+  markGroupMessagesSeen();
+}, [groupMessages, selectedGroup, user]);
 
   useEffect(() => {
     if (selectedGroup) {
