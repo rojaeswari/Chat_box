@@ -38,6 +38,7 @@ function Chat() {
   const [audio, setAudio] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
 
   const navigate = useNavigate();
@@ -764,10 +765,10 @@ useEffect(() => {
     socket.emit("join", user.id);
   };
 
+  socket.on("connect", joinRoom);
+
   if (socket.connected) {
     joinRoom();
-  } else {
-    socket.once("connect", joinRoom);
   }
 
   return () => {
@@ -906,7 +907,7 @@ useEffect(() => {
   markGroupMessagesSeen();
 }, [groupMessages, selectedGroup, user]);
 
- useEffect(() => {
+useEffect(() => {
   if (!selectedGroup || !user) return;
 
   const joinGroupRoom = () => {
@@ -914,10 +915,10 @@ useEffect(() => {
     socket.emit("join_group", selectedGroup.id);
   };
 
+  socket.on("connect", joinGroupRoom);
+
   if (socket.connected) {
     joinGroupRoom();
-  } else {
-    socket.once("connect", joinGroupRoom);
   }
 
   return () => {
@@ -1874,7 +1875,7 @@ const fetchSeenCount = async (messageId) => {
   };
 
   return (
-    <div className="container">
+    <div className={`container ${mobileChatOpen ? "mobile-chat-open" : ""}`}>
 
       {/* Sidebar */}
       <div className="sidebar">
@@ -1887,6 +1888,7 @@ const fetchSeenCount = async (messageId) => {
               key={u.id}
               className="user"
               onClick={() => {
+                setMobileChatOpen(true);
                 setMessages([]);
                 setSelectedUser(u);
                 setSelectedGroup(null);
@@ -1942,6 +1944,7 @@ const fetchSeenCount = async (messageId) => {
               <div
                 className="group-name"
                 onClick={() => {
+                  setMobileChatOpen(true);
                   setGroupMessages([]);
                   setSelectedGroup(group);
                   setSelectedUser(null);
@@ -2012,6 +2015,13 @@ const fetchSeenCount = async (messageId) => {
 
       {/* Chat Area */}
       <div className="chatArea">
+
+        <button
+    className="mobile-back-btn"
+    onClick={() => setMobileChatOpen(false)}
+>
+    ← Back
+</button>
         {/* <h3>Role : {user?.role}</h3> */}
 
         {selectedGroup ? (
@@ -2700,7 +2710,7 @@ const fetchSeenCount = async (messageId) => {
           )}
 
           <label htmlFor="imageUpload" className="file-btn">
-            📷 image
+            📷
           </label>
 
           <input
@@ -2713,7 +2723,7 @@ const fetchSeenCount = async (messageId) => {
 
 
           <label htmlFor="videoUpload" className="file-btn">
-  🎥 video
+  🎥
 </label>
 
 <input
@@ -2725,7 +2735,7 @@ const fetchSeenCount = async (messageId) => {
 />
 
           <label htmlFor="docUpload" className="file-btn">
-            📄 document
+            📄
           </label>
 
           <input
