@@ -383,7 +383,35 @@ useEffect(() => {
   //old handle msg
 
 
-  useEffect(() => {
+//   useEffect(() => {
+//   const handleConnect = () => {
+//     console.log("Socket connected:", socket.id);
+//   };
+
+//   const handleConnectError = (error) => {
+//     console.error("Socket connection error:", error.message);
+//   };
+
+//   socket.on("connect", handleConnect);
+//   socket.on("connect_error", handleConnectError);
+
+//   if (socket.connected) {
+//     handleConnect();
+//   }
+
+//   return () => {
+//     socket.off("connect", handleConnect);
+//     socket.off("connect_error", handleConnectError);
+//   };
+// }, []);
+
+useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (token && !socket.connected) {
+    socket.connect();
+  }
+
   const handleConnect = () => {
     console.log("Socket connected:", socket.id);
   };
@@ -941,11 +969,15 @@ useEffect(() => {
   const handleGroupMessage = (data) => {
     console.log("GROUP MESSAGE RECEIVED:", data);
 
-    if (!selectedGroup) return;
+    console.log("SELECTED GROUP ID:", selectedGroup?.id);
+console.log("RECEIVED GROUP ID:", data.group_id);
 
-    if (Number(data.group_id) !== Number(selectedGroup.id)) {
-      return;
-    }
+if (!selectedGroup) return;
+
+if (Number(data.group_id) !== Number(selectedGroup.id)) {
+  console.log("GROUP ID MISMATCH");
+  return;
+}
 
     setGroupMessages((prev) => {
       if (prev.some((msg) => Number(msg.id) === Number(data.id))) {
