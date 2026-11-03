@@ -1630,6 +1630,8 @@ const fetchSeenCount = async (messageId) => {
 };
 
   const openSeenPopup = async (messageId) => {
+     console.log("SEEN POPUP MESSAGE ID:", messageId);
+
   try {
     const token = localStorage.getItem("token");
 

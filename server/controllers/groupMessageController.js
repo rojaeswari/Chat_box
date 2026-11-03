@@ -76,7 +76,7 @@ const sendGroupMessage = async (req, res) => {
   [
     group_id,
     sender_id,
-    message || null,
+    message || "",
     image || null,
     document || null,
     video || null,
