@@ -878,11 +878,24 @@ useEffect(() => {
   markGroupMessagesSeen();
 }, [groupMessages, selectedGroup, user]);
 
-  useEffect(() => {
-    if (selectedGroup) {
-      socket.emit("join_group", selectedGroup.id);
-    }
-  }, [selectedGroup]);
+ useEffect(() => {
+  if (!selectedGroup || !user) return;
+
+  const joinGroupRoom = () => {
+    console.log("Joining group room:", selectedGroup.id);
+    socket.emit("join_group", selectedGroup.id);
+  };
+
+  if (socket.connected) {
+    joinGroupRoom();
+  } else {
+    socket.once("connect", joinGroupRoom);
+  }
+
+  return () => {
+    socket.off("connect", joinGroupRoom);
+  };
+}, [selectedGroup, user]);
 
   useEffect(() => {
     if (selectedGroup) {
@@ -926,16 +939,15 @@ useEffect(() => {
 
   useEffect(() => {
   const handleGroupMessage = (data) => {
+    console.log("GROUP MESSAGE RECEIVED:", data);
 
     if (!selectedGroup) return;
 
-    // Current opened group மட்டும் update ஆகணும்
     if (Number(data.group_id) !== Number(selectedGroup.id)) {
       return;
     }
 
     setGroupMessages((prev) => {
-      // Duplicate avoid
       if (prev.some((msg) => Number(msg.id) === Number(data.id))) {
         return prev;
       }
@@ -1900,7 +1912,7 @@ const fetchSeenCount = async (messageId) => {
                   setSelectedGroup(group);
                   setSelectedUser(null);
 
-                  socket.emit("join_group", group.id);
+                  // socket.emit("join_group", group.id);
 
                   fetchGroupMembers(group.id);
                   fetchGroupMessages(group.id);
