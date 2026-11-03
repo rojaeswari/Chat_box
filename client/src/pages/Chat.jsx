@@ -2128,13 +2128,18 @@ const fetchSeenCount = async (messageId) => {
       <button
         onClick={async () => {
           try {
-            const response = await axios.put(
-              `https://chat-box-2-hyl4.onrender.com/api/group-messages/edit/${msg.id}`,
-              {
-                user_id: user.id,
-                message: editMessageText
-              }
-            );
+           const response = await axios.put(
+  `https://chat-box-2-hyl4.onrender.com/api/group-messages/edit/${msg.id}`,
+  {
+    user_id: user.id,
+    message: editMessageText
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+);
 
             setGroupMessages((prev) =>
               prev.map((item) =>
