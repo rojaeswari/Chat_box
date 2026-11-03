@@ -42,6 +42,107 @@ function Chat() {
 
   const navigate = useNavigate();
 
+  const getAuthenticatedFileUrl = async (messageId, field, isGroup = false) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const endpoint = isGroup
+      ? "group-messages"
+      : "messages";
+
+    const response = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/${endpoint}/private-file/${messageId}/${field}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data.url;
+  } catch (error) {
+    console.error("Private file URL error:", error);
+    return null;
+  }
+};
+
+
+const getGroupFileUrl = (msg, field) => {
+  if (msg[`${field}_delivery_type`] === "authenticated") {
+    return privateFileUrls[`group-${msg.id}-${field}`] || "";
+  }
+
+  const fileUrl = msg[field];
+
+  if (!fileUrl) return "";
+
+  return fileUrl.startsWith("http")
+    ? fileUrl
+    : `https://chat-box-2-hyl4.onrender.com/uploads/${fileUrl}`;
+};
+
+
+const getPrivateFileUrl = (msg, field) => {
+  if (msg[`${field}_delivery_type`] === "authenticated") {
+    return privateFileUrls[`private-${msg.id}-${field}`] || "";
+  }
+
+  const fileUrl = msg[field];
+
+  if (!fileUrl) return "";
+
+  return fileUrl.startsWith("http")
+    ? fileUrl
+    : `https://chat-box-2-hyl4.onrender.com/uploads/${fileUrl}`;
+};
+
+const [privateFileUrls, setPrivateFileUrls] = useState({});
+
+
+useEffect(() => {
+  let cancelled = false;
+
+  const loadPrivateFileUrls = async () => {
+    const urlMap = {};
+
+    const loadForMessages = async (messageList, isGroup) => {
+      for (const msg of messageList) {
+        const fields = ["image", "document", "video", "audio"];
+
+        for (const field of fields) {
+          if (msg[`${field}_delivery_type`] === "authenticated") {
+            const url = await getAuthenticatedFileUrl(
+              msg.id,
+              field,
+              isGroup
+            );
+
+            if (url) {
+              urlMap[`${isGroup ? "group" : "private"}-${msg.id}-${field}`] =
+                url;
+            }
+          }
+        }
+      }
+    };
+
+    await Promise.all([
+      loadForMessages(messages, false),
+      loadForMessages(groupMessages, true),
+    ]);
+
+    if (!cancelled) {
+      setPrivateFileUrls((prev) => ({ ...prev, ...urlMap }));
+    }
+  };
+
+  loadPrivateFileUrls();
+
+  return () => {
+    cancelled = true;
+  };
+}, [messages, groupMessages]);
+
   const logout = () => {
   if (window.confirm("Are you sure you want to logout?")) {
     localStorage.removeItem("token");
@@ -281,11 +382,35 @@ useEffect(() => {
 
   //old handle msg
 
+
+  useEffect(() => {
+  const handleConnect = () => {
+    console.log("Socket connected:", socket.id);
+  };
+
+  const handleConnectError = (error) => {
+    console.error("Socket connection error:", error.message);
+  };
+
+  socket.on("connect", handleConnect);
+  socket.on("connect_error", handleConnectError);
+
+  if (socket.connected) {
+    handleConnect();
+  }
+
+  return () => {
+    socket.off("connect", handleConnect);
+    socket.off("connect_error", handleConnectError);
+  };
+}, []);
+
   useEffect(() => {
     const handleMessage = async (data) => {
 
       // if (!selectedUser || !user) return;
       if (!user) return;
+      console.log("SOCKET MESSAGE RECEIVED:", data);
 
       // const isCurrentChat =
       //   (data.sender_id === selectedUser.id &&
@@ -296,21 +421,20 @@ useEffect(() => {
       let isCurrentChat = false;
 
       if (selectedUser) {
-        isCurrentChat =
-          (data.sender_id === selectedUser.id &&
-            data.receiver_id === user.id) ||
-
-          (data.sender_id === user.id &&
-            data.receiver_id === selectedUser.id);
-      }
+  isCurrentChat =
+    (Number(data.sender_id) === Number(selectedUser.id) &&
+      Number(data.receiver_id) === Number(user.id)) ||
+    (Number(data.sender_id) === Number(user.id) &&
+      Number(data.receiver_id) === Number(selectedUser.id));
+}
 
       // if (!isCurrentChat) return;
       if (!isCurrentChat) {
 
         if (
-          data.receiver_id === user.id &&
-          data.sender_id !== user.id
-        ) {
+  Number(data.receiver_id) === Number(user.id) &&
+  Number(data.sender_id) !== Number(user.id)
+) {
           setUnreadCounts((prev) => ({
             ...prev,
             [data.sender_id]:
@@ -334,10 +458,10 @@ useEffect(() => {
       //   data.sender_id === selectedUser.id
       // ) 
       if (
-        selectedUser &&
-        data.receiver_id === user.id &&
-        data.sender_id === selectedUser.id
-      ) {
+  selectedUser &&
+  Number(data.receiver_id) === Number(user.id) &&
+  Number(data.sender_id) === Number(selectedUser.id)
+) {
 
         try {
 
@@ -605,13 +729,23 @@ useEffect(() => {
 
 
   useEffect(() => {
-    if (!user) return;
+  if (!user) return;
 
+  const joinRoom = () => {
     console.log("Joining room:", user.id);
-
     socket.emit("join", user.id);
+  };
 
-  }, [user]);
+  if (socket.connected) {
+    joinRoom();
+  } else {
+    socket.once("connect", joinRoom);
+  }
+
+  return () => {
+    socket.off("connect", joinRoom);
+  };
+}, [user]);
 
   useEffect(() => {
     const handleSeenUpdate = (data) => {
@@ -1133,86 +1267,118 @@ const stopRecording = () => {
 
     try {
       const currentUser = JSON.parse(localStorage.getItem("user"));
+
+      const token = localStorage.getItem("token");
+
+const authConfig = {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+};
       setIsSending(true);
 
-      let imageName = "";
+     let imageName = "";
+let imagePublicId = "";
+let imageResourceType = "";
 
-      if (image) {
-        const formData = new FormData();
-        formData.append("image", image);
+if (image) {
+  const formData = new FormData();
+  formData.append("image", image);
 
-        const uploadRes = await axios.post(
-          "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
-          formData
-        );
+  const uploadRes = await axios.post(
+    "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
+    formData,
+    authConfig
+  );
 
-        imageName = uploadRes.data.image;
+  imageName = uploadRes.data.image;
+  imagePublicId = uploadRes.data.public_id;
+  imageResourceType = uploadRes.data.resource_type;
+}
 
-        console.log(uploadRes.data);
-      }
 
-
-         let videoName = "";
+let videoName = "";
+let videoPublicId = "";
+let videoResourceType = "";
 
 if (video) {
   const formData = new FormData();
-
   formData.append("image", video);
 
   const res = await axios.post(
     "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
-    formData
+    formData,
+    authConfig
   );
 
-  console.log("Video upload response:", res.data);
-
   videoName = res.data.image;
+  videoPublicId = res.data.public_id;
+  videoResourceType = res.data.resource_type;
 }
 
 
-
-
-
 let audioName = "";
+let audioPublicId = "";
+let audioResourceType = "";
 
 if (audio) {
   const formData = new FormData();
   formData.append("audio", audio);
 
   const res = await axios.post(
-  "https://chat-box-2-hyl4.onrender.com/api/messages/upload-audio",
-  formData
-);
+    "https://chat-box-2-hyl4.onrender.com/api/messages/upload-audio",
+    formData,
+    authConfig
+  );
+
   audioName = res.data.audio;
+  audioPublicId = res.data.public_id;
+  audioResourceType = res.data.resource_type;
 }
-      let documentName = "";
 
-      if (document) {
-        const formData = new FormData();
-        formData.append("image", document);
 
-        const res = await axios.post(
-          "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
-          formData
-        );
+let documentName = "";
+let documentPublicId = "";
+let documentResourceType = "";
 
-        console.log("Document upload response:", res.data);
+if (document) {
+  const formData = new FormData();
+  formData.append("image", document);
 
-        documentName = res.data.image;
-      }
+  const res = await axios.post(
+    "https://chat-box-2-hyl4.onrender.com/api/messages/upload",
+    formData,
+    authConfig
+  );
 
+  documentName = res.data.image;
+  documentPublicId = res.data.public_id;
+  documentResourceType = res.data.resource_type;
+}
 
       // Group Chat
       if (selectedGroup) {
-        await axios.post("https://chat-box-2-hyl4.onrender.com/api/group-messages", {
-          group_id: selectedGroup.id,
-          sender_id: currentUser.id,
-          message,
-          image: imageName,
-          video: videoName,
-          document: documentName,
-          audio: audioName
-        });
+       await axios.post("https://chat-box-2-hyl4.onrender.com/api/group-messages", {
+  group_id: selectedGroup.id,
+  sender_id: currentUser.id,
+  message,
+
+  image: imageName,
+  image_public_id: imagePublicId,
+  image_resource_type: imageResourceType,
+
+  video: videoName,
+  video_public_id: videoPublicId,
+  video_resource_type: videoResourceType,
+
+  document: documentName,
+  document_public_id: documentPublicId,
+  document_resource_type: documentResourceType,
+
+  audio: audioName,
+  audio_public_id: audioPublicId,
+  audio_resource_type: audioResourceType
+}, authConfig);
 
         // socket.emit("send_group_message", {
         //   group_id: selectedGroup.id,
@@ -1239,15 +1405,26 @@ if (audio) {
       // Private Chat
       if (!selectedUser?.id) return;
       await axios.post("https://chat-box-2-hyl4.onrender.com/api/messages", {
-        sender_id: currentUser.id,
-        receiver_id: selectedUser.id,
-        message,
-        image: imageName,
-        video: videoName,
-        document: documentName,
-        audio: audioName
+  sender_id: currentUser.id,
+  receiver_id: selectedUser.id,
+  message,
 
-      });
+  image: imageName,
+  image_public_id: imagePublicId,
+  image_resource_type: imageResourceType,
+
+  video: videoName,
+  video_public_id: videoPublicId,
+  video_resource_type: videoResourceType,
+
+  document: documentName,
+  document_public_id: documentPublicId,
+  document_resource_type: documentResourceType,
+
+  audio: audioName,
+  audio_public_id: audioPublicId,
+  audio_resource_type: audioResourceType
+}, authConfig);
 
 
       // socket.emit("send_message", {
@@ -1875,25 +2052,15 @@ if (audio) {
                     {msg.image && (
   <>
     <PhotoProvider>
-      <PhotoView
-        src={
-          msg.image.startsWith("http")
-            ? msg.image
-            : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
-        }
-      >
-        <img
-          src={
-            msg.image.startsWith("http")
-              ? msg.image
-              : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
-          }
-          alt=""
-          className="chat-image"
-          style={{ cursor: "zoom-in" }}
-        />
-      </PhotoView>
-    </PhotoProvider>
+  <PhotoView src={getGroupFileUrl(msg, "image")}>
+    <img
+      src={getGroupFileUrl(msg, "image")}
+      alt=""
+      className="chat-image"
+      style={{ cursor: "zoom-in" }}
+    />
+  </PhotoView>
+</PhotoProvider>
 
     {/* <a
       href={
@@ -1908,12 +2075,12 @@ if (audio) {
     </a> */}
     <button
   className="download-image-btn"
-  onClick={() => {
-    const imageUrl = msg.image.startsWith("http")
-      ? getDownloadUrl(msg.image)
-      : `https://chat-box-2-hyl4.onrender.com/download/${msg.image}`;
+  onClick={async () => {
+    const imageUrl = getGroupFileUrl(msg, "image");
 
-    window.open(imageUrl, "_blank");
+    if (imageUrl) {
+      window.open(imageUrl, "_blank");
+    }
   }}
 >
   ⬇ Download
@@ -1930,21 +2097,17 @@ if (audio) {
     <video
       controls
       className="chat-video"
-      src={
-        msg.video.startsWith("http")
-          ? msg.video
-          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.video}`
-      }
+      src={getGroupFileUrl(msg, "video")}
     />
 
     <button
       className="download-image-btn"
       onClick={() => {
-        const videoUrl = msg.video.startsWith("http")
-          ? getDownloadUrl(msg.video)
-          : `https://chat-box-2-hyl4.onrender.com/download/${msg.video}`;
+        const videoUrl = getGroupFileUrl(msg, "video");
 
-        window.open(videoUrl, "_blank");
+        if (videoUrl) {
+          window.open(videoUrl, "_blank");
+        }
       }}
     >
       ⬇ Download
@@ -1960,7 +2123,7 @@ if (audio) {
       <audio
         controls
         preload="metadata"
-        src={msg.audio}
+        src={getGroupFileUrl(msg, "audio")}
       />
       <span>Voice message</span>
     </div>
@@ -1968,19 +2131,15 @@ if (audio) {
 )}
 
                     {msg.document && (
-                      <a
-                        href={
-                          msg.document.startsWith("http")
-                            ? msg.document
-                            : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.document}`
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                        className="document-link"
-                      >
-                        📄 Open Document
-                      </a>
-                    )}
+  <a
+    href={getGroupFileUrl(msg, "document")}
+    target="_blank"
+    rel="noreferrer"
+    className="document-link"
+  >
+    📄 Open Document
+  </a>
+)}
 
 
                     {msg.sender_id === user?.id && (
@@ -2188,19 +2347,9 @@ if (audio) {
                  {msg.image && (
   <>
     <PhotoProvider>
-      <PhotoView
-        src={
-          msg.image.startsWith("http")
-            ? msg.image
-            : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
-        }
-      >
+      <PhotoView src={getPrivateFileUrl(msg, "image")}>
         <img
-          src={
-            msg.image.startsWith("http")
-              ? msg.image
-              : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.image}`
-          }
+          src={getPrivateFileUrl(msg, "image")}
           alt=""
           className="chat-image"
           style={{ cursor: "zoom-in" }}
@@ -2222,11 +2371,11 @@ if (audio) {
      <button
   className="download-image-btn"
   onClick={() => {
-    const imageUrl = msg.image.startsWith("http")
-      ? getDownloadUrl(msg.image)
-      : `https://chat-box-2-hyl4.onrender.com/download/${msg.image}`;
+    const imageUrl = getPrivateFileUrl(msg, "image");
 
-    window.open(imageUrl, "_blank");
+    if (imageUrl) {
+      window.open(imageUrl, "_blank");
+    }
   }}
 >
   ⬇ Download
@@ -2241,21 +2390,17 @@ if (audio) {
     <video
       controls
       className="chat-video"
-      src={
-        msg.video.startsWith("http")
-          ? msg.video
-          : `https://chat-box-2-hyl4.onrender.com/uploads/${msg.video}`
-      }
+      src={getPrivateFileUrl(msg, "video")}
     />
 
     <button
       className="download-image-btn"
       onClick={() => {
-        const videoUrl = msg.video.startsWith("http")
-          ? getDownloadUrl(msg.video)
-          : `https://chat-box-2-hyl4.onrender.com/download/${msg.video}`;
+        const videoUrl = getPrivateFileUrl(msg, "video");
 
-        window.open(videoUrl, "_blank");
+        if (videoUrl) {
+          window.open(videoUrl, "_blank");
+        }
       }}
     >
       ⬇ Download
@@ -2283,27 +2428,22 @@ if (audio) {
       <audio
         controls
         preload="metadata"
-        src={msg.audio}
+        src={getPrivateFileUrl(msg, "audio")}
       />
       <span>Voice message</span>
     </div>
   </div>
 )}
-
-                  {msg.document && (
-                    <a
-                      href={
-                        msg.document.startsWith("http")
-                          ? msg.document
-                          : `https://chat-box-1-4g7s.onrender.com/uploads/${msg.document}`
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className="document-link"
-                    >
-                      📄 Open Document
-                    </a>
-                  )}
+                 {msg.document && (
+  <a
+    href={getPrivateFileUrl(msg, "document")}
+    target="_blank"
+    rel="noreferrer"
+    className="document-link"
+  >
+    📄 Open Document
+  </a>
+)}
 
                   {msg.sender_id === user?.id && (
                     

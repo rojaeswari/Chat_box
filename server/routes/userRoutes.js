@@ -2,9 +2,18 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 const { resetPassword } = require("../controllers/userController");
-router.put("/reset-password/:id", resetPassword);
+const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 
-router.get("/", async (req, res) => {
+
+router.put(
+  "/reset-password/:id",
+  authMiddleware,
+  adminMiddleware,
+  resetPassword
+);
+
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const { email } = req.query;
 
@@ -32,7 +41,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get all users except logged-in user
-router.get("/all", async (req, res) => {
+router.get("/all", authMiddleware, async (req, res) => {
   try {
 
     const result = await pool.query(
@@ -53,7 +62,7 @@ router.get("/all", async (req, res) => {
 });
 
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
   try {
 
     const result = await pool.query(
@@ -72,7 +81,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 
   try {
 
@@ -115,7 +124,7 @@ router.put("/:id", async (req, res) => {
 
 
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
 
     const id = req.params.id;

@@ -4,8 +4,26 @@ const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
   try {
-    const { name, email, password,role } = req.body;
+    const { name, email, password } = req.body;
+     const role = "user";
+     if (
+  !name ||
+  !email ||
+  !password ||
+  typeof name !== "string" ||
+  typeof email !== "string" ||
+  typeof password !== "string"
+) {
+  return res.status(400).json({
+    message: "Name, email and password are required",
+  });
+}
 
+if (password.length < 8 || password.length > 72) {
+  return res.status(400).json({
+    message: "Password must be between 8 and 72 characters",
+  });
+}
     const user = await pool.query(
       "SELECT * FROM users WHERE email=$1",
       [email]
@@ -21,10 +39,8 @@ const register = async (req, res) => {
 
     await pool.query(
       "INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,$4)",
-      [name, email, hashedPassword, role||"user"
-
-        
-      ]
+      [name, email, hashedPassword, role]
+      
     );
 
     res.status(201).json({
@@ -44,28 +60,28 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("Login Email:", email);
+    // console.log("Login Email:", email);
 
     const user = await pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
     );
-     console.log("User Found:", user.rows);
+     // console.log("User Found:", user.rows);
 
     if (user.rows.length === 0) {
       return res.status(400).json({
         message: "Invalid Email",
       });
     }
-      console.log("DB Password:", user.rows[0].password);
+      // console.log("DB Password:", user.rows[0].password);
 
     const validPassword = await bcrypt.compare(
       password,
       user.rows[0].password
     );
 
-    console.log("Entered Password:", password);
-console.log("Password Match:", validPassword);
+    // console.log("Entered Password:", password);
+    // console.log("Password Match:", validPassword);
 
 
     if (!validPassword) {
@@ -74,16 +90,17 @@ console.log("Password Match:", validPassword);
       });
     }
 
-    const token = jwt.sign(
-      {
-        id: user.rows[0].id,
-        email: user.rows[0].email,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
+   const token = jwt.sign(
+  {
+    id: user.rows[0].id,
+    email: user.rows[0].email,
+    role: user.rows[0].role,
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "1d",
+  }
+);
 
     res.json({
       message: "Login Successful",

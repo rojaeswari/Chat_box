@@ -10,6 +10,7 @@ const messageRoutes = require("./routes/messageRoutes");
 const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
 const groupRoutes = require("./routes/groupRoutes");
 const groupMessageRoutes = require("./routes/groupMessageRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
@@ -17,7 +18,7 @@ const notificationRoutes = require("./routes/notificationRoutes");
 
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/groups", groupRoutes);
@@ -56,18 +57,63 @@ const io = new Server(server, {
 });
 setIO(io);
 
+// Socket.IO JWT Authentication
+io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token;
+
+    if (!token) {
+      return next(new Error("Authentication required"));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    socket.user = {
+      id: decoded.id,
+      email: decoded.email,
+    };
+
+    next();
+  } catch (err) {
+    next(new Error("Invalid or expired token"));
+  }
+});
+
 io.on("connection", (socket) => {
   console.log("User Connected:", socket.id);
 
-   socket.on("join", (userId) => {
-    socket.join(`user_${userId}`);
-    console.log(`User ${userId} joined room user_${userId}`);
-  });
+   socket.on("join", () => {
+  const userId = socket.user.id;
 
-   socket.on("join_group", (groupId) => {
+  socket.join(`user_${userId}`);
+
+  console.log(`Authenticated user ${userId} joined`);
+});
+
+   socket.on("join_group", async (groupId) => {
+  try {
+    const userId = socket.user.id;
+
+    const member = await pool.query(
+      `SELECT 1
+       FROM group_members
+       WHERE group_id = $1
+       AND user_id = $2`,
+      [groupId, userId]
+    );
+
+    if (member.rows.length === 0) {
+      console.log(`Unauthorized group access: User ${userId}`);
+      return;
+    }
+
     socket.join(`group_${groupId}`);
-    console.log(`Joined group_${groupId}`);
-  });
+
+    console.log(`User ${userId} joined group_${groupId}`);
+  } catch (err) {
+    console.error("Group join error:", err);
+  }
+});
 
 //  socket.on("send_group_message", (data) => {
 //   console.log("send_group_message fired");

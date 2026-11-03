@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate ,Link} from "react-router-dom";
 import "./Login.css";
+import socket from "../socket";
 
 function Login() {
   const [form, setForm] = useState({
@@ -10,6 +11,7 @@ function Login() {
   });
 
   const navigate = useNavigate();
+
 
   const handleChange = (e) => {
     setForm({
@@ -29,6 +31,7 @@ function Login() {
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
+      socket.connect();
 
       alert(res.data.message);
       // navigate("/register");

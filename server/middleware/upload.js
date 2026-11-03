@@ -1,36 +1,3 @@
-// const multer = require("multer");
-// const path = require("path");
-
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/");
-//   },
-
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname));
-//   },
-// });
-
-// const upload = multer({
-//   storage,
-//   fileFilter: (req, file, cb) => {
-
-//     const allowed =
-//       /jpeg|jpg|png|gif|pdf|doc|docx|xls|xlsx|txt/;
-
-//     const ext = allowed.test(
-//       path.extname(file.originalname).toLowerCase()
-//     );
-
-//     if (ext) {
-//       cb(null, true);
-//     } else {
-//       cb(new Error("Only Images & Documents Allowed"));
-//     }
-//   },
-// });
-
-// module.exports = upload;
 
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -49,42 +16,80 @@ const storage = new CloudinaryStorage({
     folder: "chat_uploads",
 
     allowed_formats: [
-      // Images
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-
-      // Videos
-      "mp4",
-      "webm",
-      "mov",
-      "avi",
-
-
-      // Audio / Voice Notes
-    "mp3",
-    "wav",
-    "ogg",
-    "m4a",
-    "aac",
-    "webma",
-
-      // Documents
-      "pdf",
-      "doc",
-      "docx",
-      "xls",
-      "xlsx",
-      "txt",
+      "jpg", "jpeg", "png", "gif",
+      "mp4", "webm", "mov", "avi",
+      "mp3", "wav", "ogg", "m4a", "aac",
+      "pdf", "doc", "docx", "xls", "xlsx", "txt",
     ],
 
     resource_type: "auto",
+
+    type: "authenticated",
   },
 });
 
+const allowedMimeTypes = [
+  // Images
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+
+  // Videos
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "video/x-msvideo",
+
+  // Audio
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "audio/mp4",
+  "audio/aac",
+  "audio/webm",
+
+  // Documents
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/plain",
+];
 const upload = multer({
   storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 1,
+  },
+  fileFilter: (req, file, cb) => {
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    req.uploadMimeType = file.mimetype;
+    req.uploadOriginalName = file.originalname;
+    cb(null, true);
+  } else {
+    cb(new Error("This file type is not allowed"));
+  }
+},
 });
+
+const audioUpload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 1,
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("audio/")) {
+      req.uploadMimeType = file.mimetype;
+      req.uploadOriginalName = file.originalname;
+      cb(null, true);
+    } else {
+      cb(new Error("Only audio files are allowed"));
+    }
+  },
+});
+
+upload.audio = audioUpload;
 
 module.exports = upload;

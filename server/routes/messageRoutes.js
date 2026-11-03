@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/upload");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const {
   sendMessage,
@@ -9,17 +10,19 @@ const {
   editMessage,
   updateMessageStatus,
   updateSeenStatus,
-  getUnreadCounts
+  getUnreadCounts,
+   getPrivateFileUrl
 
 } = require("../controllers/messageController");
 
-router.post("/", sendMessage);
-router.put("/edit/:id", editMessage);
-router.delete("/:id", deleteMessage);
-router.put("/status/:id", updateMessageStatus);
-router.put("/seen/:id", updateSeenStatus);
-router.get("/unread/:userId", getUnreadCounts);
-router.get("/:senderId/:receiverId", getMessages);
+router.post("/", authMiddleware, sendMessage);
+router.put("/edit/:id", authMiddleware, editMessage);
+router.delete("/:id", authMiddleware, deleteMessage);
+router.put("/status/:id", authMiddleware, updateMessageStatus);
+router.put("/seen/:id", authMiddleware, updateSeenStatus);
+router.get("/unread/:userId", authMiddleware, getUnreadCounts);
+router.get("/private-file/:messageId/:field", authMiddleware, getPrivateFileUrl);
+router.get("/:senderId/:receiverId", authMiddleware, getMessages);
 
 
 // router.post("/upload", upload.single("image"), (req, res) => {
@@ -35,22 +38,43 @@ router.get("/:senderId/:receiverId", getMessages);
 //     });
 //   }
 // });
-router.post("/upload", upload.single("image"), (req, res) => {
+router.post("/upload", authMiddleware, upload.single("image"), (req, res) => {
   try {
-    console.log("Uploaded file:", req.file);
+    if (!req.file) {
+      return res.status(400).json({
+        message: "File not received",
+      });
+    }
+
+    const mimeType = req.uploadMimeType;
+
+    let resourceType = "raw";
+
+    if (mimeType.startsWith("image/")) {
+      resourceType = "image";
+    } else if (
+      mimeType.startsWith("video/") ||
+      mimeType.startsWith("audio/")
+    ) {
+      resourceType = "video";
+    }
 
     res.json({
-      message: "Image uploaded successfully",
+      message: "File uploaded successfully",
       image: req.file.path,
+      public_id: req.file.filename,
+      resource_type: resourceType,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Upload error:", err);
+
     res.status(500).json({
       message: "Upload Failed",
     });
   }
 });
-router.post("/upload-audio", upload.single("audio"), (req, res) => {
+
+router.post("/upload-audio", authMiddleware, upload.audio.single("audio"), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -58,20 +82,20 @@ router.post("/upload-audio", upload.single("audio"), (req, res) => {
       });
     }
 
-    console.log("Uploaded audio:", req.file);
-
     res.json({
       message: "Audio uploaded successfully",
       audio: req.file.path,
+      public_id: req.file.filename,
+      resource_type: "video",
     });
   } catch (err) {
-    console.error(err);
+    console.error("Audio upload error:", err);
+
     res.status(500).json({
       message: "Audio upload failed",
     });
   }
 });
-
 
 
 module.exports = router;

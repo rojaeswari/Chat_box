@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">chat box</string>
+    <string name="title_activity_main">chat box</string>
+    <string name="package_name">com.smazo.chatbox</string>
+    <string name="custom_url_scheme">com.smazo.chatbox</string>
+</resources>

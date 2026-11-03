@@ -1,59 +1,101 @@
 const pool = require("../db");
 const { getIO } = require("../socket");
+const cloudinary = require("cloudinary").v2;
 
 
 const sendMessage = async (req, res) => {
   try {
     const {
-      sender_id,
       receiver_id,
       message,
       image,
+      image_public_id,
+      image_resource_type,
       document,
+      document_public_id,
+      document_resource_type,
       video,
+      video_public_id,
+      video_resource_type,
       audio,
-      status
+      audio_public_id,
+      audio_resource_type,
     } = req.body;
 
+    const sender_id = req.user.id;
+
+    if (!receiver_id) {
+      return res.status(400).json({
+        message: "Receiver ID is required",
+      });
+    }
+
     const result = await pool.query(
-      `INSERT INTO messages
-      (sender_id, receiver_id, message, image, document, video, audio, status)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-      RETURNING *`,
-      [
-        sender_id,
-        receiver_id,
-        message,
-        image,
-        document,
-        video,
-        audio,
-        "sent"
-      ]
-    );
-
+  `INSERT INTO messages (
+    sender_id,
+    receiver_id,
+    message,
+    image,
+    document,
+    video,
+    audio,
+    image_public_id,
+    image_resource_type,
+    document_public_id,
+    document_resource_type,
+    video_public_id,
+    video_resource_type,
+    audio_public_id,
+    audio_resource_type,
+    image_delivery_type,
+    document_delivery_type,
+    video_delivery_type,
+    audio_delivery_type,
+    status
+  )
+  VALUES (
+    $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
+    $11,$12,$13,$14,$15,$16,$17,$18,$19,$20
+  )
+  RETURNING *`,
+  [
+    sender_id,
+    receiver_id,
+    message || null,
+    image || null,
+    document || null,
+    video || null,
+    audio || null,
+    image_public_id || null,
+    image_resource_type || null,
+    document_public_id || null,
+    document_resource_type || null,
+    video_public_id || null,
+    video_resource_type || null,
+    audio_public_id || null,
+    audio_resource_type || null,
+    image_public_id ? "authenticated" : null,
+    document_public_id ? "authenticated" : null,
+    video_public_id ? "authenticated" : null,
+    audio_public_id ? "authenticated" : null,
+    "sent",
+  ]
+);
     const savedMessage = result.rows[0];
-
+    console.log("SAVED MESSAGE:", savedMessage.id);
+console.log("EMITTING TO:", `user_${receiver_id}`, `user_${sender_id}`);
     const io = getIO();
 
-    // Receiver
-    io.to(`user_${receiver_id}`).emit(
-      "receive_message",
-      savedMessage
-    );
-
-    // Sender
-    io.to(`user_${sender_id}`).emit(
-      "receive_message",
-      savedMessage
-    );
+    io.to(`user_${receiver_id}`).emit("receive_message", savedMessage);
+    io.to(`user_${sender_id}`).emit("receive_message", savedMessage);
 
     return res.status(201).json(savedMessage);
 
   } catch (err) {
-    console.error(err);
+    console.error("Send message error:", err);
+
     return res.status(500).json({
-      message: err.message,
+      message: "Unable to send message",
     });
   }
 };
@@ -64,54 +106,108 @@ const sendMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   try {
     const { senderId, receiverId } = req.params;
+    const loggedInUserId = req.user.id;
+
+    if (
+      String(loggedInUserId) !== String(senderId) &&
+      String(loggedInUserId) !== String(receiverId)
+    ) {
+      return res.status(403).json({
+        message: "You are not allowed to view this conversation",
+      });
+    }
 
     const result = await pool.query(
-      // `
-      // SELECT *
-      // FROM messages
-      // WHERE
-      // (sender_id=$1 AND receiver_id=$2)
-      // OR
-      // (sender_id=$2 AND receiver_id=$1)
-      // ORDER BY created_at ASC
-      // `,
       `
       SELECT
-messages.*,
-users.name
-FROM messages
-JOIN users
-ON users.id = messages.sender_id
-WHERE
-(sender_id=$1 AND receiver_id=$2)
-OR
-(sender_id=$2 AND receiver_id=$1)
-ORDER BY created_at ASC;
+        messages.*,
+        users.name
+      FROM messages
+      JOIN users ON users.id = messages.sender_id
+      WHERE
+        (sender_id = $1 AND receiver_id = $2)
+        OR
+        (sender_id = $2 AND receiver_id = $1)
+      ORDER BY created_at ASC
       `,
-
-      
       [senderId, receiverId]
     );
 
-    res.json(result.rows);
+    return res.json(result.rows);
 
   } catch (err) {
-    console.log(err);
-    res.status(500).json({
+    console.error("Get messages error:", err);
+
+    return res.status(500).json({
       message: "Server Error",
     });
   }
 };
 
 
+const getPrivateFileUrl = async (req, res) => {
+  try {
+    const { messageId, field } = req.params;
+    const userId = req.user.id;
+
+    const allowedFields = {
+      image: ["image_public_id", "image_resource_type", "image_delivery_type"],
+      document: ["document_public_id", "document_resource_type", "document_delivery_type"],
+      video: ["video_public_id", "video_resource_type", "video_delivery_type"],
+      audio: ["audio_public_id", "audio_resource_type", "audio_delivery_type"],
+    };
+
+    if (!allowedFields[field]) {
+      return res.status(400).json({ message: "Invalid file type" });
+    }
+
+    const result = await pool.query(
+      `SELECT * FROM messages
+       WHERE id = $1
+       AND (sender_id = $2 OR receiver_id = $2)`,
+      [messageId, userId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const file = result.rows[0];
+    const [publicIdColumn, resourceTypeColumn, deliveryTypeColumn] =
+      allowedFields[field];
+
+    const publicId = file[publicIdColumn];
+    const resourceType = file[resourceTypeColumn];
+    const deliveryType = file[deliveryTypeColumn];
+
+    if (!publicId || deliveryType !== "authenticated") {
+      return res.status(404).json({ message: "Private file not found" });
+    }
+
+    const signedUrl = cloudinary.url(publicId, {
+      resource_type: resourceType,
+      type: "authenticated",
+      sign_url: true,
+      secure: true,
+    });
+
+    return res.json({ url: signedUrl });
+  } catch (err) {
+    console.error("Get private file URL error:", err);
+    return res.status(500).json({ message: "Unable to access file" });
+  }
+};
+
 const deleteMessage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { user_id } = req.body;
+    const loggedInUserId = req.user.id;
 
     const result = await pool.query(
-      "DELETE FROM messages WHERE id=$1 AND sender_id=$2 RETURNING *",
-      [id, user_id]
+      `DELETE FROM messages
+       WHERE id = $1 AND sender_id = $2
+       RETURNING *`,
+      [id, loggedInUserId]
     );
 
     if (result.rowCount === 0) {
@@ -120,15 +216,18 @@ const deleteMessage = async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       message: "Message Deleted",
     });
 
   } catch (err) {
-    console.log(err);
+    console.error("Delete message error:", err);
+
+    return res.status(500).json({
+      message: "Unable to delete message",
+    });
   }
 };
-
 // const updateMessageStatus = async (req, res) => {
 //   try {
 //     const { id } = req.params;
@@ -184,55 +283,53 @@ const updateMessageStatus = async (req, res) => {
 const updateSeenStatus = async (req, res) => {
   try {
     const { id } = req.params;
+    const loggedInUserId = req.user.id;
 
-    await pool.query(
-      "UPDATE messages SET status='seen' WHERE id=$1",
-      [id]
-    );
-      const result = await pool.query(
-      `
-      SELECT sender_id, receiver_id
-      FROM messages
-      WHERE id=$1
-      `,
-      [id]
+    const result = await pool.query(
+      `UPDATE messages
+       SET status = 'seen'
+       WHERE id = $1
+       AND receiver_id = $2
+       AND status != 'seen'
+       RETURNING sender_id, receiver_id`,
+      [id, loggedInUserId]
     );
 
-    const senderId = result.rows[0].sender_id;
-    const receiverId = result.rows[0].receiver_id;
+    if (result.rowCount === 0) {
+      return res.status(403).json({
+        message: "You are not allowed to update this message",
+      });
+    }
 
+    const { sender_id, receiver_id } = result.rows[0];
     const io = getIO();
 
-    // io.emit("message_seen", {
-    //   id,
-    //   status: "seen",
-    // });
-     io.to(`user_${senderId}`).emit("message_seen", {
+    io.to(`user_${sender_id}`).emit("message_seen", {
       id: Number(id),
       status: "seen",
     });
 
-    // Notify receiver
-    io.to(`user_${receiverId}`).emit("message_seen", {
+    io.to(`user_${receiver_id}`).emit("message_seen", {
       id: Number(id),
       status: "seen",
     });
 
-    res.json({
+    return res.json({
       message: "Seen Updated",
     });
 
   } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: err.message,
+    console.error("Update seen status error:", err);
+
+    return res.status(500).json({
+      message: "Unable to update seen status",
     });
   }
 };
 
 const getUnreadCounts = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const loggedInUserId = req.user.id;
 
     const result = await pool.query(
       `
@@ -244,24 +341,26 @@ const getUnreadCounts = async (req, res) => {
         AND status != 'seen'
       GROUP BY sender_id
       `,
-      [userId]
+      [loggedInUserId]
     );
 
-    res.json(result.rows);
+    return res.json(result.rows);
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      message: err.message,
+    console.error("Get unread counts error:", err);
+
+    return res.status(500).json({
+      message: "Unable to get unread counts",
     });
   }
 };
-
 
 // Edit Private Message - 15 Minutes Restriction
 const editMessage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { user_id, message } = req.body;
+    const { message } = req.body;
+    const loggedInUserId = req.user.id;
 
     if (!message || !message.trim()) {
       return res.status(400).json({
@@ -276,7 +375,7 @@ const editMessage = async (req, res) => {
        AND sender_id = $3
        AND created_at >= NOW() - INTERVAL '15 minutes'
        RETURNING *`,
-      [message.trim(), id, user_id]
+      [message.trim(), id, loggedInUserId]
     );
 
     if (result.rowCount === 0) {
@@ -301,21 +400,20 @@ const editMessage = async (req, res) => {
     return res.json(updatedMessage);
 
   } catch (err) {
-    console.error(err);
+    console.error("Edit message error:", err);
+
     return res.status(500).json({
-      message: err.message,
+      message: "Unable to edit message",
     });
   }
 };
-
 module.exports = {
   sendMessage,
   getMessages,
   deleteMessage,
   editMessage,
-   updateMessageStatus,
+  updateMessageStatus,
   updateSeenStatus,
   getUnreadCounts,
-  
-  
+  getPrivateFileUrl,
 };
