@@ -17,17 +17,23 @@ function CreateGroup() {
     }
 
     const user = JSON.parse(localStorage.getItem("user"));
+const token = localStorage.getItem("token");
 
-    setLoading(true);
+setLoading(true);
 
-    try {
-      const res = await axios.post(
-        "https://chat-box-2-hyl4.onrender.com/api/groups",
-        {
-          group_name: groupName,
-          created_by: user.id,
-        }
-      );
+try {
+  const res = await axios.post(
+    "https://chat-box-2-hyl4.onrender.com/api/groups",
+    {
+      group_name: groupName,
+      created_by: user.id,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
       alert("Group Created Successfully");
 
