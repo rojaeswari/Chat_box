@@ -12,6 +12,7 @@ function Chat() {
   const [groups, setGroups] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [showGroupMembers, setShowGroupMembers] = useState(false);
   const [groupMembers, setGroupMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
@@ -2024,64 +2025,91 @@ const fetchSeenCount = async (messageId) => {
 </button>
         {/* <h3>Role : {user?.role}</h3> */}
 
-        {selectedGroup ? (
-          <>
-            <h2>{selectedGroup.group_name}</h2>
+       {selectedGroup ? (
+  <>
+    <div className="group-chat-header">
+      <h2>{selectedGroup.group_name}</h2>
+
+      <button
+        className="group-members-icon"
+        onClick={() => setShowGroupMembers(true)}
+        title="View group members"
+        aria-label="View group members"
+      >
+        👥
+      </button>
+    </div>
 
             <div className="group-chat-container">
 
               {/* Left Panel */}
-              <div className="group-left">
+              {/* Group Members Popup */}
+{showGroupMembers && (
+  <div
+    className="group-members-overlay"
+    onClick={() => setShowGroupMembers(false)}
+  >
+    <div
+      className="group-members-popup"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="group-members-popup-header">
+        <h3>👥 Group Members</h3>
 
-                <h4>Members</h4>
+        <button
+          onClick={() => setShowGroupMembers(false)}
+          title="Close"
+        >
+          ✕
+        </button>
+      </div>
 
-                <div className="members-list">
-                  {groupMembers.map((member) => (
-                    <div key={member.id} className="member-row">
+      <h4>Members</h4>
 
-                      <span>{member.name}</span>
+      <div className="members-list">
+        {groupMembers.map((member) => (
+          <div key={member.id} className="member-row">
+            <span>{member.name}</span>
 
-                      {user?.role === "admin" && (
-                        <button
-                          className="remove-btn"
-                          onClick={() =>
-                            removeMember(selectedGroup.id, member.id)
-                          }
-                        >
-                          Remove
-                        </button>
-                      )}
+            {user?.role === "admin" && (
+              <button
+                className="remove-btn"
+                onClick={() =>
+                  removeMember(selectedGroup.id, member.id)
+                }
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
 
-                    </div>
-                  ))}
-                </div>
+      {user?.role === "admin" && (
+        <>
+          <h4>Available Users</h4>
 
-                {user?.role === "admin" && (
-                  <>
-                    <h4>Available Users</h4>
+          <div className="members-list">
+            {availableUsers.map((u) => (
+              <div key={u.id} className="member-row">
+                <span>{u.name}</span>
 
-                    <div className="members-list">
-                      {availableUsers.map((u) => (
-                        <div key={u.id} className="member-row">
-
-                          <span>{u.name}</span>
-
-                          <button
-                            className="add-btn"
-                            onClick={() =>
-                              addMember(selectedGroup.id, u.id)
-                            }
-                          >
-                            Add
-                          </button>
-
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-
+                <button
+                  className="add-btn"
+                  onClick={() =>
+                    addMember(selectedGroup.id, u.id)
+                  }
+                >
+                  Add
+                </button>
               </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
 
               {/* Right Panel */}
               <div className="messages">
@@ -2290,17 +2318,23 @@ const fetchSeenCount = async (messageId) => {
 
                     {msg.sender_id === user?.id && (
   <>
-    <input
-      type="checkbox"
-      checked={selectedMessages.includes(msg.id)}
-      onChange={() => toggleMessageSelection(msg.id)}
-    />
-    <button
-      className="delete-btn"
-      onClick={() => deleteMessage(msg.id)}
-    >
-      Delete
-    </button>
+  <input
+  type="checkbox"
+  checked={selectedMessages.includes(msg.id)}
+  onChange={() => toggleMessageSelection(msg.id)}
+/>
+
+<button
+  className="delete-btn"
+  onClick={(e) => {
+    e.stopPropagation();
+    deleteMessage(msg.id);
+  }}
+  title="Delete"
+  aria-label="Delete message"
+>
+  🗑️
+</button>
 
 {msg.message?.trim() &&
   !msg.audio &&
@@ -2316,8 +2350,10 @@ const fetchSeenCount = async (messageId) => {
           setEditingMessageId(msg.id);
           setEditMessageText(msg.message || "");
         }}
+        title="Edit"
+        aria-label="Edit message"
       >
-        Edit
+        ✏️
       </button>
 )}
   </>
@@ -2606,13 +2642,15 @@ const fetchSeenCount = async (messageId) => {
     />
 
     <button
-      className="delete-btn"
-      onClick={() => deleteMessage(msg.id)}
-    >
-      Delete
-    </button>
+  className="delete-btn"
+  onClick={() => deleteMessage(msg.id)}
+  title="Delete"
+  aria-label="Delete message"
+>
+  🗑️
+</button>
 
- {msg.message?.trim() &&
+{msg.message?.trim() &&
   !msg.audio &&
   !msg.image &&
   !msg.video &&
@@ -2625,8 +2663,10 @@ const fetchSeenCount = async (messageId) => {
           setEditingMessageId(msg.id);
           setEditMessageText(msg.message || "");
         }}
+        title="Edit"
+        aria-label="Edit message"
       >
-        Edit
+        ✏️
       </button>
 )}
   </>
