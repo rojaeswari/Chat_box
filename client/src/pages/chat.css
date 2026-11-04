@@ -175,13 +175,15 @@ body{
     border:1px solid #ddd;
 }
 
-.message strong{
-    display:block;
-    margin-bottom:5px;
+.message strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
 }
 
-.message p{
-    margin:0;
+.message p {
+    margin: 0;
+    font-size: 14px;
 }
 
 /* Image */
@@ -732,17 +734,27 @@ body{
 
     /* Messages */
 
-    .messages {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-        padding: 10px;
-    }
+   .messages {
+    padding: 6px;
+    gap: 5px;
+}
 
-    .message {
-        max-width: 85%;
-        overflow-wrap: anywhere;
-    }
+.message {
+    max-width: 80%;
+    padding: 6px 9px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.message strong {
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+
+.message p {
+    font-size: 13px;
+    margin: 0;
+}
 
     .chat-image,
     .chat-video {

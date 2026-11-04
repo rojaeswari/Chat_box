@@ -123,13 +123,26 @@ const fetchUsers = async () => {
                 </div>
 
                 <button
-                  className="reset-btn"
-                  onClick={() =>
-                    navigate(`/change-password/${user.id}`)
-                  }
-                >
-                  🔑 Reset Password
-                </button>
+  className="reset-btn"
+  onClick={() =>
+    navigate(`/change-password/${user.id}`)
+  }
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="8" cy="15" r="4" />
+    <path d="m10.85 12.15 8.15-8.15 2 2-2 2 2 2-2 2-2-2-2 2" />
+  </svg>
+  Reset Password
+</button>
               </div>
 
             </div>
