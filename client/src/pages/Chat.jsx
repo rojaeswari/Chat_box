@@ -969,6 +969,11 @@ useEffect(() => {
 
   useEffect(() => {
   const handleGroupMessage = (data) => {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+
+if (Number(data.sender_id) !== Number(currentUser.id)) {
+  fetchGroupUnreadCounts();
+}
     console.log("GROUP MESSAGE RECEIVED:", data);
 
     console.log("SELECTED GROUP ID:", selectedGroup?.id);
