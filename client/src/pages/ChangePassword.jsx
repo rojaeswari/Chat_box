@@ -25,12 +25,19 @@ function ChangePassword() {
     setLoading(true);
 
     try {
-      const res = await axios.put(
-        `https://chat-box-2-hyl4.onrender.com/api/users/reset-password/${id}`,
-        {
-          newPassword: form.newPassword,
-        }
-      );
+     const token = localStorage.getItem("token");
+
+const res = await axios.put(
+  `https://chat-box-2-hyl4.onrender.com/api/users/reset-password/${id}`,
+  {
+    newPassword: form.newPassword,
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
       alert(res.data.message);
       navigate("/chat");

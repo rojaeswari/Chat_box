@@ -16,17 +16,24 @@ function SelectMembers() {
   }, []);
 
   const fetchUsers = async () => {
-    const currentUser = JSON.parse(localStorage.getItem("user"));
+  const currentUser = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
 
-    try {
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/users?email=${currentUser.email}`
-      );
-      setUsers(res.data);
-    } catch (err) {
-      console.log("FETCH USERS ERROR:", err);
-    }
-  };
+  try {
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/users?email=${currentUser.email}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setUsers(res.data);
+  } catch (err) {
+    console.log("FETCH USERS ERROR:", err);
+  }
+};
 
   const handleSelect = (id) => {
     setSelectedUsers((prev) =>
@@ -48,12 +55,19 @@ function SelectMembers() {
     }
 
     try {
-      for (const userId of selectedUsers) {
-        await axios.post(
-          `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/add-member`,
-          { user_id: userId }
-        );
-      }
+     const token = localStorage.getItem("token");
+
+for (const userId of selectedUsers) {
+  await axios.post(
+    `https://chat-box-2-hyl4.onrender.com/api/groups/${groupId}/add-member`,
+    { user_id: userId },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+}
 
       alert("Members Added Successfully");
       navigate("/chat");

@@ -28,10 +28,17 @@ function AddUser() {
     setLoading(true);
 
     try {
-      await axios.post(
-        "https://chat-box-2-hyl4.onrender.com/api/auth/register",
-        form
-      );
+     const token = localStorage.getItem("token");
+
+await axios.post(
+  "https://chat-box-2-hyl4.onrender.com/api/auth/register",
+  form,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
       alert("User Created Successfully");
       navigate("/manage-users");

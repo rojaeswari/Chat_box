@@ -17,18 +17,24 @@ function EditUser() {
     fetchUser();
   }, []);
 
-  const fetchUser = async () => {
-    try {
-      const res = await axios.get(
-        `https://chat-box-2-hyl4.onrender.com/api/users/${id}`
-      );
+const fetchUser = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-      setForm(res.data);
+    const res = await axios.get(
+      `https://chat-box-2-hyl4.onrender.com/api/users/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    setForm(res.data);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const handleChange = (e) => {
     setForm({
@@ -41,10 +47,17 @@ function EditUser() {
     e.preventDefault();
 
     try {
-      await axios.put(
-        `https://chat-box-2-hyl4.onrender.com/api/users/${id}`,
-        form
-      );
+      const token = localStorage.getItem("token");
+
+await axios.put(
+  `https://chat-box-2-hyl4.onrender.com/api/users/${id}`,
+  form,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
       alert("User Updated");
 

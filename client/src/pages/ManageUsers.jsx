@@ -12,24 +12,39 @@ function ManageUsers() {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const res = await axios.get(
-        "https://chat-box-2-hyl4.onrender.com/api/users/all"
-      );
-      setUsers(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  
+const fetchUsers = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      "https://chat-box-2-hyl4.onrender.com/api/users/all",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setUsers(res.data);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 
   const deleteUser = async (id) => {
     if (!window.confirm("Delete this user?")) return;
 
     try {
-      await axios.delete(
-        `https://chat-box-2-hyl4.onrender.com/api/users/${id}`
-      );
+     await axios.delete(
+  `https://chat-box-2-hyl4.onrender.com/api/users/${id}`,
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+);
 
       alert("User Deleted");
       fetchUsers();
