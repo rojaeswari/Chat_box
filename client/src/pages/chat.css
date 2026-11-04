@@ -786,6 +786,82 @@ body{
         margin: 0;
     }
 
+
+    
+/* Compact Sent and Received Messages */
+
+.message {
+    width: fit-content;
+    max-width: 80%;
+    padding: 6px 8px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.message.sent {
+    align-self: flex-end;
+}
+
+.message.received {
+    align-self: flex-start;
+}
+
+.message strong {
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+
+.message p {
+    font-size: 13px;
+    line-height: 1.3;
+    margin: 0;
+}
+
+/* Small Checkbox */
+
+.message input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    margin: 4px;
+    vertical-align: middle;
+}
+
+/* Small Delete Button */
+
+.message .delete-btn {
+    margin: 3px 2px;
+    padding: 3px 7px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+/* Small Edit Button */
+
+.message .edit-btn {
+    margin: 3px 2px;
+    padding: 3px 7px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+/* Small Seen / Sent Status */
+
+.message .status {
+    margin-top: 3px;
+    font-size: 11px;
+}
+
+/* Small Document Button */
+
+.message .document-link {
+    margin-top: 4px;
+    padding: 5px 8px;
+    font-size: 12px;
+    border-radius: 7px;
+}
+
+
     .chat-image,
     .chat-video {
         max-width: 100%;
