@@ -9,7 +9,7 @@
   justify-content: center;
   align-items: center;
   padding: 25px;
-  background: linear-gradient(135deg, #10152e, #20245a, #432b78);
+ background: linear-gradient(135deg, #0f2747, #075985, #0284c7);
   position: relative;
   overflow: hidden;
   font-family: Arial, sans-serif;
@@ -61,7 +61,7 @@
   justify-content: center;
   align-items: center;
   margin: 0 auto 12px;
-  background: linear-gradient(135deg, #5145d9, #8b5cf6);
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
   color: white;
   border-radius: 18px;
   box-shadow: 0 8px 20px rgba(81, 69, 217, 0.3);
@@ -80,7 +80,7 @@
 }
 
 .login-brand h1 span {
-  color: #7055e8;
+  color: #0284c7;
 }
 
 .login-brand p {
@@ -129,10 +129,14 @@
   transition: 0.2s;
 }
 
+.login-brand h1 span {
+  color: #0284c7;
+}
+
 .login-input-wrapper:focus-within {
-  border-color: #7055e8;
+  border-color: #0ea5e9;
   background: white;
-  box-shadow: 0 0 0 3px rgba(112, 85, 232, 0.1);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
 }
 
 .login-input-wrapper svg {
@@ -164,7 +168,7 @@
   justify-content: center;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, #5145d9, #8055e9);
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
   color: white;
   border: none;
   border-radius: 9px;

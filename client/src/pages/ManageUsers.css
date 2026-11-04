@@ -162,13 +162,25 @@
 }
 
 .reset-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 9px 13px;
   background: #2563eb;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+}
+
+.reset-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: block;
 }
 
 .no-users {
