@@ -1,5 +1,9 @@
 {
   "appId": "com.smazo.chatbox",
   "appName": "chat box",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "url": "https://chat-box-kr1j.vercel.app",
+    "cleartext": false
+  }
 }
