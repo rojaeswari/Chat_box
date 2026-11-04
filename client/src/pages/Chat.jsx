@@ -2457,7 +2457,9 @@ const fetchSeenCount = async (messageId) => {
           // private chat
         ) : selectedUser ? (
           <>
-            <h2>Chat with {selectedUser.name}</h2>
+            <h2 className="private-chat-header">
+  Chat with {selectedUser.name}
+</h2>
              {selectedMessages.length > 0 && (
   <button
     className="delete-selected-btn"

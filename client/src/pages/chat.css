@@ -645,6 +645,7 @@ body{
 
 
 
+
 /* Mobile Responsive Chat */
 
 .mobile-back-btn {
@@ -670,43 +671,38 @@ body{
         overflow: hidden;
     }
 
-    /* Users List */
-
     .sidebar {
         display: block;
         width: 100%;
         min-width: 100%;
         height: 100%;
-        padding: 15px;
+        padding: 12px;
         overflow-y: auto;
         flex-shrink: 0;
     }
 
     .sidebar h2 {
-        font-size: 28px;
+        font-size: 23px;
     }
 
     .user {
         width: 100%;
-        padding: 15px;
-        font-size: 17px;
-        margin-bottom: 10px;
+        padding: 12px;
+        font-size: 15px;
+        margin-bottom: 8px;
     }
-
-    /* Hide Chat Initially */
 
     .chatArea {
         display: none;
         width: 100%;
         min-width: 100%;
         height: 100%;
-        padding: 10px;
+        padding: 6px;
         flex-direction: column;
         overflow: hidden;
         flex-shrink: 0;
+        box-sizing: border-box;
     }
-
-    /* When Chat Opens */
 
     .container.mobile-chat-open .sidebar {
         display: none;
@@ -716,45 +712,79 @@ body{
         display: flex;
     }
 
-    /* Back Button */
+    /* Small Back Button */
 
     .mobile-back-btn {
-        display: block;
-        width: fit-content;
-        padding: 9px 16px;
-        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 32px;
+        padding: 4px;
+        margin: 0 0 5px 0;
         background: #304566;
         color: white;
         border: none;
-        border-radius: 8px;
-        font-size: 16px;
+        border-radius: 7px;
         cursor: pointer;
         flex-shrink: 0;
     }
 
+    .mobile-back-btn svg {
+        width: 19px;
+        height: 19px;
+    }
+
+    /* Private Chat Header */
+
+    .private-chat-header {
+        font-size: 17px;
+        margin: 0 0 7px 0;
+        padding: 4px 2px;
+        line-height: 1.3;
+        flex-shrink: 0;
+    }
+
+    .group-chat-header {
+        padding: 4px 2px;
+        flex-shrink: 0;
+    }
+
+    .group-chat-header h2 {
+        font-size: 17px;
+        margin: 0;
+    }
+
     /* Messages */
 
-   .messages {
-    padding: 6px;
-    gap: 5px;
-}
+    .messages {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 6px;
+        gap: 5px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
 
-.message {
-    max-width: 80%;
-    padding: 6px 9px;
-    font-size: 13px;
-    line-height: 1.4;
-}
+    .message {
+        max-width: 80%;
+        padding: 6px 9px;
+        font-size: 13px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
 
-.message strong {
-    font-size: 12px;
-    margin-bottom: 2px;
-}
+    .message strong {
+        font-size: 12px;
+        margin-bottom: 2px;
+    }
 
-.message p {
-    font-size: 13px;
-    margin: 0;
-}
+    .message p {
+        font-size: 13px;
+        margin: 0;
+    }
 
     .chat-image,
     .chat-video {
@@ -769,7 +799,7 @@ body{
         flex-direction: column;
         flex: 1;
         min-height: 0;
-        overflow: auto;
+        overflow: hidden;
     }
 
     .group-left {
@@ -777,38 +807,50 @@ body{
         max-width: 100%;
     }
 
-    /* Input */
+    /* Compact Input Area */
 
     .inputBox {
         width: 100%;
+        box-sizing: border-box;
         flex-shrink: 0;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 8px;
-        margin-top: 10px;
-        padding-bottom: env(safe-area-inset-bottom);
+        gap: 5px;
+        margin-top: 5px;
+        padding: 5px 2px;
+        padding-bottom: calc(5px + env(safe-area-inset-bottom));
     }
 
     .input {
         width: 100%;
         min-width: 0;
         flex: 1 1 100%;
+        height: 38px;
+        box-sizing: border-box;
+        padding: 7px 10px;
+        font-size: 13px;
     }
 
-    .file-btn {
-        padding: 10px;
-        font-size: 13px;
+    .file-btn,
+    .link-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        box-sizing: border-box;
+        padding: 5px;
+        font-size: 15px;
+        flex-shrink: 0;
     }
 
     .inputBox .button {
         width: auto;
-        padding: 10px 15px;
-    }
-
-    .link-btn {
-        width: 48px;
-        height: 48px;
+        height: 34px;
+        padding: 6px 12px;
+        font-size: 13px;
+        flex-shrink: 0;
     }
 
     .chat-audio-container {
@@ -819,5 +861,4 @@ body{
     .edit-message-box {
         flex-wrap: wrap;
     }
-
 }

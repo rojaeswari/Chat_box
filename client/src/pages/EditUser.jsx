@@ -68,56 +68,75 @@ await axios.put(
     }
   };
 
-  return (
-    <div className="add-user">
+  
+return (
+  <div className="add-user-page">
+    <div className="add-user-card">
 
-      <h2>Edit User</h2>
-
-      <button
-  type="button"
-  className="back-btn"
-  onClick={() => navigate("/manage-users")}
-  aria-label="Go Back"
->
-  <svg viewBox="0 0 24 24" width="22" height="22"
-    fill="none" stroke="currentColor" strokeWidth="2"
-    strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 12H5" />
-    <path d="M12 19l-7-7 7-7" />
-  </svg>
-</button>
-
-      <form onSubmit={updateUser}>
-
-        <input
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-        />
-
-        <input
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-        />
-
-        <select
-          name="role"
-          value={form.role}
-          onChange={handleChange}
+      <div className="add-user-header">
+        <button
+          type="button"
+          className="back-btn"
+          onClick={() => navigate("/manage-users")}
+          aria-label="Go Back"
         >
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
-
-        <button type="submit">
-          Update User
+          <svg viewBox="0 0 24 24" width="22" height="22"
+            fill="none" stroke="currentColor" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
         </button>
 
+        <div>
+          <h2>Edit User</h2>
+          <p>Update user details</p>
+        </div>
+      </div>
+
+      <form onSubmit={updateUser}>
+        <div className="add-user-field">
+          <label>Name</label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Enter name"
+          />
+        </div>
+
+        <div className="add-user-field">
+          <label>Email</label>
+          <input
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Enter email"
+          />
+        </div>
+
+        <div className="add-user-field">
+          <label>Role</label>
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+          >
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <button type="submit" className="save-user-btn">
+          Update User
+        </button>
       </form>
 
     </div>
-  );
+  </div>
+);
+
 }
 
 export default EditUser;
