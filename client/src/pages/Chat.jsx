@@ -2034,8 +2034,21 @@ const fetchSeenCount = async (messageId) => {
     setSelectedGroup(null);
     setSelectedUser(null);
   }}
+  aria-label="Back"
 >
-  ← Back
+  <svg
+    viewBox="0 0 24 24"
+    width="22"
+    height="22"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M19 12H5" />
+    <path d="M12 19l-7-7 7-7" />
+  </svg>
 </button>
         {/* <h3>Role : {user?.role}</h3> */}
 

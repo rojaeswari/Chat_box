@@ -1,42 +1,148 @@
-.add-user{
-    width:400px;
-    margin:40px auto;
+
+.add-user-page {
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  background: #f3f6fb;
 }
 
-.add-user h2{
-    text-align:center;
-    margin-bottom:20px;
+.add-user-card {
+  width: 100%;
+  max-width: 440px;
+  box-sizing: border-box;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
 }
 
-.add-user form{
-    display:flex;
-    flex-direction:column;
-    gap:15px;
+.add-user-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
 }
 
-.add-user input,
-.add-user select{
-    padding:10px;
-    font-size:16px;
+.add-user-header h2 {
+  margin: 0;
+  font-size: 23px;
+  color: #172554;
 }
 
-.add-user button{
-    padding:12px;
-    cursor:pointer;
+.add-user-header p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 14px;
 }
+
 .back-btn {
-  background: #6c757d;
-  color: white;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
   border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
+  border-radius: 10px;
+  background: #e8eef9;
+  color: #1e40af;
+  font-size: 23px;
   cursor: pointer;
-  margin-bottom: 20px;
-  margin-right: 10px;
-  font-size: 15px;
-  transition: 0.3s;
+   /* Add these lines */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.back-btn:hover {
-  background: #545b62;
+
+.add-user-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
+
+.add-user-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-user-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.add-user-field input,
+.add-user-field select {
+  width: 100%;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0 13px;
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  outline: none;
+  font-size: 15px;
+  background: #fff;
+}
+
+.add-user-field input:focus,
+.add-user-field select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.save-user-btn {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.save-user-btn:hover {
+  background: #1d4ed8;
+}
+
+.save-user-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .add-user-page {
+    min-height: 100dvh;
+    padding: 20px 14px;
+    align-items: flex-start;
+  }
+
+  .add-user-card {
+    padding: 22px 18px;
+    border-radius: 15px;
+  }
+
+  .add-user-header {
+    margin-bottom: 25px;
+  }
+
+  .add-user-header h2 {
+    font-size: 21px;
+  }
+
+  .add-user-field input,
+  .add-user-field select {
+    height: 50px;
+    font-size: 16px;
+  }
+
+  .save-user-btn {
+    height: 52px;
+  }
+}
+
