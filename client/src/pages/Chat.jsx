@@ -876,37 +876,37 @@ useEffect(() => {
 
 
 
-  useEffect(() => {
-  if (!selectedGroup || !user) return;
+//   useEffect(() => {
+//   if (!selectedGroup || !user) return;
 
-  const markGroupMessagesSeen = async () => {
-    const token = localStorage.getItem("token");
+//   const markGroupMessagesSeen = async () => {
+//     const token = localStorage.getItem("token");
 
-    try {
-      for (const msg of groupMessages) {
-        if (Number(msg.sender_id) === Number(user.id)) continue;
+//     try {
+//       for (const msg of groupMessages) {
+//         if (Number(msg.sender_id) === Number(user.id)) continue;
 
-        await axios.post(
-          "https://chat-box-2-hyl4.onrender.com/api/group-messages/seen",
-          {
-            message_id: msg.id,
-            user_id: user.id,
-            group_id: selectedGroup.id,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+//         await axios.post(
+//           "https://chat-box-2-hyl4.onrender.com/api/group-messages/seen",
+//           {
+//             message_id: msg.id,
+//             user_id: user.id,
+//             group_id: selectedGroup.id,
+//           },
+//           {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
+//           }
+//         );
+//       }
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   };
 
-  markGroupMessagesSeen();
-}, [groupMessages, selectedGroup, user]);
+//   markGroupMessagesSeen();
+// }, [groupMessages, selectedGroup, user]);
 
 useEffect(() => {
   if (!selectedGroup || !user) return;
@@ -1086,7 +1086,10 @@ const res = await axios.get(
       counts[row.group_id] = Number(row.unread_count);
     });
 
-    setGroupUnreadCounts(counts);
+    setGroupUnreadCounts((prev) => ({
+  ...prev,
+  ...counts,
+}));
   } catch (err) {
     console.log(err);
   }
@@ -1600,26 +1603,28 @@ if (document) {
     }
 
     // Seen
-    for (const msg of res.data) {
-      if (
-        Number(msg.sender_id) !== Number(currentUser.id) &&
-        msg.status === "delivered"
-      ) {
-        await axios.put(
-          `https://chat-box-2-hyl4.onrender.com/api/group-messages/seen/${msg.id}`,
-          {},
-          config
-        );
+for (const msg of res.data) {
+  if (
+    Number(msg.sender_id) !== Number(currentUser.id) &&
+    msg.status !== "seen"
+  ) {
+    await axios.post(
+      "https://chat-box-2-hyl4.onrender.com/api/group-messages/seen",
+      {
+        message_id: msg.id,
+      },
+      config
+    );
 
-        msg.status = "seen";
-      }
-    }
+    msg.status = "seen";
+  }
+}
 
-    setGroupMessages(res.data);
+setGroupMessages(res.data);
 
-    res.data.forEach((msg) => {
-      fetchSeenCount(msg.id);
-    });
+res.data.forEach((msg) => {
+  fetchSeenCount(msg.id);
+});
 
   } catch (err) {
     console.log(err);
@@ -2022,11 +2027,15 @@ const fetchSeenCount = async (messageId) => {
       {/* Chat Area */}
       <div className="chatArea">
 
-        <button
-    className="mobile-back-btn"
-    onClick={() => setMobileChatOpen(false)}
+       <button
+  className="mobile-back-btn"
+  onClick={() => {
+    setMobileChatOpen(false);
+    setSelectedGroup(null);
+    setSelectedUser(null);
+  }}
 >
-    ← Back
+  ← Back
 </button>
         {/* <h3>Role : {user?.role}</h3> */}
 
