@@ -25,9 +25,11 @@ if (password.length < 8 || password.length > 72) {
   });
 }
     const user = await pool.query(
+      
       "SELECT * FROM users WHERE email=$1",
       [email]
     );
+   
 
     if (user.rows.length > 0) {
       return res.status(400).json({
@@ -61,11 +63,14 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     // console.log("Login Email:", email);
-
+     console.time("LOGIN DB QUERY");
     const user = await pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
     );
+
+    console.timeEnd("LOGIN DB QUERY");
+    console.time("BCRYPT CHECK");
      // console.log("User Found:", user.rows);
 
     if (user.rows.length === 0) {
@@ -79,6 +84,7 @@ const login = async (req, res) => {
       password,
       user.rows[0].password
     );
+    console.timeEnd("BCRYPT CHECK");
 
     // console.log("Entered Password:", password);
     // console.log("Password Match:", validPassword);
