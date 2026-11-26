@@ -20,15 +20,45 @@ const sendGroupMessage = async (req, res) => {
       audio,
       audio_public_id,
       audio_resource_type,
+      message_type,
+     contact_name,
+    contact_phone,
+    location_lat,
+    location_lng,
     } = req.body;
 
     const sender_id = req.user.id;
-
     if (!group_id) {
       return res.status(400).json({
         message: "Group ID is required",
       });
     }
+     if (
+  message_type === "contact" &&
+  (!contact_name?.trim() || !contact_phone?.trim())
+) {
+  return res.status(400).json({
+    message: "Contact name and phone are required",
+  });
+}
+
+if (
+  message_type === "location" &&
+  (
+    location_lat == null ||
+    location_lng == null ||
+    !Number.isFinite(Number(location_lat)) ||
+    !Number.isFinite(Number(location_lng)) ||
+    Number(location_lat) < -90 ||
+    Number(location_lat) > 90 ||
+    Number(location_lng) < -180 ||
+    Number(location_lng) > 180
+  )
+) {
+  return res.status(400).json({
+    message: "Valid location coordinates are required",
+  });
+}
 
     // Verify group membership
     const memberCheck = await pool.query(
@@ -66,17 +96,22 @@ const sendGroupMessage = async (req, res) => {
     document_delivery_type,
     video_delivery_type,
     audio_delivery_type,
-    status
+    status,
+    message_type,
+  contact_name,
+  contact_phone,
+  location_lat,
+  location_lng
   )
   VALUES (
     $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
-    $11,$12,$13,$14,$15,$16,$17,$18,$19,$20
+    $11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21, $22, $23,$24,$25
   )
   RETURNING *`,
   [
     group_id,
     sender_id,
-    message || "",
+    message_type === "contact" ? "Shared a contact" : (message || ""),
     image || null,
     document || null,
     video || null,
@@ -94,6 +129,11 @@ const sendGroupMessage = async (req, res) => {
     video_public_id ? "authenticated" : null,
     audio_public_id ? "authenticated" : null,
     "sent",
+    message_type || "text",
+  contact_name || null,
+  contact_phone || null,
+  location_lat ?? null,
+ location_lng ?? null,
   ]
 );
 
@@ -228,6 +268,11 @@ const getGroupMessages = async (req, res) => {
   group_messages.id,
   group_messages.message,
   group_messages.image,
+  group_messages.message_type,
+  group_messages.contact_name,
+  group_messages.contact_phone,
+  group_messages.location_lat,
+  group_messages.location_lng,
   group_messages.document,
   group_messages.video,
   group_messages.audio,
