@@ -156,7 +156,7 @@ const getMessages = async (req, res) => {
         message: "You are not allowed to view this conversation",
       });
     }
-
+    console.time("GET MESSAGES DB");
     const result = await pool.query(
       `
       SELECT
