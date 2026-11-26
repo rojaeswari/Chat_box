@@ -10,7 +10,7 @@ const pool = new Pool({
 });
 
 pool.on("connect", () => {
-  console.log("NEW DATABASE CONNECTION");
+  console.log("NEW DATABASE CONNECTION:", new Date().toISOString());
 });
 
 pool.on("error", (err) => {
