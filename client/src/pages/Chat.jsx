@@ -142,9 +142,9 @@ const loadDeviceContacts = async () => {
     setDeviceContacts(result.contacts || []);
     setShowContactPicker(true);
   } catch (error) {
-    console.error("Load contacts error:", error);
-    alert("Unable to load contacts");
-  }
+  console.error("Load contacts error:", error);
+  alert("Contacts Error: " + (error?.message || String(error)));
+}
 };
 
 
