@@ -9,4 +9,12 @@ const pool = new Pool({
   },
 });
 
+pool.on("connect", () => {
+  console.log("NEW DATABASE CONNECTION");
+});
+
+pool.on("error", (err) => {
+  console.log("DATABASE POOL ERROR:", err.message);
+});
+
 module.exports = pool;
