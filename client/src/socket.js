@@ -2,6 +2,7 @@
 import { io } from "socket.io-client";
 
 const socket = io("https://chat-box-2-hyl4.onrender.com", {
+  
   autoConnect: false,
 
   transports: ["websocket"],
@@ -17,6 +18,14 @@ const socket = io("https://chat-box-2-hyl4.onrender.com", {
   reconnection: true,
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,
+});
+
+socket.on("connect", () => {
+  console.log("SOCKET CONNECTED:", socket.id);
+});
+
+socket.on("connect_error", (err) => {
+  console.log("SOCKET ERROR:", err.message);
 });
 
 export default socket;

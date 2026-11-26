@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef } from "react";
+import { Capacitor } from "@capacitor/core";
+import { Contacts } from "@capacitor-community/contacts";
 import axios from "axios";
 import "./chat.css";
 import socket from "../socket";
 import { useNavigate } from "react-router-dom";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
+import { App as CapacitorApp } from "@capacitor/app";
 
 function Chat() {
   const [user, setUser] = useState(null);
@@ -40,6 +43,15 @@ function Chat() {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const [activeSidebarTab, setActiveSidebarTab] = useState("users");
+  const [sidebarSearch, setSidebarSearch] = useState("");
+  const [showContactPicker, setShowContactPicker] = useState(false);
+  const [deviceContacts, setDeviceContacts] = useState([]);
+  const [contactSearch, setContactSearch] = useState("");
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [contactPhone, setContactPhone] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
 
 
   const navigate = useNavigate();
@@ -66,6 +78,99 @@ function Chat() {
     console.error("Private file URL error:", error);
     return null;
   }
+};
+
+
+const loadDeviceContacts = async () => {
+
+ if (!Capacitor.isNativePlatform()) {
+  // Browser Contact Picker API
+  if (navigator.contacts && navigator.contacts.select) {
+    try {
+      const contacts = await navigator.contacts.select(
+        ["name", "tel"],
+        { multiple: false }
+      );
+
+      if (!contacts.length) return;
+
+      setSelectedContact(contacts[0].name?.[0] || "Contact");
+      setContactPhone(contacts[0].tel?.[0] || "");
+    } catch (error) {
+      console.error("Web contact picker error:", error);
+      alert("Unable to select contact");
+    }
+  } else {
+    // Manual fallback
+    const name = prompt("Enter contact name:");
+    if (!name) return;
+
+    const phone = prompt("Enter phone number:");
+    if (!phone) return;
+
+    setSelectedContact(name);
+    setContactPhone(phone);
+  }
+
+  return;
+}
+  try {
+    const permission = await Contacts.checkPermissions();
+
+    if (
+      permission.contacts !== "granted" &&
+      permission.contacts !== "limited"
+    ) {
+      const requested = await Contacts.requestPermissions();
+
+      if (
+        requested.contacts !== "granted" &&
+        requested.contacts !== "limited"
+      ) {
+        alert("Contacts permission denied");
+        return;
+      }
+    }
+
+    const result = await Contacts.getContacts({
+      projection: {
+        name: true,
+        phones: true,
+      },
+    });
+
+    setDeviceContacts(result.contacts || []);
+    setShowContactPicker(true);
+  } catch (error) {
+    console.error("Load contacts error:", error);
+    alert("Unable to load contacts");
+  }
+};
+
+
+const shareCurrentLocation = () => {
+  if (!navigator.geolocation) {
+    alert("Location is not supported on this device");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      setSelectedLocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+    },
+    (error) => {
+      console.error("Location error:", error);
+      alert("Unable to get location. Please allow location permission.");
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0,
+    }
+  );
 };
 
 
@@ -145,14 +250,18 @@ useEffect(() => {
   };
 }, [messages, groupMessages]);
 
-  const logout = () => {
+  
+const logout = () => {
   if (window.confirm("Are you sure you want to logout?")) {
+    socket.disconnect();
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
-    navigate("/login");
+    navigate("/login", { replace: true });
   }
 };
+
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("user"));
@@ -1004,6 +1113,61 @@ if (Number(data.group_id) !== Number(selectedGroup.id)) {
 
 
 
+useEffect(() => {
+  const setupAppStateListener = async () => {
+    const listener = await CapacitorApp.addListener(
+      "appStateChange",
+      ({ isActive }) => {
+        if (isActive) {
+          const token = localStorage.getItem("token");
+
+          if (token && !socket.connected) {
+            socket.connect();
+          }
+        }
+      }
+    );
+
+    return listener;
+  };
+
+  let appListener;
+
+  setupAppStateListener().then((listener) => {
+    appListener = listener;
+  });
+
+  return () => {
+    appListener?.remove();
+  };
+}, []);
+
+
+
+useEffect(() => {
+  const backButtonListener = CapacitorApp.addListener(
+    "backButton",
+    () => {
+      if (mobileChatOpen || selectedUser || selectedGroup) {
+        setSelectedUser(null);
+        setSelectedGroup(null);
+        setMobileChatOpen(false);
+        setShowGroupMembers(false);
+      } else {
+        CapacitorApp.exitApp();
+      }
+    }
+  );
+
+  return () => {
+    backButtonListener.then((listener) => listener.remove());
+  };
+}, [mobileChatOpen, selectedUser, selectedGroup]);
+
+
+
+
+
 const toggleMessageSelection = (id) => {
   setSelectedMessages((prev) =>
     prev.includes(id)
@@ -1017,7 +1181,7 @@ const toggleMessageSelection = (id) => {
       const data = JSON.parse(localStorage.getItem("user"));
 
       const token = localStorage.getItem("token");
-
+console.time("USERS LOAD");
 const res = await axios.get(
   `https://chat-box-2-hyl4.onrender.com/api/users?email=${data.email}`,
   {
@@ -1026,7 +1190,7 @@ const res = await axios.get(
     },
   }
 );
-
+console.timeEnd("USERS LOAD");
       setUsers(res.data);
     } catch (err) {
       console.log(err);
@@ -1050,7 +1214,7 @@ const res = await axios.get(
   try {
     const currentUser = JSON.parse(localStorage.getItem("user"));
     const token = localStorage.getItem("token");
-
+    console.time("GROUPS LOAD");
     const res = await axios.get(
       `https://chat-box-2-hyl4.onrender.com/api/groups?userId=${currentUser.id}`,
       {
@@ -1059,7 +1223,7 @@ const res = await axios.get(
         },
       }
     );
-
+   console.timeEnd("GROUPS LOAD");
     setGroups(res.data);
   } catch (err) {
     console.log(err);
@@ -1151,7 +1315,9 @@ const res = await axios.get(
   //     console.log(err);
   //   }
   // };
- const fetchMessages = async (receiverId) => {
+ 
+const fetchMessages = async (receiverId) => {
+  console.count("fetchMessages CALLED");
   try {
     const currentUser = JSON.parse(localStorage.getItem("user"));
     const token = localStorage.getItem("token");
@@ -1162,44 +1328,51 @@ const res = await axios.get(
       },
     };
 
+   console.time("CHAT API TOTAL");
+
     const res = await axios.get(
       `https://chat-box-2-hyl4.onrender.com/api/messages/${currentUser.id}/${receiverId}`,
       config
     );
 
-    for (const msg of res.data) {
-      if (
-        Number(msg.receiver_id) === Number(currentUser.id) &&
-        msg.status === "sent"
-      ) {
-        await axios.put(
-          `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
-          { status: "delivered" },
-          config
-        );
-
-        msg.status = "delivered";
-      }
-
-      if (
-        Number(msg.receiver_id) === Number(currentUser.id) &&
-        msg.status === "delivered"
-      ) {
-        await axios.put(
-          `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`,
-          {},
-          config
-        );
-
-        msg.status = "seen";
-      }
-    }
-
     setMessages(res.data);
+
+    console.timeEnd("CHAT API TOTAL");
+
+    // Update Delivered and Seen in background
+    const updateMessages = res.data
+      .filter(
+        (msg) =>
+          Number(msg.receiver_id) === Number(currentUser.id) &&
+          (msg.status === "sent" || msg.status === "delivered")
+      )
+      .map(async (msg) => {
+        try {
+          if (msg.status === "sent") {
+            await axios.put(
+              `https://chat-box-2-hyl4.onrender.com/api/messages/status/${msg.id}`,
+              { status: "delivered" },
+              config
+            );
+          }
+
+          await axios.put(
+            `https://chat-box-2-hyl4.onrender.com/api/messages/seen/${msg.id}`,
+            {},
+            config
+          );
+        } catch (err) {
+          console.log("Message status update error:", err);
+        }
+      });
+
+    await Promise.all(updateMessages);
+
   } catch (err) {
     console.log(err);
   }
 };
+
 
 
   const fetchUnreadCounts = async () => {
@@ -1358,7 +1531,15 @@ const stopRecording = () => {
 
   const sendMessage = async () => {
      if (isSending) return;
-    if (!message.trim() && !image && !video && !document && !audio) return;
+   if (
+  !message.trim() &&
+  !image &&
+  !video &&
+  !document &&
+  !audio &&
+  !selectedContact &&
+  !selectedLocation
+) return;
     console.log(image);
 
     try {
@@ -1456,9 +1637,17 @@ if (document) {
       if (selectedGroup) {
        await axios.post("https://chat-box-2-hyl4.onrender.com/api/group-messages", {
   group_id: selectedGroup.id,
-  sender_id: currentUser.id,
-  message,
-
+sender_id: currentUser.id,
+message,
+message_type: selectedLocation
+  ? "location"
+  : selectedContact
+  ? "contact"
+  : "text",
+contact_name: selectedContact || null,
+contact_phone: contactPhone || null,
+location_lat: selectedLocation?.lat ?? null,
+location_lng: selectedLocation?.lng ?? null,
   image: imageName,
   image_public_id: imagePublicId,
   image_resource_type: imageResourceType,
@@ -1490,6 +1679,9 @@ if (document) {
         setVideo(null);
         setDocument(null);
         setAudio(null);
+        setSelectedContact(null);
+       setContactPhone("");
+       setSelectedLocation(null);
         
         
         // fetchGroupMessages(selectedGroup.id);
@@ -1504,6 +1696,17 @@ if (document) {
   sender_id: currentUser.id,
   receiver_id: selectedUser.id,
   message,
+  message_type: selectedLocation
+  ? "location"
+  : selectedContact
+  ? "contact"
+  : "text",
+
+contact_name: selectedContact || null,
+contact_phone: contactPhone || null,
+
+location_lat: selectedLocation?.lat ?? null,
+location_lng: selectedLocation?.lng ?? null,
 
   image: imageName,
   image_public_id: imagePublicId,
@@ -1538,6 +1741,9 @@ if (document) {
       setVideo(null);
       setDocument(null);
       setAudio(null);
+      setSelectedContact(null);
+      setContactPhone("");
+      setSelectedLocation(null);
       
       } catch (err) {
 
@@ -1885,144 +2091,170 @@ const fetchSeenCount = async (messageId) => {
     });
   };
 
+ const filteredUsers = users.filter((u) =>
+  u.name?.toLowerCase().includes(sidebarSearch.toLowerCase())
+);
+
+const filteredGroups = groups.filter((g) =>
+  g.group_name?.toLowerCase().includes(sidebarSearch.toLowerCase())
+);
+
   return (
     <div className={`container ${mobileChatOpen ? "mobile-chat-open" : ""}`}>
+      
+{/* Sidebar */}
+<div className="sidebar">
 
-      {/* Sidebar */}
-      <div className="sidebar">
+  {/* Sidebar Header */}
+  <div className="sidebar-header">
+    {/* <h2>ChatBox</h2> */}
 
-        <h2>Users</h2>
+    <button
+      className="logout-btn"
+      onClick={logout}
+      title="Logout"
+      aria-label="Logout"
+    >
+      ↪
+    </button>
+  </div>
 
-        {users.length > 0 ? (
-          users.map((u) => (
-            <div
-              key={u.id}
-              className="user"
-              onClick={() => {
-                setMobileChatOpen(true);
-                setMessages([]);
-                setSelectedUser(u);
-                setSelectedGroup(null);
-                setUnreadCounts((prev) => ({
-                  ...prev,
-                  [u.id]: 0,
-                }));
+  {/* Users / Groups Tabs */}
+  {/* <div className="sidebar-tabs">
 
-                fetchMessages(u.id);
-              }}
-            >
-              {/* {u.name} */}
-              <span>{u.name}</span>
+    <button
+      className={activeSidebarTab === "users" ? "sidebar-tab active" : "sidebar-tab"}
+      onClick={() => setActiveSidebarTab("users")}
+    >
+      👤 Users
+    </button>
 
-              {unreadCounts[u.id] > 0 && (
-                <span className="unread-badge">
-                  {unreadCounts[u.id]}
-                </span>
-              )}
-            </div>
-          ))
-        ) : (
-          <p>No users found</p>
+    <button
+      className={activeSidebarTab === "groups" ? "sidebar-tab active" : "sidebar-tab"}
+      onClick={() => setActiveSidebarTab("groups")}
+    >
+      👥 Groups
+    </button>
+
+  </div> */}
+
+ <div className="sidebar-search">
+  <input
+    type="text"
+    placeholder="Search users or groups..."
+    value={sidebarSearch}
+    onChange={(e) => setSidebarSearch(e.target.value)}
+  />
+
+  {sidebarSearch && (
+    <button onClick={() => setSidebarSearch("")}>
+      {/* ✕ */}
+    </button>
+  )}
+</div>
+ 
+{/* Common Users and Groups List */}
+<div className="sidebar-list">
+
+  {/* Users */}
+  {filteredUsers.map((u) => (
+    <div
+      key={u.id}
+      className="user"
+      onClick={() => {
+        setMobileChatOpen(true);
+        setMessages([]);
+        setSelectedUser(u);
+        setSelectedGroup(null);
+
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [u.id]: 0,
+        }));
+
+        fetchMessages(u.id);
+      }}
+    >
+      <span>👤 {u.name}</span>
+
+      {unreadCounts[u.id] > 0 && (
+        <span className="unread-badge">
+          {unreadCounts[u.id]}
+        </span>
+      )}
+    </div>
+  ))}
+
+  {/* Create Group */}
+  {user?.role === "admin" && (
+    <button
+      className="create-group-btn"
+      onClick={() => navigate("/create-group")}
+    >
+      + Create Group
+    </button>
+  )}
+
+  {/* Groups */}
+  {filteredGroups.map((group) => (
+    <div key={group.id} className="group-item">
+
+      <div
+        className="group-name"
+        onClick={() => {
+          setMobileChatOpen(true);
+          setGroupMessages([]);
+          setSelectedGroup(group);
+          setSelectedUser(null);
+
+          fetchGroupMembers(group.id);
+          fetchGroupMessages(group.id);
+          fetchAvailableUsers(group.id);
+
+          setGroupUnreadCounts((prev) => ({
+            ...prev,
+            [group.id]: 0,
+          }));
+        }}
+      >
+        <span>👥 {group.group_name}</span>
+
+        {groupUnreadCounts[group.id] > 0 && (
+          <span className="unread-badge">
+            {groupUnreadCounts[group.id]}
+          </span>
         )}
-
-        <hr />
-
-        <h2>Groups</h2>
-
-        {groups.length > 0 ? (
-          groups.map((group) => (
-            <div key={group.id} className="group-item">
-
-              {/* <span
-                className="group-name"
-                onClick={() => {
-                  setGroupMessages([]);
-                  setSelectedGroup(group);
-                  setSelectedUser(null);
-                  socket.emit("join_group", group.id);
-                  fetchGroupMembers(group.id);
-                  fetchGroupMessages(group.id);
-                  fetchAvailableUsers(group.id);
-                  setGroupUnreadCounts((prev) => ({
-                    ...prev,
-                    [group.id]: 0,
-                  }));
-                }}
-              >
-                {group.group_name}
-              </span> */}
-
-              <div
-                className="group-name"
-                onClick={() => {
-                  setMobileChatOpen(true);
-                  setGroupMessages([]);
-                  setSelectedGroup(group);
-                  setSelectedUser(null);
-
-                  // socket.emit("join_group", group.id);
-
-                  fetchGroupMembers(group.id);
-                  fetchGroupMessages(group.id);
-                  fetchAvailableUsers(group.id);
-
-                  setGroupUnreadCounts((prev) => ({
-                    ...prev,
-                    [group.id]: 0,
-                  }));
-                }}
-              >
-                <span>{group.group_name}</span>
-
-                {groupUnreadCounts[group.id] > 0 && (
-                  <span className="unread-badge">
-                    {groupUnreadCounts[group.id]}
-                  </span>
-                )}
-              </div>
-
-
-              {user?.role === "admin" && (
-                <div className="group-actions">
-                  <button
-                    className="edit-btn"
-                    onClick={() => renameGroup(group.id)}
-                  >
-                    ✏️
-                  </button>
-
-                  <button
-                    className="delete-btn"
-                    onClick={() => deleteGroup(group.id)}
-                  >
-                    🗑️
-                  </button>
-                </div>
-              )}
-            </div>
-
-          ))
-        ) : (
-          <p>No Groups Found</p>
-        )}
-
-        {user?.role === "admin" && (
-          <button
-            className="button"
-            onClick={() => navigate("/create-group")}
-          >
-            + Create Group
-          </button>
-        )}
-
-        <button
-          className="logout-btn"
-          onClick={logout}
-        >
-          Logout
-        </button>
-
       </div>
+
+      {user?.role === "admin" && (
+        <div className="group-actions">
+          <button
+            className="edit-btn"
+            onClick={() => renameGroup(group.id)}
+            title="Rename group"
+          >
+            ✏️
+          </button>
+
+          <button
+            className="delete-btn"
+            onClick={() => deleteGroup(group.id)}
+            title="Delete group"
+          >
+            🗑️
+          </button>
+        </div>
+      )}
+    </div>
+  ))}
+
+  {filteredUsers.length === 0 && filteredGroups.length === 0 && (
+    <p className="sidebar-empty">No users or groups found</p>
+  )}
+
+</div>
+
+</div>
 
       {/* Chat Area */}
       <div className="chatArea">
@@ -2170,6 +2402,39 @@ const fetchSeenCount = async (messageId) => {
                         ? "You"
                         : msg.name}
                     </strong>
+
+                    {msg.message_type === "contact" && (
+  <div className="shared-contact-card">
+    <div className="shared-contact-icon">👤</div>
+
+    <div className="shared-contact-details">
+      <strong>{msg.contact_name}</strong>
+      <p>{msg.contact_phone}</p>
+    </div>
+
+    <a
+      href={`tel:${msg.contact_phone}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      Call
+    </a>
+  </div>
+)}
+
+{msg.message_type === "location" && (
+  <div className="shared-location-card">
+    <div>📍 Location shared</div>
+
+    <a
+      href={`https://www.google.com/maps?q=${msg.location_lat},${msg.location_lng}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+    >
+      Open Map
+    </a>
+  </div>
+)}
 
                     {msg.message && (
   editingMessageId === msg.id ? (
@@ -2481,6 +2746,35 @@ const fetchSeenCount = async (messageId) => {
                     {msg.sender_id === user?.id ? "You" : msg.name}
                   </strong>
 
+                  {msg.message_type === "contact" && (
+  <div className="shared-contact-card">
+    <div className="shared-contact-icon">👤</div>
+
+    <div className="shared-contact-details">
+      <strong>{msg.contact_name}</strong>
+      <p>{msg.contact_phone}</p>
+    </div>
+
+    <a href={`tel:${msg.contact_phone}`}>
+      Call
+    </a>
+  </div>
+)}
+{msg.message_type === "location" && (
+  <div className="shared-location-card">
+    <div>📍 Location shared</div>
+
+    <a
+      href={`https://www.google.com/maps?q=${msg.location_lat},${msg.location_lng}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+    >
+      Open Map
+    </a>
+  </div>
+)}
+
                   {msg.message && (
   editingMessageId === msg.id ? (
     <div className="edit-message-box">
@@ -2788,7 +3082,7 @@ const fetchSeenCount = async (messageId) => {
             </div>
           )}
 
-          <label htmlFor="imageUpload" className="file-btn">
+          {/* <label htmlFor="imageUpload" className="file-btn">
             📷
           </label>
 
@@ -2817,13 +3111,101 @@ const fetchSeenCount = async (messageId) => {
             📄
           </label>
 
+          <button
+  type="button"
+  className="link-btn"
+ onClick={loadDeviceContacts}
+  disabled={!selectedUser && !selectedGroup}
+  title="Share Contact"
+>
+  👤
+</button>
+
+<button
+  type="button"
+  className="link-btn"
+  onClick={shareCurrentLocation}
+  disabled={!selectedUser && !selectedGroup}
+  title="Share Location"
+>
+  📍
+</button>
+
           <input
             id="docUpload"
             type="file"
             className="file-input"
             accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
             onChange={(e) => setDocument(e.target.files[0])}
-          />
+          /> */}
+
+
+
+<button
+  type="button"
+  className="link-btn attach-plus-btn"
+  onClick={() => setShowAttachMenu((prev) => !prev)}
+  disabled={!selectedUser && !selectedGroup}
+>
+  +
+</button>
+
+{showAttachMenu && (
+  <div className="attach-menu">
+    <label htmlFor="imageUpload">📷 Image</label>
+    <input
+      id="imageUpload"
+      type="file"
+      accept="image/*"
+      className="file-input"
+      onChange={(e) => {
+        setImage(e.target.files[0]);
+        setShowAttachMenu(false);
+      }}
+    />
+
+    <label htmlFor="videoUpload">🎥 Video</label>
+    <input
+      id="videoUpload"
+      type="file"
+      accept="video/*"
+      className="file-input"
+      onChange={(e) => {
+        setVideo(e.target.files[0]);
+        setShowAttachMenu(false);
+      }}
+    />
+
+    <label htmlFor="docUpload">📄 Document</label>
+    <input
+      id="docUpload"
+      type="file"
+      className="file-input"
+      accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+      onChange={(e) => {
+        setDocument(e.target.files[0]);
+        setShowAttachMenu(false);
+      }}
+    />
+
+    <button type="button" onClick={() => {
+      const link = prompt("Paste Document Link");
+      if (link) setMessage(link);
+      setShowAttachMenu(false);
+    }}>🔗 Link</button>
+
+    <button type="button" onClick={() => {
+      loadDeviceContacts();
+      setShowAttachMenu(false);
+    }}>👤 Contact</button>
+
+    <button type="button" onClick={() => {
+      shareCurrentLocation();
+      setShowAttachMenu(false);
+    }}>📍 Location</button>
+  </div>
+)}
+
 
           {image && (
             <div className="selected-file">
@@ -2897,7 +3279,7 @@ const fetchSeenCount = async (messageId) => {
     ⏹
   </button>
 )}
-          <button
+          {/* <button
             className="link-btn"
             onClick={() => {
               const link = prompt("Paste Document Link");
@@ -2905,15 +3287,44 @@ const fetchSeenCount = async (messageId) => {
             }}
           >
             🔗
-          </button>
+          </button> */}
 
-          <button
+          {selectedContact && (
+  <div className="selected-contact-preview">
+    👤 {selectedContact} — {contactPhone}
+    <button
+      type="button"
+      onClick={() => {
+        setSelectedContact(null);
+        setContactPhone("");
+      }}
+    >
+      ✕
+    </button>
+  </div>
+)}
+
+          {/* <button
   className="button"
   onClick={sendMessage}
   disabled={isSending || (!selectedUser && !selectedGroup)}
 >
   {isSending ? "Sending..." : "Send"}
+</button> */}
+
+
+
+<button
+  type="button"
+  className="button send-icon-btn"
+  onClick={sendMessage}
+  disabled={isSending || (!selectedUser && !selectedGroup)}
+  title="Send"
+  aria-label="Send message"
+>
+  {isSending ? "..." : "➤"}
 </button>
+
 
           {/* <button
             onClick={() =>  navigate(`/change-password/${user.id}`)}
@@ -2921,6 +3332,79 @@ const fetchSeenCount = async (messageId) => {
             Change Password
           </button> */}
         </div>
+
+        {selectedLocation && (
+  <div className="selected-contact-preview">
+    📍 Current Location selected
+    <button
+      type="button"
+      onClick={() => setSelectedLocation(null)}
+    >
+      ✕
+    </button>
+  </div>
+)}
+
+
+        {showContactPicker && (
+  <div className="contact-picker-overlay">
+    <div className="contact-picker">
+      <h3>Select Contact</h3>
+
+      <input
+        type="text"
+        placeholder="Search contacts..."
+        value={contactSearch}
+        onChange={(e) => setContactSearch(e.target.value)}
+      />
+
+      <div className="contact-list">
+        {deviceContacts
+          .filter((contact) =>
+            (contact.name?.display || "")
+              .toLowerCase()
+              .includes(contactSearch.toLowerCase())
+          )
+          .map((contact) => (
+            <div
+              key={contact.contactId}
+              className="contact-item"
+              onClick={() => {
+                const phone = contact.phones?.[0]?.number || "";
+
+                if (!phone) {
+                  alert("This contact has no phone number");
+                  return;
+                }
+
+                setSelectedContact(
+                  contact.name?.display || "Unknown Contact"
+                );
+                setContactPhone(phone);
+                setShowContactPicker(false);
+                setContactSearch("");
+              }}
+            >
+              <strong>{contact.name?.display || "Unknown Contact"}</strong>
+              <small>
+                {contact.phones?.[0]?.number || "No phone number"}
+              </small>
+            </div>
+          ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          setShowContactPicker(false);
+          setContactSearch("");
+        }}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
 
         {showSeenPopup && (
           <div className="seen-popup">

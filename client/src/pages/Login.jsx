@@ -23,10 +23,13 @@ function Login() {
     e.preventDefault();
 
     try {
+      console.time("LOGIN API");
       const res = await axios.post(
+        
         "https://chat-box-2-hyl4.onrender.com/api/auth/login",
         form
       );
+      console.timeEnd("LOGIN API");
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
