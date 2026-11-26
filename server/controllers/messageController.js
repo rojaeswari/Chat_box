@@ -172,12 +172,12 @@ const getMessages = async (req, res) => {
       `,
       [senderId, receiverId]
     );
-
+   console.timeEnd("GET MESSAGES DB");
     return res.json(result.rows);
 
   } catch (err) {
     console.error("Get messages error:", err);
-
+  
     return res.status(500).json({
       message: "Server Error",
     });
