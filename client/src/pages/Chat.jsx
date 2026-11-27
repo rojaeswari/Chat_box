@@ -3346,17 +3346,38 @@ const filteredGroups = groups.filter((g) =>
 )}
 
 
-        {showContactPicker && (
+       
+{showContactPicker && (
   <div className="contact-picker-overlay">
     <div className="contact-picker">
-      <h3>Select Contact</h3>
 
-      <input
-        type="text"
-        placeholder="Search contacts..."
-        value={contactSearch}
-        onChange={(e) => setContactSearch(e.target.value)}
-      />
+      <div className="contact-picker-header">
+        <div>
+          <h3>Select Contact</h3>
+          <small>{deviceContacts.length} contacts</small>
+        </div>
+
+        <button
+          type="button"
+          className="contact-close-btn"
+          onClick={() => {
+            setShowContactPicker(false);
+            setContactSearch("");
+          }}
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="contact-search-box">
+        <span>⌕</span>
+        <input
+          type="text"
+          placeholder="Search contacts..."
+          value={contactSearch}
+          onChange={(e) => setContactSearch(e.target.value)}
+        />
+      </div>
 
       <div className="contact-list">
         {deviceContacts
@@ -3385,26 +3406,40 @@ const filteredGroups = groups.filter((g) =>
                 setContactSearch("");
               }}
             >
-              <strong>{contact.name?.display || "Unknown Contact"}</strong>
-              <small>
-                {contact.phones?.[0]?.number || "No phone number"}
-              </small>
+              <div className="contact-avatar">
+                {(contact.name?.display || "?")
+                  .charAt(0)
+                  .toUpperCase()}
+              </div>
+
+              <div className="contact-info">
+                <strong>
+                  {contact.name?.display || "Unknown Contact"}
+                </strong>
+                <small>
+                  {contact.phones?.[0]?.number || "No phone number"}
+                </small>
+              </div>
+
+              <span className="contact-arrow">›</span>
             </div>
           ))}
+
+        {deviceContacts.filter((contact) =>
+          (contact.name?.display || "")
+            .toLowerCase()
+            .includes(contactSearch.toLowerCase())
+        ).length === 0 && (
+          <div className="no-contacts">
+            No contacts found
+          </div>
+        )}
       </div>
 
-      <button
-        type="button"
-        onClick={() => {
-          setShowContactPicker(false);
-          setContactSearch("");
-        }}
-      >
-        Close
-      </button>
     </div>
   </div>
 )}
+
 
         {showSeenPopup && (
           <div className="seen-popup">
