@@ -3093,25 +3093,39 @@ const filteredGroups = groups.filter((g) =>
         )}
 
         <div className="inputBox">
-          <input
-            type="text"
-            className="input"
-            placeholder="Type a message..."
-            value={message}
-            onChange={
-              selectedGroup
-                ? handleGroupMessageChange
-                : (e) => setMessage(e.target.value)
-            }
+          <textarea
+  className="input"
+  placeholder="Type a message..."
+  value={message}
+  rows={1}
+ onChange={(e) => {
+  if (selectedGroup) {
+    handleGroupMessageChange(e);
+  } else {
+    setMessage(e.target.value);
+  }
 
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            disabled={!selectedUser && !selectedGroup}
-          />
+  e.target.style.height = "auto";
+  e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+}}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      // Mobile keyboard: Enter means new line
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(
+        navigator.userAgent
+      );
+
+      if (isMobile || e.shiftKey) {
+        return;
+      }
+
+      // Computer: Enter sends message
+      e.preventDefault();
+      sendMessage();
+    }
+  }}
+  disabled={!selectedUser && !selectedGroup}
+/>
           {selectedGroup && showMentionBox && (
             <div className="mention-box">
               {mentionUsers.map((member) => (

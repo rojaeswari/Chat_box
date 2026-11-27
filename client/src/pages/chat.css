@@ -2040,4 +2040,33 @@ max-height: 100%;
   color: white;
 }
 
+/* Multiline WhatsApp Message Input */
+
+.inputBox {
+    align-items: flex-end;
+}
+
+.inputBox .input {
+    height: auto;
+    min-height: 42px;
+    max-height: 120px;
+    padding: 11px 15px;
+    line-height: 1.4;
+    overflow-y: auto;
+    resize: none;
+    font-family: Arial, Helvetica, sans-serif;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+@media screen and (max-width: 768px) {
+    .inputBox .input {
+        height: auto;
+        min-height: 38px;
+        max-height: 100px;
+        padding: 9px 10px;
+        font-size: 13px;
+    }
+}
+
 
