@@ -1,12 +1,13 @@
 
 .manage-users-page {
-  min-height: 100vh;
-  height: auto;
   width: 100%;
-  box-sizing: border-box;
+  height: 100dvh;
   padding: 35px 20px;
   background: #f0fdf4;
-  overflow-y: visible;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 
 .manage-users-container {
@@ -190,9 +191,12 @@ color: #075e54;
 
 @media (max-width: 600px) {
   .manage-users-page {
-    min-height: 100dvh;
+    height: 100dvh;
     padding: 20px 14px;
+    overflow-y: scroll;
+    touch-action: pan-y;
   }
+}
 
   .manage-users-header h1 {
     font-size: 21px;
@@ -216,4 +220,4 @@ color: #075e54;
     align-items: center;
     width: 100%;
   }
-}
+
