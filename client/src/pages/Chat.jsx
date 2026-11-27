@@ -1189,6 +1189,33 @@ useEffect(() => {
 //   };
 // }, [mobileChatOpen, selectedUser, selectedGroup]);
 
+useEffect(() => {
+  const backButtonListener = CapacitorApp.addListener(
+    "backButton",
+    () => {
+      if (mobileChatOpen || selectedUser || selectedGroup) {
+        setSelectedUser(null);
+        setSelectedGroup(null);
+        setMobileChatOpen(false);
+        setShowGroupMembers(false);
+      } else if (user?.role === "admin") {
+        navigate("/admin");
+      } else {
+        CapacitorApp.exitApp();
+      }
+    }
+  );
+
+  return () => {
+    backButtonListener.then((listener) => listener.remove());
+  };
+}, [
+  mobileChatOpen,
+  selectedUser,
+  selectedGroup,
+  user?.role,
+  navigate
+]);
 
 
 

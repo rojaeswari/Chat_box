@@ -24,19 +24,23 @@ useEffect(() => {
 
   const setupBackButton = async () => {
     backButtonListener = await CapacitorApp.addListener(
-      "backButton",
-      () => {
-        if (location.pathname === "/admin") {
-          CapacitorApp.exitApp();
-        } else if (
-          location.pathname === "/" ||
-          location.pathname === "/login"
-        ) {
-          CapacitorApp.exitApp();
-        } else {
-          navigate("/admin", { replace: true });
-        }
-      }
+     "backButton",
+() => {
+  if (location.pathname === "/chat") {
+    return;
+  }
+
+  if (location.pathname === "/admin") {
+    CapacitorApp.exitApp();
+  } else if (
+    location.pathname === "/" ||
+    location.pathname === "/login"
+  ) {
+    CapacitorApp.exitApp();
+  } else {
+    navigate("/admin", { replace: true });
+  }
+}
     );
   };
 
