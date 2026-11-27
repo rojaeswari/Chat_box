@@ -5,6 +5,8 @@
   box-sizing: border-box;
   padding: 35px 20px;
   background: #f0fdf4;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .manage-users-container {

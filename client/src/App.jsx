@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import ChangePassword from "./pages/ChangePassword";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageUsers from "./pages/ManageUsers";
@@ -8,12 +9,43 @@ import Login from "./pages/Login";
 import Chat from "./pages/Chat";
 import CreateGroup from "./pages/CreateGroup";
 import SelectMembers from "./pages/SelectMembers";
+import { App as CapacitorApp } from "@capacitor/app";
 // import Register from "./pages/Register";
 import PrivateRoute from "./PrivateRoute";
 
 
 
 function App() {
+
+  const navigate = useNavigate();
+  const location = useLocation();
+useEffect(() => {
+  let backButtonListener;
+
+  const setupBackButton = async () => {
+    backButtonListener = await CapacitorApp.addListener(
+      "backButton",
+      () => {
+        if (location.pathname === "/admin") {
+          CapacitorApp.exitApp();
+        } else if (
+          location.pathname === "/" ||
+          location.pathname === "/login"
+        ) {
+          CapacitorApp.exitApp();
+        } else {
+          navigate("/admin", { replace: true });
+        }
+      }
+    );
+  };
+
+  setupBackButton();
+
+  return () => {
+    backButtonListener?.remove();
+  };
+}, [location.pathname, navigate]);
   return (
     <Routes>
       <Route path="/" element={<Login />} />

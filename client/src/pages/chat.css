@@ -2020,3 +2020,24 @@ max-height: 100%;
 }
 
 
+.admin-back-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 9px;
+  background: #dcfce7;
+  color: #075e54;
+  font-size: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.admin-back-btn:hover {
+  background: #25d366;
+  color: white;
+}
+
+

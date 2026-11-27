@@ -1169,25 +1169,25 @@ useEffect(() => {
 
 
 
-useEffect(() => {
-  const backButtonListener = CapacitorApp.addListener(
-    "backButton",
-    () => {
-      if (mobileChatOpen || selectedUser || selectedGroup) {
-        setSelectedUser(null);
-        setSelectedGroup(null);
-        setMobileChatOpen(false);
-        setShowGroupMembers(false);
-      } else {
-        CapacitorApp.exitApp();
-      }
-    }
-  );
+// useEffect(() => {
+//   const backButtonListener = CapacitorApp.addListener(
+//     "backButton",
+//     () => {
+//       if (mobileChatOpen || selectedUser || selectedGroup) {
+//         setSelectedUser(null);
+//         setSelectedGroup(null);
+//         setMobileChatOpen(false);
+//         setShowGroupMembers(false);
+//       } else {
+//         CapacitorApp.exitApp();
+//       }
+//     }
+//   );
 
-  return () => {
-    backButtonListener.then((listener) => listener.remove());
-  };
-}, [mobileChatOpen, selectedUser, selectedGroup]);
+//   return () => {
+//     backButtonListener.then((listener) => listener.remove());
+//   };
+// }, [mobileChatOpen, selectedUser, selectedGroup]);
 
 
 
@@ -2133,6 +2133,18 @@ const filteredGroups = groups.filter((g) =>
   {/* Sidebar Header */}
   <div className="sidebar-header">
     {/* <h2>ChatBox</h2> */}
+    
+      {user?.role === "admin" && (
+    <button
+      className="admin-back-btn"
+      onClick={() => navigate("/admin")}
+      title="Back to Admin Dashboard"
+      aria-label="Back to Admin Dashboard"
+    >
+      ←
+    </button>
+  )}
+
 
     <button
       className="logout-btn"
@@ -2143,25 +2155,6 @@ const filteredGroups = groups.filter((g) =>
       ↪
     </button>
   </div>
-
-  {/* Users / Groups Tabs */}
-  {/* <div className="sidebar-tabs">
-
-    <button
-      className={activeSidebarTab === "users" ? "sidebar-tab active" : "sidebar-tab"}
-      onClick={() => setActiveSidebarTab("users")}
-    >
-      👤 Users
-    </button>
-
-    <button
-      className={activeSidebarTab === "groups" ? "sidebar-tab active" : "sidebar-tab"}
-      onClick={() => setActiveSidebarTab("groups")}
-    >
-      👥 Groups
-    </button>
-
-  </div> */}
 
  <div className="sidebar-search">
   <input
