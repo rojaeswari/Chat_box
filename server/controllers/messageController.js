@@ -160,17 +160,26 @@ const getMessages = async (req, res) => {
     const result = await pool.query(
       `
       SELECT
-        messages.*,
-        users.name
-      FROM messages
-      JOIN users ON users.id = messages.sender_id
-      WHERE
-        (sender_id = $1 AND receiver_id = $2)
-        OR
-        (sender_id = $2 AND receiver_id = $1)
-      ORDER BY created_at ASC
+    messages.*,
+    users.name
+   FROM messages
+  JOIN users ON users.id = messages.sender_id
+ WHERE
+  (
+    (messages.sender_id = $1 AND messages.receiver_id = $2)
+    OR
+    (messages.sender_id = $2 AND messages.receiver_id = $1)
+  )
+  AND NOT EXISTS (
+    SELECT 1
+    FROM message_deletions md
+    WHERE md.message_id = messages.id
+      AND md.user_id = $3
+      AND md.message_type = 'private'
+  )
+ORDER BY messages.created_at ASC
       `,
-      [senderId, receiverId]
+      [senderId, receiverId, loggedInUserId]
     );
    console.timeEnd("GET MESSAGES DB");
     return res.json(result.rows);
@@ -238,16 +247,60 @@ const getPrivateFileUrl = async (req, res) => {
   }
 };
 
+
 const deleteMessage = async (req, res) => {
   try {
     const { id } = req.params;
-    const loggedInUserId = req.user.id;
+    const { delete_for } = req.body;
+    const userId = req.user.id;
+
+    if (!["me", "everyone"].includes(delete_for)) {
+      return res.status(400).json({
+        message: "Invalid delete option",
+      });
+    }
+
+    if (delete_for === "me") {
+      const check = await pool.query(
+        `SELECT id FROM messages
+         WHERE id = $1
+         AND (sender_id = $2 OR receiver_id = $2)`,
+        [id, userId]
+      );
+
+      if (check.rowCount === 0) {
+        return res.status(404).json({
+          message: "Message not found",
+        });
+      }
+
+      await pool.query(
+        `INSERT INTO message_deletions
+         (message_id, user_id, message_type)
+         VALUES ($1, $2, 'private')
+         ON CONFLICT (message_id, user_id, message_type)
+         DO NOTHING`,
+        [id, userId]
+      );
+
+      return res.json({
+        message: "Message deleted for you",
+      });
+    }
 
     const result = await pool.query(
-      `DELETE FROM messages
-       WHERE id = $1 AND sender_id = $2
-       RETURNING *`,
-      [id, loggedInUserId]
+      `UPDATE messages
+       SET deleted_for_everyone = TRUE,
+           message = 'This message was deleted',
+           image = NULL,
+           document = NULL,
+           video = NULL,
+           audio = NULL
+       WHERE id = $1
+       AND sender_id = $2
+       AND deleted_for_everyone = FALSE
+       RETURNING id`,
+      [id, userId]
     );
 
     if (result.rowCount === 0) {
@@ -257,17 +310,17 @@ const deleteMessage = async (req, res) => {
     }
 
     return res.json({
-      message: "Message Deleted",
+      message: "Message deleted for everyone",
     });
 
   } catch (err) {
     console.error("Delete message error:", err);
-
     return res.status(500).json({
       message: "Unable to delete message",
     });
   }
 };
+
 // const updateMessageStatus = async (req, res) => {
 //   try {
 //     const { id } = req.params;

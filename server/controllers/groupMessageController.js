@@ -262,47 +262,26 @@ const getGroupMessages = async (req, res) => {
       });
     }
 
-    const result = await pool.query(
-      `
-     SELECT
-  group_messages.id,
-  group_messages.message,
-  group_messages.image,
-  group_messages.message_type,
-  group_messages.contact_name,
-  group_messages.contact_phone,
-  group_messages.location_lat,
-  group_messages.location_lng,
-  group_messages.document,
-  group_messages.video,
-  group_messages.audio,
-
-  group_messages.image_delivery_type,
-  group_messages.document_delivery_type,
-  group_messages.video_delivery_type,
-  group_messages.audio_delivery_type,
-
-  group_messages.image_public_id,
-  group_messages.image_resource_type,
-  group_messages.document_public_id,
-  group_messages.document_resource_type,
-  group_messages.video_public_id,
-  group_messages.video_resource_type,
-  group_messages.audio_public_id,
-  group_messages.audio_resource_type,
-
-  group_messages.status,
-  group_messages.created_at,
-  users.id AS sender_id,
-  users.name
-FROM group_messages
-JOIN users
-  ON group_messages.sender_id = users.id
-WHERE group_messages.group_id = $1
-ORDER BY group_messages.created_at ASC
-      `,
-      [groupId]
-    );
+   const result = await pool.query(
+  `
+  SELECT
+    group_messages.*,
+    users.id AS sender_id,
+    users.name
+  FROM group_messages
+  JOIN users ON group_messages.sender_id = users.id
+  WHERE group_messages.group_id = $1
+    AND NOT EXISTS (
+      SELECT 1
+      FROM message_deletions md
+      WHERE md.message_id = group_messages.id
+        AND md.user_id = $2
+        AND md.message_type = 'group'
+    )
+  ORDER BY group_messages.created_at ASC
+  `,
+  [groupId, userId]
+);
 
     res.json(result.rows);
 
@@ -416,13 +395,66 @@ const getGroupPrivateFileUrl = async (req, res) => {
 const deleteGroupMessage = async (req, res) => {
   try {
     const { id } = req.params;
+    const { delete_for } = req.body;
     const userId = req.user.id;
 
+    if (!["me", "everyone"].includes(delete_for)) {
+      return res.status(400).json({
+        message: "Invalid delete option",
+      });
+    }
+
+    if (delete_for === "me") {
+      const check = await pool.query(
+        `SELECT gm.id
+         FROM group_messages gm
+         JOIN group_members gmem
+           ON gmem.group_id = gm.group_id
+         WHERE gm.id = $1
+           AND gmem.user_id = $2`,
+        [id, userId]
+      );
+
+      if (check.rowCount === 0) {
+        return res.status(404).json({
+          message: "Message not found",
+        });
+      }
+
+      await pool.query(
+        `INSERT INTO message_deletions
+         (message_id, user_id, message_type)
+         VALUES ($1, $2, 'group')
+         ON CONFLICT (message_id, user_id, message_type)
+         DO NOTHING`,
+        [id, userId]
+      );
+
+      return res.json({
+        message: "Group message deleted for you",
+      });
+    }
+
     const result = await pool.query(
-      `DELETE FROM group_messages
+      `UPDATE group_messages
+       SET deleted_for_everyone = TRUE,
+           message = 'This message was deleted',
+           image = NULL,
+           document = NULL,
+           video = NULL,
+           audio = NULL,
+           image_public_id = NULL,
+           image_resource_type = NULL,
+           document_public_id = NULL,
+           document_resource_type = NULL,
+           video_public_id = NULL,
+           video_resource_type = NULL,
+           audio_public_id = NULL,
+           audio_resource_type = NULL
        WHERE id = $1
-       AND sender_id = $2
-       RETURNING *`,
+         AND sender_id = $2
+         AND deleted_for_everyone = FALSE
+       RETURNING id`,
       [id, userId]
     );
 
@@ -432,18 +464,17 @@ const deleteGroupMessage = async (req, res) => {
       });
     }
 
-    res.json({
-      message: "Group Message Deleted Successfully",
+    return res.json({
+      message: "Group message deleted for everyone",
     });
 
   } catch (err) {
-    console.log(err);
-    res.status(500).json({
+    console.log("Delete group message error:", err);
+    return res.status(500).json({
       message: "Server Error",
     });
   }
 };
-
 // const updateGroupMessageStatus = async (req, res) => {
 //   try {
 

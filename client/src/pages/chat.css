@@ -2059,6 +2059,15 @@ max-height: 100%;
     overflow-wrap: anywhere;
 }
 
+
+
+.deleted-message {
+  color: #777;
+  font-style: italic;
+  font-size: 13px;
+  margin: 5px 0;
+}
+
 /* Preserve message line breaks */
 
 .message p {

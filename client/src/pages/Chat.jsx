@@ -2036,7 +2036,11 @@ const fetchSeenCount = async (messageId) => {
 
   const deleteMessage = async (id) => {
   try {
-    if (!window.confirm("Delete this message?")) return;
+    const deleteForEveryone = window.confirm(
+      "OK = Delete for everyone\nCancel = Delete for me"
+    );
+
+    const delete_for = deleteForEveryone ? "everyone" : "me";
 
     const token = localStorage.getItem("token");
 
@@ -2045,7 +2049,7 @@ const fetchSeenCount = async (messageId) => {
         Authorization: `Bearer ${token}`,
       },
       data: {
-        user_id: user.id,
+        delete_for,
       },
     };
 
@@ -2065,22 +2069,20 @@ const fetchSeenCount = async (messageId) => {
       fetchMessages(selectedUser.id);
     }
   } catch (err) {
-    console.log(err);
+    console.log("Delete message error:", err);
+    alert(err.response?.data?.message || "Unable to delete message");
   }
 };
-
 
 
   const deleteSelectedMessages = async () => {
   if (selectedMessages.length === 0) return;
 
-  if (
-    !window.confirm(
-      `Delete ${selectedMessages.length} selected message(s)?`
-    )
-  ) {
-    return;
-  }
+  const deleteForEveryone = window.confirm(
+    `Delete ${selectedMessages.length} selected message(s) for everyone?\n\nOK = Delete for everyone\nCancel = Delete for me`
+  );
+
+  const delete_for = deleteForEveryone ? "everyone" : "me";
 
   try {
     const token = localStorage.getItem("token");
@@ -2090,7 +2092,7 @@ const fetchSeenCount = async (messageId) => {
         Authorization: `Bearer ${token}`,
       },
       data: {
-        user_id: user.id,
+        delete_for,
       },
     };
 
@@ -2115,11 +2117,12 @@ const fetchSeenCount = async (messageId) => {
     } else if (selectedUser?.id) {
       fetchMessages(selectedUser.id);
     }
-
   } catch (err) {
-    console.log(err);
+    console.log("Bulk delete error:", err);
+    alert(err.response?.data?.message || "Unable to delete messages");
   }
 };
+
 
   const handleGroupSeen = (data) => {
     console.log("Seen Event:", data);
@@ -2447,12 +2450,16 @@ const filteredGroups = groups.filter((g) =>
                   >
 
                     <strong>
-                      {msg.sender_id === user?.id
-                        ? "You"
-                        : msg.name}
-                    </strong>
+  {msg.sender_id === user?.id ? "You" : msg.name}
+</strong>
 
-                    {msg.message_type === "contact" && (
+{msg.deleted_for_everyone ? (
+  <p className="deleted-message">
+    🚫 This message was deleted
+  </p>
+) : (
+  <>
+    {msg.message_type === "contact" && (
   <div className="shared-contact-card">
     <div className="shared-contact-icon">👤</div>
 
@@ -2758,6 +2765,9 @@ const filteredGroups = groups.filter((g) =>
                       </div>
                     )}
 
+                    </> 
+                   )} 
+
 
                   </div>
                 ))}
@@ -2792,8 +2802,15 @@ const filteredGroups = groups.filter((g) =>
                     }`}
                 >
                   <strong>
-                    {msg.sender_id === user?.id ? "You" : msg.name}
-                  </strong>
+  {msg.sender_id === user?.id ? "You" : msg.name}
+</strong>
+
+{msg.deleted_for_everyone ? (
+  <p className="deleted-message">
+    🚫 This message was deleted
+  </p>
+) : (
+  <>
 
                   {msg.message_type === "contact" && (
   <div className="shared-contact-card">
@@ -3077,9 +3094,13 @@ const filteredGroups = groups.filter((g) =>
                       )}
                     </div>
                   )}
+                  </>
+                )}
 
                 </div>
               ))}
+
+              
 
               <div ref={bottomRef}></div>
             </div>
