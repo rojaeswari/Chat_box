@@ -56,6 +56,7 @@ function Chat() {
   const attachButtonRef = useRef(null);
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
 const [deleteMessageId, setDeleteMessageId] = useState(null);
+const [deleteSelectedMode, setDeleteSelectedMode] = useState(false);
 
 
   const navigate = useNavigate();
@@ -2037,14 +2038,18 @@ const fetchSeenCount = async (messageId) => {
 
 
   const deleteMessage = (id) => {
+  setDeleteSelectedMode(false);
   setDeleteMessageId(id);
   setShowDeleteOptions(true);
 };
 
 const confirmDeleteMessage = async (delete_for) => {
   try {
-    const id = deleteMessageId;
-    if (!id) return;
+    const ids = deleteSelectedMode
+      ? selectedMessages
+      : [deleteMessageId];
+
+    if (ids.length === 0 || ids.some(id => id == null)) return;
 
     const token = localStorage.getItem("token");
 
@@ -2057,54 +2062,7 @@ const confirmDeleteMessage = async (delete_for) => {
       },
     };
 
-    if (selectedGroup) {
-      await axios.delete(
-        `https://chat-box-2-hyl4.onrender.com/api/group-messages/${id}`,
-        config
-      );
-
-      fetchGroupMessages(selectedGroup.id);
-    } else {
-      await axios.delete(
-        `https://chat-box-2-hyl4.onrender.com/api/messages/${id}`,
-        config
-      );
-
-      fetchMessages(selectedUser.id);
-    }
-
-    setShowDeleteOptions(false);
-    setDeleteMessageId(null);
-
-  } catch (err) {
-    console.log("Delete message error:", err);
-    alert(err.response?.data?.message || "Unable to delete message");
-  }
-};
-
-
-  const deleteSelectedMessages = async () => {
-  if (selectedMessages.length === 0) return;
-
-  const deleteForEveryone = window.confirm(
-    `Delete ${selectedMessages.length} selected message(s) for everyone?\n\nOK = Delete for everyone\nCancel = Delete for me`
-  );
-
-  const delete_for = deleteForEveryone ? "everyone" : "me";
-
-  try {
-    const token = localStorage.getItem("token");
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        delete_for,
-      },
-    };
-
-    for (const id of selectedMessages) {
+    for (const id of ids) {
       if (selectedGroup) {
         await axios.delete(
           `https://chat-box-2-hyl4.onrender.com/api/group-messages/${id}`,
@@ -2119,18 +2077,29 @@ const confirmDeleteMessage = async (delete_for) => {
     }
 
     setSelectedMessages([]);
+    setDeleteMessageId(null);
+    setDeleteSelectedMode(false);
+    setShowDeleteOptions(false);
 
     if (selectedGroup) {
       fetchGroupMessages(selectedGroup.id);
     } else if (selectedUser?.id) {
       fetchMessages(selectedUser.id);
     }
+
   } catch (err) {
-    console.log("Bulk delete error:", err);
+    console.log("Delete message error:", err);
     alert(err.response?.data?.message || "Unable to delete messages");
   }
 };
 
+const deleteSelectedMessages = () => {
+  if (selectedMessages.length === 0) return;
+
+  setDeleteMessageId(null);
+  setDeleteSelectedMode(true);
+  setShowDeleteOptions(true);
+};
 
   const handleGroupSeen = (data) => {
     console.log("Seen Event:", data);
