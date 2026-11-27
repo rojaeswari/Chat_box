@@ -205,32 +205,61 @@
 
 @media (max-width: 600px) {
   .login-container {
-    padding: 15px;
+    padding: 10px;
+    align-items: center;
   }
 
   .login-box {
-    max-width: 350px;
-    padding: 24px 22px;
-    border-radius: 16px;
+    max-width: 320px;
+    padding: 18px 18px;
+    border-radius: 14px;
   }
 
   .login-brand {
-    margin-bottom: 22px;
+    margin-bottom: 14px;
+  }
+
+  .brand-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+  }
+
+  .brand-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .login-brand h1 {
+    font-size: 23px;
   }
 
   .login-heading {
-    margin-bottom: 18px;
+    margin-bottom: 12px;
   }
 
   .login-heading h2 {
-    font-size: 21px;
+    font-size: 19px;
+  }
+
+  .login-input-group {
+    margin-bottom: 10px;
+  }
+
+  .login-input-group label {
+    margin-bottom: 5px;
   }
 
   .login-input-wrapper {
-    height: 42px;
+    height: 38px;
   }
 
   .login-submit-btn {
-    height: 43px;
+    height: 40px;
+    margin-top: 2px;
+  }
+
+  .login-footer {
+    margin-top: 15px;
   }
 }
