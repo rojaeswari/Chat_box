@@ -1328,7 +1328,8 @@ body{
 
 .sidebar {
     height: 100%;
-    min-height: 0;
+min-height: 0;
+max-height: 100%;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -1432,12 +1433,15 @@ body{
     color: #075e54;
 }
 
+
 /* SIDEBAR LIST */
 
 .sidebar-list {
     flex: 1;
     min-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
     background: #fff;
 }
 
