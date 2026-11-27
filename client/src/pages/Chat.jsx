@@ -52,6 +52,8 @@ function Chat() {
   const [contactPhone, setContactPhone] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const attachMenuRef = useRef(null);
+  const attachButtonRef = useRef(null);
 
 
   const navigate = useNavigate();
@@ -79,6 +81,29 @@ function Chat() {
     return null;
   }
 };
+
+
+useEffect(() => {
+  const handleOutsideClick = (event) => {
+    if (
+      attachMenuRef.current &&
+      !attachMenuRef.current.contains(event.target) &&
+      attachButtonRef.current &&
+      !attachButtonRef.current.contains(event.target)
+    ) {
+      setShowAttachMenu(false);
+    }
+  };
+
+  window.addEventListener("mousedown", handleOutsideClick);
+  window.addEventListener("touchstart", handleOutsideClick);
+
+  return () => {
+    window.removeEventListener("mousedown", handleOutsideClick);
+    window.removeEventListener("touchstart", handleOutsideClick);
+  };
+}, []);
+
 
 
 const loadDeviceContacts = async () => {
@@ -3144,6 +3169,7 @@ const filteredGroups = groups.filter((g) =>
 <button
   type="button"
   className="link-btn attach-plus-btn"
+  ref={attachButtonRef}
   onClick={() => setShowAttachMenu((prev) => !prev)}
   disabled={!selectedUser && !selectedGroup}
 >
@@ -3151,7 +3177,7 @@ const filteredGroups = groups.filter((g) =>
 </button>
 
 {showAttachMenu && (
-  <div className="attach-menu">
+  <div className="attach-menu" ref={attachMenuRef}>
     <label htmlFor="imageUpload">📷 Image</label>
     <input
       id="imageUpload"
