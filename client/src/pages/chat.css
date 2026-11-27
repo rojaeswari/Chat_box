@@ -1784,4 +1784,216 @@ body{
   cursor: pointer;
 }
 
+/* Modern Contact Picker */
+
+.contact-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.contact-picker {
+  width: 100%;
+  max-width: 430px;
+  height:  min(600px, 85vh);
+  background: #ffffff;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+}
+
+.contact-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  background: #075e54;
+  color: white;
+}
+
+.contact-picker-header h3 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.contact-picker-header small {
+  display: block;
+  margin-top: 4px;
+  color: #d5ece7;
+}
+
+.contact-close-btn {
+  border: none;
+  background: rgba(255,255,255,0.18);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.contact-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px;
+  padding: 0 13px;
+  background: #f1f3f5;
+  border-radius: 12px;
+}
+
+.contact-search-box span {
+  font-size: 24px;
+  color: #667781;
+}
+
+.contact-search-box input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 13px 0;
+  font-size: 15px;
+}
+
+.contact-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 12px 12px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 8px;
+  border-bottom: 1px solid #eeeeee;
+  cursor: pointer;
+}
+
+.contact-item:active {
+  background: #f0f7f5;
+}
+
+.contact-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #d9eee9;
+  color: #075e54;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.contact-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.contact-info strong {
+  font-size: 15px;
+  color: #222;
+  font-weight: 600;
+}
+
+.contact-info small {
+  font-size: 13px;
+  color: #667781;
+}
+
+.contact-arrow {
+  font-size: 24px;
+  color: #86969d;
+}
+
+.no-contacts {
+  text-align: center;
+  padding: 35px 10px;
+  color: #667781;
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .contact-picker-overlay {
+    padding: 10px;
+  }
+
+  .contact-picker {
+    max-width: 100%;
+    height: 85vh;
+    border-radius: 16px;
+  }
+}
+
+
+/* Chat input toolbar alignment */
+
+.inputBox {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.inputBox .attach-plus-btn {
+    order: 1;
+    flex-shrink: 0;
+}
+
+.inputBox .input {
+    order: 2;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.inputBox > .link-btn:not(.attach-plus-btn) {
+    order: 3;
+    flex-shrink: 0;
+}
+
+.inputBox .send-icon-btn {
+    order: 4;
+    flex-shrink: 0;
+}
+
+@media screen and (max-width: 768px) {
+    .inputBox {
+        flex-wrap: nowrap;
+        gap: 4px;
+        padding: 7px 5px;
+    }
+
+    .inputBox .input {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+        height: 38px;
+    }
+
+    .inputBox .attach-plus-btn,
+    .inputBox > .link-btn:not(.attach-plus-btn),
+    .inputBox .send-icon-btn {
+        width: 34px;
+        min-width: 34px;
+        height: 34px;
+        padding: 0;
+    }
+}
+
 
