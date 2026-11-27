@@ -2059,6 +2059,13 @@ max-height: 100%;
     overflow-wrap: anywhere;
 }
 
+/* Preserve message line breaks */
+
+.message p {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 @media screen and (max-width: 768px) {
     .inputBox .input {
         height: auto;
