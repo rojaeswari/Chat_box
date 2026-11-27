@@ -140,50 +140,55 @@ body{
     cursor:pointer;
 }
 
-/* Chat */
+/* WhatsApp Compact Chat */
 
-.messages{
-    flex:1;
-    overflow-y:auto;
-    background:white;
-    border-radius:10px;
-    padding:15px;
-    border:1px solid #ddd;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    background: #efeae2;
+    border-radius: 10px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 /* Message */
 
-.message{
-    max-width:70%;
-    padding:10px 15px;
-    border-radius:12px;
-    position:relative;
-    word-wrap:break-word;
+.message {
+    width: fit-content;
+    max-width: 70%;
+    padding: 6px 9px;
+    border-radius: 9px;
+    position: relative;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
 }
 
-.sent{
-    align-self:flex-end;
-    background:#dcf8c6;
+.sent {
+    align-self: flex-end;
+    background: #dcf8c6;
 }
 
-.received{
-    align-self:flex-start;
-    background:white;
-    border:1px solid #ddd;
+.received {
+    align-self: flex-start;
+    background: white;
+    border: 1px solid #ddd;
 }
 
 .message strong {
     display: block;
-    margin-bottom: 2px;
-    font-size: 12px;
+    margin-bottom: 1px;
+    font-size: 11px;
 }
 
 .message p {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.35;
+    white-space: pre-wrap;
 }
 
 /* Image */
