@@ -3551,13 +3551,15 @@ const filteredGroups = groups.filter((g) =>
       </button>
 
       <button
-        onClick={() => {
-          setShowDeleteOptions(false);
-          setDeleteMessageId(null);
-        }}
-      >
-        Cancel
-      </button>
+  onClick={() => {
+    setShowDeleteOptions(false);
+    setDeleteMessageId(null);
+    setDeleteSelectedMode(false);
+    setSelectedMessages([]);
+  }}
+>
+  Cancel
+</button>
 
     </div>
   </div>
