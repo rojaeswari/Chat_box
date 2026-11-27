@@ -2068,6 +2068,47 @@ max-height: 100%;
   margin: 5px 0;
 }
 
+
+.delete-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.delete-popup {
+  background: white;
+  width: 280px;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.delete-popup h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.delete-popup button {
+  padding: 12px;
+  border: none;
+  background: #f3f3f3;
+  border-radius: 7px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.delete-popup .delete-everyone-option {
+  color: #e53935;
+  font-weight: bold;
+}
+
 /* Preserve message line breaks */
 
 .message p {

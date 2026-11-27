@@ -54,6 +54,8 @@ function Chat() {
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const attachMenuRef = useRef(null);
   const attachButtonRef = useRef(null);
+  const [showDeleteOptions, setShowDeleteOptions] = useState(false);
+const [deleteMessageId, setDeleteMessageId] = useState(null);
 
 
   const navigate = useNavigate();
@@ -2034,13 +2036,15 @@ const fetchSeenCount = async (messageId) => {
 };
 
 
-  const deleteMessage = async (id) => {
-  try {
-    const deleteForEveryone = window.confirm(
-      "OK = Delete for everyone\nCancel = Delete for me"
-    );
+  const deleteMessage = (id) => {
+  setDeleteMessageId(id);
+  setShowDeleteOptions(true);
+};
 
-    const delete_for = deleteForEveryone ? "everyone" : "me";
+const confirmDeleteMessage = async (delete_for) => {
+  try {
+    const id = deleteMessageId;
+    if (!id) return;
 
     const token = localStorage.getItem("token");
 
@@ -2068,6 +2072,10 @@ const fetchSeenCount = async (messageId) => {
 
       fetchMessages(selectedUser.id);
     }
+
+    setShowDeleteOptions(false);
+    setDeleteMessageId(null);
+
   } catch (err) {
     console.log("Delete message error:", err);
     alert(err.response?.data?.message || "Unable to delete message");
@@ -3553,6 +3561,38 @@ const filteredGroups = groups.filter((g) =>
             </div>
           </div>
         )}
+
+        {showDeleteOptions && (
+  <div className="delete-popup-overlay">
+    <div className="delete-popup">
+
+      <h3>Delete Message?</h3>
+
+      <button
+        className="delete-everyone-option"
+        onClick={() => confirmDeleteMessage("everyone")}
+      >
+        Delete for everyone
+      </button>
+
+      <button
+        onClick={() => confirmDeleteMessage("me")}
+      >
+        Delete for me
+      </button>
+
+      <button
+        onClick={() => {
+          setShowDeleteOptions(false);
+          setDeleteMessageId(null);
+        }}
+      >
+        Cancel
+      </button>
+
+    </div>
+  </div>
+)}
 
 
       </div>
