@@ -7,7 +7,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 40px 20px;
-  background: #f3f6fb;
+  background: #f0fdf4;
 }
 
 .add-user-card {
@@ -30,7 +30,7 @@
 .add-user-header h2 {
   margin: 0;
   font-size: 23px;
-  color: #172554;
+  color: #075e54;
 }
 
 .add-user-header p {
@@ -45,11 +45,10 @@
   flex-shrink: 0;
   border: none;
   border-radius: 10px;
-  background: #e8eef9;
-  color: #1e40af;
+  background: #dcfce7;
+  color: #075e54;
   font-size: 23px;
   cursor: pointer;
-   /* Add these lines */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -89,8 +88,8 @@
 
 .add-user-field input:focus,
 .add-user-field select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #128c7e;
+  box-shadow: 0 0 0 3px rgba(18, 140, 126, 0.12);
 }
 
 .save-user-btn {
@@ -98,7 +97,7 @@
   height: 50px;
   border: none;
   border-radius: 10px;
-  background: #2563eb;
+  background: linear-gradient(135deg, #075e54, #25d366);
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -107,7 +106,7 @@
 }
 
 .save-user-btn:hover {
-  background: #1d4ed8;
+  background: #075e54;
 }
 
 .save-user-btn:disabled {

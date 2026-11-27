@@ -3,7 +3,7 @@
   min-height: 100vh;
   padding: 30px 15px;
   box-sizing: border-box;
-  background: #f4f6f9;
+  background: #f0fdf4;
 }
 
 .member-container {
@@ -29,7 +29,7 @@
   text-align: center;
   margin: 0;
   font-size: 23px;
-  color: #1f2a44;
+  color: #075e54;
 }
 
 .member-back-btn {
@@ -40,8 +40,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eef1f5;
-  color: #1f2a44;
+  background: #dcfce7;
+color: #075e54;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -75,7 +75,7 @@
 .member-card input {
   width: 18px;
   height: 18px;
-  accent-color: #1f2a44;
+  accent-color: #128c7e;
   flex-shrink: 0;
 }
 
@@ -89,7 +89,7 @@
   width: 100%;
   margin-top: 20px;
   padding: 13px;
-  background: #1f2a44;
+  background: linear-gradient(135deg, #075e54, #25d366);
   color: white;
   border: none;
   border-radius: 8px;
@@ -98,7 +98,7 @@
 }
 
 .save-btn:hover {
-  background: #31456d;
+ background: #075e54;
 }
 
 .save-btn:disabled {

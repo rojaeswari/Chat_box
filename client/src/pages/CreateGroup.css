@@ -7,7 +7,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 40px 20px;
-  background: #f3f6fb;
+  background: #f0fdf4;
 }
 
 .create-group-card {
@@ -30,7 +30,7 @@
 .create-group-header h2 {
   margin: 0;
   font-size: 23px;
-  color: #172554;
+  color: #075e54;
 }
 
 .create-group-header p {
@@ -48,8 +48,8 @@
   justify-content: center;
   border: none;
   border-radius: 10px;
-  background: #e8eef9;
-  color: #1e40af;
+  background: #dcfce7;
+color: #075e54;
   cursor: pointer;
 }
 
@@ -78,15 +78,15 @@
 }
 
 .group-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+ border-color: #128c7e;
+box-shadow: 0 0 0 3px rgba(18, 140, 126, 0.12);
 }
 
 .create-btn {
   width: 100%;
   height: 50px;
   margin-top: 22px;
-  background: #2563eb;
+  background: linear-gradient(135deg, #075e54, #25d366);
   color: white;
   border: none;
   border-radius: 10px;
@@ -97,7 +97,7 @@
 }
 
 .create-btn:hover {
-  background: #1d4ed8;
+ background: #075e54;
 }
 
 .create-btn:disabled {

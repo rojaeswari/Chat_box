@@ -124,6 +124,8 @@ const fetchUsers = async () => {
 
                 <button
   className="reset-btn"
+  aria-label="Reset Password"
+  title="Reset Password"
   onClick={() =>
     navigate(`/change-password/${user.id}`)
   }
@@ -141,7 +143,6 @@ const fetchUsers = async () => {
     <circle cx="8" cy="15" r="4" />
     <path d="m10.85 12.15 8.15-8.15 2 2-2 2 2 2-2 2-2-2-2 2" />
   </svg>
-  Reset Password
 </button>
               </div>
 

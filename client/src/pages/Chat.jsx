@@ -2286,11 +2286,15 @@ const filteredGroups = groups.filter((g) =>
 
        <button
   className="mobile-back-btn"
-  onClick={() => {
+ onClick={() => {
+  if (user?.role === "admin") {
+    navigate("/admin");
+  } else {
     setMobileChatOpen(false);
     setSelectedGroup(null);
     setSelectedUser(null);
-  }}
+  }
+}}
   aria-label="Back"
 >
   <svg

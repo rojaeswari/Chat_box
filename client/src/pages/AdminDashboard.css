@@ -7,7 +7,7 @@
   align-items: center;
   padding: 20px;
   box-sizing: border-box;
-  background: #f5f5f5;
+  background: #f0fdf4;
 }
 
 .admin-box {
@@ -15,8 +15,8 @@
   max-width: 350px;
   background: white;
   padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(7, 94, 84, 0.12);
   text-align: center;
   box-sizing: border-box;
 }
@@ -24,7 +24,7 @@
 .admin-box h1 {
   font-size: 25px;
   margin-bottom: 25px;
-  color: #1f2a44;
+  color: #075e54;
 }
 
 .admin-btn {
@@ -34,13 +34,16 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background: #2563eb;
+  background: linear-gradient(135deg, #075e54, #25d366);
   color: white;
   font-size: 16px;
+  font-weight: 600;
+  transition: 0.2s;
 }
 
 .admin-btn:hover {
-  background: #1d4ed8;
+  background: #075e54;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 600px) {
@@ -49,7 +52,7 @@
   }
 
   .admin-box {
-    max-width: 100%;
+    max-width: 350px;
     padding: 25px 20px;
   }
 
@@ -58,7 +61,7 @@
   }
 
   .admin-btn {
-    padding: 15px 12px;
-    font-size: 16px;
+    padding: 13px 12px;
+    font-size: 15px;
   }
 }

@@ -4,7 +4,7 @@
   width: 100%;
   box-sizing: border-box;
   padding: 35px 20px;
-  background: #f3f6fb;
+  background: #f0fdf4;
 }
 
 .manage-users-container {
@@ -22,7 +22,7 @@
 .manage-users-header h1 {
   margin: 0;
   font-size: 25px;
-  color: #172554;
+  color: #075e54;
 }
 
 .manage-users-header p {
@@ -40,8 +40,8 @@
   justify-content: center;
   border: none;
   border-radius: 10px;
-  background: #e8eef9;
-  color: #1e40af;
+ background: #dcfce7;
+color: #075e54;
   cursor: pointer;
 }
 
@@ -51,7 +51,7 @@
   height: 45px;
   margin-bottom: 22px;
   padding: 0 15px;
-  background: #2563eb;
+  background: linear-gradient(135deg, #075e54, #25d366);
   color: white;
   border: none;
   border-radius: 10px;
@@ -61,7 +61,7 @@
 }
 
 .add-user-btn:hover {
-  background: #1d4ed8;
+  background: #075e54;
 }
 
 .user-list {
@@ -97,8 +97,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #e0eaff;
-  color: #2563eb;
+ background: #dcfce7;
+color: #075e54;
   font-size: 20px;
   font-weight: 700;
 }
@@ -109,7 +109,7 @@
 
 .user-details h3 {
   margin: 0 0 5px;
-  color: #172554;
+  color: #075e54;
   font-size: 16px;
 }
 
@@ -124,8 +124,8 @@
   display: inline-block;
   padding: 4px 9px;
   border-radius: 20px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #dcfce7;
+  color: #075e54;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -145,16 +145,23 @@
 }
 
 .edit-btn,
-.delete-btn {
+.delete-btn,
+.reset-btn {
   width: 38px;
   height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   border-radius: 9px;
   cursor: pointer;
 }
 
 .edit-btn {
-  background: #eff6ff;
+  background: #dcfce7;
+  color: #075e54;
+  font-size: 18px;
+  filter: grayscale(1);
 }
 
 .delete-btn {
@@ -162,27 +169,15 @@
 }
 
 .reset-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 9px 13px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
+  background: #dcfce7;
+  color: #075e54;
+  padding: 9px;
 }
 
 .reset-btn svg {
   width: 18px;
   height: 18px;
-  flex-shrink: 0;
-  display: block;
 }
-
 .no-users {
   text-align: center;
   padding: 35px;
@@ -218,9 +213,5 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-  }
-
-  .reset-btn {
-    padding: 10px 12px;
   }
 }
