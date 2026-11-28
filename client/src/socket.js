@@ -2,17 +2,12 @@
 import { io } from "socket.io-client";
 
 const socket = io("https://chat-box-2-hyl4.onrender.com", {
-  
   autoConnect: false,
-
   transports: ["websocket"],
 
   auth: (callback) => {
     const token = localStorage.getItem("token");
-
-    callback({
-      token: token || "",
-    });
+    callback({ token: token || "" });
   },
 
   reconnection: true,
@@ -26,6 +21,12 @@ socket.on("connect", () => {
 
 socket.on("connect_error", (err) => {
   console.log("SOCKET ERROR:", err.message);
+
+  if (err.message === "SESSION_REVOKED") {
+    window.dispatchEvent(
+      new Event("session-revoked")
+    );
+  }
 });
 
 export default socket;

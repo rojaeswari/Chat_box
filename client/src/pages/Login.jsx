@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
@@ -11,6 +11,27 @@ function Login() {
   });
 
   const navigate = useNavigate();
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+  const savedUser = localStorage.getItem("user");
+
+  if (token && savedUser) {
+    try {
+      const userData = JSON.parse(savedUser);
+
+      socket.connect();
+
+      if (userData.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/chat", { replace: true });
+      }
+    } catch (error) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+  }
+}, [navigate]);
 
   const handleChange = (e) => {
     setForm({
@@ -32,9 +53,10 @@ function Login() {
       console.timeEnd("LOGIN API");
 
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      socket.connect();
+socket.disconnect();
+socket.connect();
 
       alert(res.data.message);
 

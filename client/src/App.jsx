@@ -10,6 +10,7 @@ import Chat from "./pages/Chat";
 import CreateGroup from "./pages/CreateGroup";
 import SelectMembers from "./pages/SelectMembers";
 import { App as CapacitorApp } from "@capacitor/app";
+import socket from "./socket";
 // import Register from "./pages/Register";
 import PrivateRoute from "./PrivateRoute";
 
@@ -19,6 +20,32 @@ function App() {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+  const handleSessionRevoked = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    socket.disconnect();
+
+    navigate("/login", { replace: true });
+
+    alert("Your account was logged in on another device. Please login again.");
+  };
+
+  window.addEventListener(
+    "session-revoked",
+    handleSessionRevoked
+  );
+
+  return () => {
+    window.removeEventListener(
+      "session-revoked",
+      handleSessionRevoked
+    );
+  };
+}, [navigate]);
+
 useEffect(() => {
   let backButtonListener;
 

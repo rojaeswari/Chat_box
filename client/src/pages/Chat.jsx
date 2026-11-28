@@ -282,16 +282,34 @@ useEffect(() => {
 }, [messages, groupMessages]);
 
   
-const logout = () => {
+
+const logout = async () => {
   if (window.confirm("Are you sure you want to logout?")) {
-    socket.disconnect();
+    try {
+      const token = localStorage.getItem("token");
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+      await axios.post(
+        "https://chat-box-2-hyl4.onrender.com/api/auth/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (err) {
+      console.error("Logout API Error:", err);
+    } finally {
+      socket.disconnect();
 
-    navigate("/login", { replace: true });
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      navigate("/login", { replace: true });
+    }
   }
 };
+
 
 
   useEffect(() => {

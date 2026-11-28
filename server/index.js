@@ -58,7 +58,9 @@ const io = new Server(server, {
 setIO(io);
 
 // Socket.IO JWT Authentication
-io.use((socket, next) => {
+
+// Socket.IO JWT + Database Session Authentication
+io.use(async (socket, next) => {
   try {
     const token = socket.handshake.auth?.token;
 
@@ -66,21 +68,48 @@ io.use((socket, next) => {
       return next(new Error("Authentication required"));
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    if (!decoded.sessionId) {
+      return next(new Error("Session expired"));
+    }
+
+    const session = await pool.query(
+      `SELECT id
+       FROM user_sessions
+       WHERE user_id = $1
+       AND session_id = $2
+       AND is_active = TRUE
+       AND expires_at > NOW()`,
+      [decoded.id, decoded.sessionId]
+    );
+
+    if (session.rows.length === 0) {
+      return next(new Error("SESSION_REVOKED"));
+    }
 
     socket.user = {
       id: decoded.id,
       email: decoded.email,
+      role: decoded.role,
+      sessionId: decoded.sessionId,
     };
 
     next();
+
   } catch (err) {
     next(new Error("Invalid or expired token"));
   }
 });
 
+
 io.on("connection", (socket) => {
   console.log("User Connected:", socket.id);
+
+  socket.join(`user_${socket.user.id}`);
 
    socket.on("join", () => {
   const userId = socket.user.id;
