@@ -58,6 +58,8 @@ function Chat() {
 const [deleteMessageId, setDeleteMessageId] = useState(null);
 const [deleteSelectedMode, setDeleteSelectedMode] = useState(false);
 const [activeMessageActions, setActiveMessageActions] = useState(null);
+const longPressTimer = useRef(null);
+const longPressTriggered = useRef(false);
 
 
   const navigate = useNavigate();
@@ -2420,11 +2422,48 @@ const filteredGroups = groups.filter((g) =>
                       : "received"
                       }`}
 
-                    onClick={() => {
-                      if (msg.sender_id === user?.id) {
-                        openSeenPopup(msg.id);
-                      }
-                    }}
+                   
+onPointerDown={() => {
+  if (msg.sender_id !== user?.id) return;
+
+  longPressTriggered.current = false;
+  longPressTimer.current = setTimeout(() => {
+    longPressTriggered.current = true;
+    setActiveMessageActions(msg.id);
+  }, 600);
+}}
+
+onPointerUp={() => {
+  clearTimeout(longPressTimer.current);
+}}
+
+onPointerLeave={() => {
+  clearTimeout(longPressTimer.current);
+}}
+
+onPointerCancel={() => {
+  clearTimeout(longPressTimer.current);
+}}
+
+onContextMenu={(e) => {
+  if (msg.sender_id !== user?.id) return;
+
+  e.preventDefault();
+  clearTimeout(longPressTimer.current);
+  setActiveMessageActions(msg.id);
+}}
+
+onClick={() => {
+  if (longPressTriggered.current) {
+    longPressTriggered.current = false;
+    return;
+  }
+
+  if (msg.sender_id === user?.id) {
+    openSeenPopup(msg.id);
+  }
+}}
+
                   >
 
                     <strong>
@@ -2643,64 +2682,40 @@ const filteredGroups = groups.filter((g) =>
 
 
                     
-{msg.sender_id === user?.id && (
-  <>
+{msg.sender_id === user?.id && activeMessageActions === msg.id && (
+  <div
+    className="message-action-tools"
+    onClick={(e) => e.stopPropagation()}
+  >
+    <input
+      type="checkbox"
+      checked={selectedMessages.includes(msg.id)}
+      onChange={() => toggleMessageSelection(msg.id)}
+    />
+
     <button
-      type="button"
-      className="message-actions-toggle"
-      onClick={(e) => {
-        e.stopPropagation();
-        setActiveMessageActions(
-          activeMessageActions === msg.id ? null : msg.id
-        );
-      }}
-      title="Message options"
+      className="delete-btn"
+      onClick={() => deleteMessage(msg.id)}
     >
-      ⋮
+      🗑️
     </button>
 
-    {activeMessageActions === msg.id && (
-      <div
-        className="message-action-tools"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <input
-          type="checkbox"
-          checked={selectedMessages.includes(msg.id)}
-          onChange={() => toggleMessageSelection(msg.id)}
-        />
-
+    {msg.message?.trim() &&
+      !msg.audio && !msg.image &&
+      !msg.video && !msg.document &&
+      new Date(msg.created_at).getTime() >=
+        currentTime - 15 * 60 * 1000 && (
         <button
-          className="delete-btn"
-          onClick={() => deleteMessage(msg.id)}
-          title="Delete"
-          aria-label="Delete message"
+          className="edit-btn"
+          onClick={() => {
+            setEditingMessageId(msg.id);
+            setEditMessageText(msg.message || "");
+          }}
         >
-          🗑️
+          ✏️
         </button>
-
-        {msg.message?.trim() &&
-          !msg.audio &&
-          !msg.image &&
-          !msg.video &&
-          !msg.document &&
-          new Date(msg.created_at).getTime() >=
-            currentTime - 15 * 60 * 1000 && (
-            <button
-              className="edit-btn"
-              onClick={() => {
-                setEditingMessageId(msg.id);
-                setEditMessageText(msg.message || "");
-              }}
-              title="Edit"
-              aria-label="Edit message"
-            >
-              ✏️
-            </button>
-          )}
-      </div>
-    )}
-  </>
+      )}
+  </div>
 )}
 
                     {/* <div className="status">
@@ -2792,10 +2807,31 @@ const filteredGroups = groups.filter((g) =>
 
               {messages.map((msg, index) => (
                 <div
-                  key={`${msg.id}-${index}`}
-                  className={`message ${msg.sender_id === user?.id ? "sent" : "received"
-                    }`}
-                >
+  key={`${msg.id}-${index}`}
+  className={`message ${msg.sender_id === user?.id ? "sent" : "received"}`}
+
+  onPointerDown={() => {
+    if (msg.sender_id !== user?.id) return;
+
+    longPressTriggered.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      setActiveMessageActions(msg.id);
+    }, 600);
+  }}
+
+  onPointerUp={() => clearTimeout(longPressTimer.current)}
+  onPointerLeave={() => clearTimeout(longPressTimer.current)}
+  onPointerCancel={() => clearTimeout(longPressTimer.current)}
+
+  onContextMenu={(e) => {
+    if (msg.sender_id !== user?.id) return;
+
+    e.preventDefault();
+    clearTimeout(longPressTimer.current);
+    setActiveMessageActions(msg.id);
+  }}
+>
                   <strong>
   {msg.sender_id === user?.id ? "You" : msg.name}
 </strong>
@@ -3017,64 +3053,45 @@ const filteredGroups = groups.filter((g) =>
 )}
 
                   
-{msg.sender_id === user?.id && (
-  <>
+
+{msg.sender_id === user?.id && activeMessageActions === msg.id && (
+  <div
+    className="message-action-tools"
+    onClick={(e) => e.stopPropagation()}
+  >
+    <input
+      type="checkbox"
+      checked={selectedMessages.includes(msg.id)}
+      onChange={() => toggleMessageSelection(msg.id)}
+    />
+
     <button
-      type="button"
-      className="message-actions-toggle"
-      onClick={(e) => {
-        e.stopPropagation();
-        setActiveMessageActions(
-          activeMessageActions === msg.id ? null : msg.id
-        );
-      }}
-      title="Message options"
+      className="delete-btn"
+      onClick={() => deleteMessage(msg.id)}
+      title="Delete"
     >
-      ⋮
+      🗑️
     </button>
 
-    {activeMessageActions === msg.id && (
-      <div
-        className="message-action-tools"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <input
-          type="checkbox"
-          checked={selectedMessages.includes(msg.id)}
-          onChange={() => toggleMessageSelection(msg.id)}
-        />
-
+    {msg.message?.trim() &&
+      !msg.audio &&
+      !msg.image &&
+      !msg.video &&
+      !msg.document &&
+      new Date(msg.created_at).getTime() >=
+        currentTime - 15 * 60 * 1000 && (
         <button
-          className="delete-btn"
-          onClick={() => deleteMessage(msg.id)}
-          title="Delete"
-          aria-label="Delete message"
+          className="edit-btn"
+          onClick={() => {
+            setEditingMessageId(msg.id);
+            setEditMessageText(msg.message || "");
+          }}
+          title="Edit"
         >
-          🗑️
+          ✏️
         </button>
-
-        {msg.message?.trim() &&
-          !msg.audio &&
-          !msg.image &&
-          !msg.video &&
-          !msg.document &&
-          new Date(msg.created_at).getTime() >=
-            currentTime - 15 * 60 * 1000 && (
-            <button
-              className="edit-btn"
-              onClick={() => {
-                setEditingMessageId(msg.id);
-                setEditMessageText(msg.message || "");
-              }}
-              title="Edit"
-              aria-label="Edit message"
-            >
-              ✏️
-            </button>
-          )}
-      </div>
-    )}
-  </>
+      )}
+  </div>
 )}
 
 
