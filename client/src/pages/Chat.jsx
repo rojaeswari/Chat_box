@@ -57,6 +57,7 @@ function Chat() {
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
 const [deleteMessageId, setDeleteMessageId] = useState(null);
 const [deleteSelectedMode, setDeleteSelectedMode] = useState(false);
+const [activeMessageActions, setActiveMessageActions] = useState(null);
 
 
   const navigate = useNavigate();
@@ -2641,50 +2642,67 @@ const filteredGroups = groups.filter((g) =>
 )}
 
 
-                    {msg.sender_id === user?.id && (
+                    
+{msg.sender_id === user?.id && (
   <>
-  <input
-  type="checkbox"
-  checked={selectedMessages.includes(msg.id)}
-  onChange={() => toggleMessageSelection(msg.id)}
-/>
+    <button
+      type="button"
+      className="message-actions-toggle"
+      onClick={(e) => {
+        e.stopPropagation();
+        setActiveMessageActions(
+          activeMessageActions === msg.id ? null : msg.id
+        );
+      }}
+      title="Message options"
+    >
+      ⋮
+    </button>
 
-<button
-  className="delete-btn"
-  onClick={(e) => {
-    e.stopPropagation();
-    deleteMessage(msg.id);
-  }}
-  title="Delete"
-  aria-label="Delete message"
->
-  🗑️
-</button>
-
-{msg.message?.trim() &&
-  !msg.audio &&
-  !msg.image &&
-  !msg.video &&
-  !msg.document &&
-  new Date(msg.created_at).getTime() >=
-    currentTime - 15 * 60 * 1000 && (
-      <button
-        className="edit-btn"
-        onClick={(e) => {
-          e.stopPropagation();
-          setEditingMessageId(msg.id);
-          setEditMessageText(msg.message || "");
-        }}
-        title="Edit"
-        aria-label="Edit message"
+    {activeMessageActions === msg.id && (
+      <div
+        className="message-action-tools"
+        onClick={(e) => e.stopPropagation()}
       >
-        ✏️
-      </button>
-)}
-  </>
+        <input
+          type="checkbox"
+          checked={selectedMessages.includes(msg.id)}
+          onChange={() => toggleMessageSelection(msg.id)}
+        />
 
-  
+        <button
+          className="delete-btn"
+          onClick={() => deleteMessage(msg.id)}
+          title="Delete"
+          aria-label="Delete message"
+        >
+          🗑️
+        </button>
+
+        {msg.message?.trim() &&
+          !msg.audio &&
+          !msg.image &&
+          !msg.video &&
+          !msg.document &&
+          new Date(msg.created_at).getTime() >=
+            currentTime - 15 * 60 * 1000 && (
+            <button
+              className="edit-btn"
+              onClick={() => {
+                setEditingMessageId(msg.id);
+                setEditMessageText(msg.message || "");
+              }}
+              title="Edit"
+              aria-label="Edit message"
+            >
+              ✏️
+            </button>
+          )}
+      </div>
+    )}
+  </>
 )}
+
                     {/* <div className="status">
   {msg.status === "sent" && (
     <span>✓ Sent</span>
@@ -2998,45 +3016,67 @@ const filteredGroups = groups.filter((g) =>
   </a>
 )}
 
-                  {msg.sender_id === user?.id && (
-                    
+                  
+{msg.sender_id === user?.id && (
   <>
-    <input
-      type="checkbox"
-      checked={selectedMessages.includes(msg.id)}
-      onChange={() => toggleMessageSelection(msg.id)}
-    />
-
     <button
-  className="delete-btn"
-  onClick={() => deleteMessage(msg.id)}
-  title="Delete"
-  aria-label="Delete message"
->
-  🗑️
-</button>
+      type="button"
+      className="message-actions-toggle"
+      onClick={(e) => {
+        e.stopPropagation();
+        setActiveMessageActions(
+          activeMessageActions === msg.id ? null : msg.id
+        );
+      }}
+      title="Message options"
+    >
+      ⋮
+    </button>
 
-{msg.message?.trim() &&
-  !msg.audio &&
-  !msg.image &&
-  !msg.video &&
-  !msg.document &&
-  new Date(msg.created_at).getTime() >=
-    currentTime - 15 * 60 * 1000 && (
-      <button
-        className="edit-btn"
-        onClick={() => {
-          setEditingMessageId(msg.id);
-          setEditMessageText(msg.message || "");
-        }}
-        title="Edit"
-        aria-label="Edit message"
+    {activeMessageActions === msg.id && (
+      <div
+        className="message-action-tools"
+        onClick={(e) => e.stopPropagation()}
       >
-        ✏️
-      </button>
-)}
+        <input
+          type="checkbox"
+          checked={selectedMessages.includes(msg.id)}
+          onChange={() => toggleMessageSelection(msg.id)}
+        />
+
+        <button
+          className="delete-btn"
+          onClick={() => deleteMessage(msg.id)}
+          title="Delete"
+          aria-label="Delete message"
+        >
+          🗑️
+        </button>
+
+        {msg.message?.trim() &&
+          !msg.audio &&
+          !msg.image &&
+          !msg.video &&
+          !msg.document &&
+          new Date(msg.created_at).getTime() >=
+            currentTime - 15 * 60 * 1000 && (
+            <button
+              className="edit-btn"
+              onClick={() => {
+                setEditingMessageId(msg.id);
+                setEditMessageText(msg.message || "");
+              }}
+              title="Edit"
+              aria-label="Edit message"
+            >
+              ✏️
+            </button>
+          )}
+      </div>
+    )}
   </>
 )}
+
 
                   {/* <div className="status">
   {msg.status === "sent" && (
