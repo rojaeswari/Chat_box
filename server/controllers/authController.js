@@ -142,6 +142,7 @@ await client.query(
     await client.query("COMMIT");
 
     // Disconnect previous device sockets
+// Disconnect all previous device sockets
 try {
   const io = getIO();
 
@@ -150,10 +151,13 @@ try {
     .fetchSockets();
 
   for (const oldSocket of sockets) {
-    if (oldSocket.user.sessionId !== sessionId) {
-      oldSocket.disconnect(true);
-    }
+    oldSocket.disconnect(true);
   }
+
+  console.log(
+    `Disconnected ${sockets.length} old sockets for user ${user.rows[0].id}`
+  );
+
 } catch (socketError) {
   console.error("Old socket disconnect error:", socketError);
 }
