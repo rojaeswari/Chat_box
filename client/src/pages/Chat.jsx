@@ -3619,29 +3619,60 @@ onClick={() => {
 
       <h3>Delete Message?</h3>
 
-      <button
-        className="delete-everyone-option"
-        onClick={() => confirmDeleteMessage("everyone")}
-      >
-        Delete for everyone
-      </button>
+      {(() => {
+        const ids = deleteSelectedMode
+          ? selectedMessages
+          : [deleteMessageId];
+
+        const currentMessages = selectedGroup
+          ? groupMessages
+          : messages;
+
+        const canDeleteForEveryone =
+          ids.length > 0 &&
+          ids.every((id) => {
+            const msg = currentMessages.find(
+              (m) => m.id === id
+            );
+
+            return (
+              msg &&
+              new Date(msg.created_at).getTime() >=
+                currentTime - 15 * 60 * 1000
+            );
+          });
+
+        return (
+          <>
+            {canDeleteForEveryone && (
+              <button
+                className="delete-everyone-option"
+                onClick={() => confirmDeleteMessage("everyone")}
+              >
+                Delete for everyone
+              </button>
+            )}
+
+            <button
+              onClick={() => confirmDeleteMessage("me")}
+            >
+              Delete for me
+            </button>
+          </>
+        );
+      })()}
 
       <button
-        onClick={() => confirmDeleteMessage("me")}
+        onClick={() => {
+          setShowDeleteOptions(false);
+          setDeleteMessageId(null);
+          setDeleteSelectedMode(false);
+          setSelectedMessages([]);
+          setActiveMessageActions(null);
+        }}
       >
-        Delete for me
+        Cancel
       </button>
-
-      <button
-  onClick={() => {
-    setShowDeleteOptions(false);
-    setDeleteMessageId(null);
-    setDeleteSelectedMode(false);
-    setSelectedMessages([]);
-  }}
->
-  Cancel
-</button>
 
     </div>
   </div>

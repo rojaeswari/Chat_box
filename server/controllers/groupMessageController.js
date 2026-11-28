@@ -392,6 +392,7 @@ const getGroupPrivateFileUrl = async (req, res) => {
 //   }
 // };
 
+
 const deleteGroupMessage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -454,13 +455,14 @@ const deleteGroupMessage = async (req, res) => {
        WHERE id = $1
          AND sender_id = $2
          AND deleted_for_everyone = FALSE
+         AND created_at >= NOW() - INTERVAL '15 minutes'
        RETURNING id`,
       [id, userId]
     );
 
     if (result.rowCount === 0) {
       return res.status(403).json({
-        message: "You can delete only your own messages",
+        message: "Cannot delete for everyone after 15 minutes or message is not yours",
       });
     }
 
@@ -475,6 +477,7 @@ const deleteGroupMessage = async (req, res) => {
     });
   }
 };
+
 // const updateGroupMessageStatus = async (req, res) => {
 //   try {
 
