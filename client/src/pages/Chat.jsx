@@ -2319,17 +2319,71 @@ const filteredGroups = groups.filter((g) =>
        {selectedGroup ? (
   <>
     <div className="group-chat-header">
-      <h2>{selectedGroup.group_name}</h2>
+  <div className="group-chat-title">
+    <h2>{selectedGroup.group_name}</h2>
 
-      <button
-        className="group-members-icon"
-        onClick={() => setShowGroupMembers(true)}
-        title="View group members"
-        aria-label="View group members"
+    {activeMessageActions && groupMessages.some(
+      (msg) =>
+        msg.id === activeMessageActions &&
+        msg.sender_id === user?.id
+    ) && (
+      <div
+        className="header-message-actions"
+        onClick={(e) => e.stopPropagation()}
       >
-        👥
-      </button>
-    </div>
+        <input
+          type="checkbox"
+          checked={selectedMessages.includes(activeMessageActions)}
+          onChange={() => toggleMessageSelection(activeMessageActions)}
+          title="Select message"
+        />
+
+        <button
+          className="delete-btn"
+          onClick={() => deleteMessage(activeMessageActions)}
+          title="Delete"
+        >
+          🗑️
+        </button>
+
+        {(() => {
+          const activeMsg = groupMessages.find(
+            (msg) => msg.id === activeMessageActions
+          );
+
+          return activeMsg?.message?.trim() &&
+            !activeMsg.audio &&
+            !activeMsg.image &&
+            !activeMsg.video &&
+            !activeMsg.document &&
+            new Date(activeMsg.created_at).getTime() >=
+              currentTime - 15 * 60 * 1000 ? (
+            <button
+              className="edit-btn"
+              onClick={() => {
+                setEditingMessageId(activeMsg.id);
+                setEditMessageText(activeMsg.message || "");
+                setActiveMessageActions(null);
+              }}
+              title="Edit"
+            >
+              ✏️
+            </button>
+          ) : null;
+        })()}
+      </div>
+    )}
+  </div>
+
+  <button
+    className="group-members-icon"
+    onClick={() => setShowGroupMembers(true)}
+    title="View group members"
+    aria-label="View group members"
+  >
+    👥
+  </button>
+</div>
 
             <div className="group-chat-container">
 
@@ -2680,44 +2734,6 @@ onClick={() => {
   </a>
 )}
 
-
-                    
-{msg.sender_id === user?.id && activeMessageActions === msg.id && (
-  <div
-    className="message-action-tools"
-    onClick={(e) => e.stopPropagation()}
-  >
-    <input
-      type="checkbox"
-      checked={selectedMessages.includes(msg.id)}
-      onChange={() => toggleMessageSelection(msg.id)}
-    />
-
-    <button
-      className="delete-btn"
-      onClick={() => deleteMessage(msg.id)}
-    >
-      🗑️
-    </button>
-
-    {msg.message?.trim() &&
-      !msg.audio && !msg.image &&
-      !msg.video && !msg.document &&
-      new Date(msg.created_at).getTime() >=
-        currentTime - 15 * 60 * 1000 && (
-        <button
-          className="edit-btn"
-          onClick={() => {
-            setEditingMessageId(msg.id);
-            setEditMessageText(msg.message || "");
-          }}
-        >
-          ✏️
-        </button>
-      )}
-  </div>
-)}
-
                     {/* <div className="status">
   {msg.status === "sent" && (
     <span>✓ Sent</span>
@@ -2791,9 +2807,63 @@ onClick={() => {
           // private chat
         ) : selectedUser ? (
           <>
-            <h2 className="private-chat-header">
-  Chat with {selectedUser.name}
-</h2>
+            <div className="private-chat-header-area">
+  <h2 className="private-chat-header">
+    Chat with {selectedUser.name}
+  </h2>
+
+  {activeMessageActions && messages.some(
+    (msg) =>
+      msg.id === activeMessageActions &&
+      msg.sender_id === user?.id
+  ) && (
+    <div
+      className="header-message-actions"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <input
+        type="checkbox"
+        checked={selectedMessages.includes(activeMessageActions)}
+        onChange={() => toggleMessageSelection(activeMessageActions)}
+        title="Select message"
+      />
+
+      <button
+        className="delete-btn"
+        onClick={() => deleteMessage(activeMessageActions)}
+        title="Delete"
+      >
+        🗑️
+      </button>
+
+      {(() => {
+        const activeMsg = messages.find(
+          (msg) => msg.id === activeMessageActions
+        );
+
+        return activeMsg?.message?.trim() &&
+          !activeMsg.audio &&
+          !activeMsg.image &&
+          !activeMsg.video &&
+          !activeMsg.document &&
+          new Date(activeMsg.created_at).getTime() >=
+            currentTime - 15 * 60 * 1000 ? (
+          <button
+            className="edit-btn"
+            onClick={() => {
+              setEditingMessageId(activeMsg.id);
+              setEditMessageText(activeMsg.message || "");
+              setActiveMessageActions(null);
+            }}
+            title="Edit"
+          >
+            ✏️
+          </button>
+        ) : null;
+      })()}
+    </div>
+  )}
+</div>
              {selectedMessages.length > 0 && (
   <button
     className="delete-selected-btn"
@@ -3052,48 +3122,7 @@ onClick={() => {
   </a>
 )}
 
-                  
-
-{msg.sender_id === user?.id && activeMessageActions === msg.id && (
-  <div
-    className="message-action-tools"
-    onClick={(e) => e.stopPropagation()}
-  >
-    <input
-      type="checkbox"
-      checked={selectedMessages.includes(msg.id)}
-      onChange={() => toggleMessageSelection(msg.id)}
-    />
-
-    <button
-      className="delete-btn"
-      onClick={() => deleteMessage(msg.id)}
-      title="Delete"
-    >
-      🗑️
-    </button>
-
-    {msg.message?.trim() &&
-      !msg.audio &&
-      !msg.image &&
-      !msg.video &&
-      !msg.document &&
-      new Date(msg.created_at).getTime() >=
-        currentTime - 15 * 60 * 1000 && (
-        <button
-          className="edit-btn"
-          onClick={() => {
-            setEditingMessageId(msg.id);
-            setEditMessageText(msg.message || "");
-          }}
-          title="Edit"
-        >
-          ✏️
-        </button>
-      )}
-  </div>
-)}
-
+          
 
                   {/* <div className="status">
   {msg.status === "sent" && (
