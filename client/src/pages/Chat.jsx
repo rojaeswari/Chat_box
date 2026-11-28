@@ -2046,10 +2046,11 @@ const fetchSeenCount = async (messageId) => {
   setShowDeleteOptions(true);
 };
 
+
 const confirmDeleteMessage = async (delete_for) => {
   try {
     const ids = deleteSelectedMode
-      ? selectedMessages
+      ? [...selectedMessages]
       : [deleteMessageId];
 
     if (ids.length === 0 || ids.some(id => id == null)) return;
@@ -2079,29 +2080,24 @@ const confirmDeleteMessage = async (delete_for) => {
       }
     }
 
+    // Close all message action controls
+    setActiveMessageActions(null);
     setSelectedMessages([]);
     setDeleteMessageId(null);
     setDeleteSelectedMode(false);
     setShowDeleteOptions(false);
 
+    // Refresh messages
     if (selectedGroup) {
-      fetchGroupMessages(selectedGroup.id);
+      await fetchGroupMessages(selectedGroup.id);
     } else if (selectedUser?.id) {
-      fetchMessages(selectedUser.id);
+      await fetchMessages(selectedUser.id);
     }
 
   } catch (err) {
     console.log("Delete message error:", err);
     alert(err.response?.data?.message || "Unable to delete messages");
   }
-};
-
-const deleteSelectedMessages = () => {
-  if (selectedMessages.length === 0) return;
-
-  setDeleteMessageId(null);
-  setDeleteSelectedMode(true);
-  setShowDeleteOptions(true);
 };
 
   const handleGroupSeen = (data) => {
